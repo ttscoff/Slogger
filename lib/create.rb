@@ -43,7 +43,6 @@ XMLTEMPLATE
     datestamp = options['datestamp'] || Time.now.utc.iso8601
 
     if @debug || options['debug']
-      $stderr.puts "Logging: "+content
       return true
     end
 
@@ -66,12 +65,10 @@ XMLTEMPLATE
     end
     target = @dayonepath + '/photos/'+uuid+ext
     begin
-      $stderr.puts "Downloading"
       Net::HTTP.get_response(URI.parse(imageurl)) do |http|
         data = http.body
         open( File.expand_path(target), "wb" ) { |file| file.write(data) }
       end
-      $stderr.puts "Downloaded"
       return self.process_image(target)
     rescue Exception => e
       p e
@@ -80,14 +77,11 @@ XMLTEMPLATE
   end
 
   def process_image(image)
-    $stderr.puts "Processing"
     orig = File.expand_path(image)
     match = orig.match(/(\..{3,4})$/)
     return false if match.nil?
     ext = match[1]
-    $stderr.puts "sipsing"
     %x{sips -Z 800 "#{orig}"}
-    $stderr.puts "sipsd"
     unless ext =~ /\.jpg$/
       case ext
       when '.jpeg'
@@ -95,18 +89,14 @@ XMLTEMPLATE
         FileUtils.mv(orig,target)
         return target
       when /\.(png|gif)$/
-        $stderr.puts "Extension is #{ext}, converting"
         target = orig.gsub(/#{ext}$/,'.jpg')
         %x{/usr/local/bin/convert "#{orig}" "#{target}"}
         File.delete(orig)
-        $stderr.puts "Converted, returning #{target}"
         return target
       else
-        $stderr.puts("No working handler for #{ext} found, returning")
         return orig
       end
     end
-    $stderr.puts "Processed, returning #{orig}"
     return orig
   end
 
@@ -119,12 +109,10 @@ XMLTEMPLATE
     target_path = File.expand_path(@dayonepath+"/photos/"+options['uuid']+".jpg")
 
     if copy
-      $stderr.puts "Copying #{file} to #{target_path}"
       FileUtils.copy(File.expand_path(file),target_path)
     end
 
     res = self.process_image(File.expand_path(file))
-    $stderr.puts "Processed #{res}"
     return self.to_dayone(options)
   end
 end

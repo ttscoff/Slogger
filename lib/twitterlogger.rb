@@ -15,7 +15,6 @@ class TwitterLogger < SocialLogger
     @droplr_domain ||= 'd.pr'
     @storage ||= 'icloud'
     @sl = DayOne.new({ 'storage' => @storage })
-    $stderr.puts @sl.dayonepath
     # @sl.dayonepath = @storage unless @storage == 'icloud'
     @tags ||= ''
     @tags = "\n\n#{@tags}\n" unless @tags == ''
@@ -40,10 +39,8 @@ class TwitterLogger < SocialLogger
       options['content'] = image['content']
       options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
       path = @sl.save_image(image['url'],options['uuid'])
-      $stderr.puts "Saved to #{path}"
 
       @sl.store_single_photo(path,options)
-      $stderr.puts "Generated entry"
     end
     return true
   end
@@ -112,7 +109,6 @@ class TwitterLogger < SocialLogger
       }
       if @save_images && !images.empty?
         begin
-          p images
           self.download_images(images)
         rescue Exception => e
           raise "Failure downloading images"
