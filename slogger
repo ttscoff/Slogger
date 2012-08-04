@@ -1,9 +1,9 @@
 #!/usr/bin/env ruby
 
-require 'yaml'
-require File.dirname(__FILE__)+'/lib/sociallogger.rb'
-ENV['SLOGGER_HOME'] = File.dirname(File.expand_path(__FILE__))
-$config_file = File.expand_path(ENV['SLOGGER_HOME']+'/slogger_config')
+SLOGGER_HOME = File.dirname(File.expand_path(__FILE__))
+ENV['SLOGGER_HOME'] = SLOGGER_HOME
+require SLOGGER_HOME + '/lib/sociallogger.rb'
+require SLOGGER_HOME + '/lib/configtools.rb'
 
 class String
   def markdownify
@@ -22,38 +22,6 @@ class String
   end
 end
 
-class ConfigTools
-	def load_config
-	  File.open($config_file) { |yf| YAML::load(yf) }
-	end
-
-	def dump_config (config)
-	  File.open($config_file, 'w') { |yf| YAML::dump(config, yf) }
-	end
-
-	def config_exists?
-		if !File.exists?($config_file)
-			dump_config( {
-				'lastfm_user' => '',
-				'rss_feeds' => [],
-				'markdownify_rss_posts' => false,
-				'star_rss_posts' => false,
-				'twitter_users' => [],
-				'save_images' => true,
-				'droplr_domain' => 'd.pr',
-				'gist_user' => '',
-				'rss_tags' => '@social @blogging',
-				'lastfm_tags' => '@social @music',
-				'twitter_tags' => '@social @twitter',
-				'gist_tags' => '@social @coding'
-			} )
-			puts "Please update the configuration file at #{$config_file}."
-			Process.exit(-1)
-		end
-		return true
-	end
-end
-
 cfg = ConfigTools.new
 log = Logger.new(STDERR)
 if cfg.config_exists?
@@ -62,11 +30,15 @@ if cfg.config_exists?
 		raise "Config should not be nil"
 		Process.exit(-1)
 	end
+
+	storage = config['storage'] || 'icloud'
+
 	if config['lastfm_user']
 		log.info("Loading last.fm logger for user #{config['lastfm_user']}")
 		options = {}
 		options['user'] = config['lastfm_user']
 		options['tags'] = config['lastfm_tags'] || ''
+		options['storage'] = storage
 		LastFMLogger.new(options).log_lastfm
 	end
 	if config['rss_feeds']
@@ -76,6 +48,7 @@ if cfg.config_exists?
 		options['markdownify'] = config['markdownify_rss_posts'] || false
 		options['starred'] = config['star_rss_posts'] || false
 		options['tags'] = config['rss_tags'] || ''
+		options['storage'] = storage
 		RSSLogger.new(options).log_rss
 	end
 	if config['twitter_users']
@@ -83,6 +56,7 @@ if cfg.config_exists?
 		options = {}
 		options['twitter_users'] = config['twitter_users']
 		options['tags'] = config['twitter_tags'] || ''
+		options['storage'] = storage
 		TwitterLogger.new(options).log_tweets
 	end
 	if config['gist_user']
@@ -92,6 +66,7 @@ if cfg.config_exists?
 		options = {}
 		options['user'] = config['gist_user']
 		options['tags'] = config['gist_tags'] || ''
+		options['storage'] = storage
 		GistLogger.new(options).log_gists
 	end
 end

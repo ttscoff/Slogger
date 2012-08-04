@@ -11,7 +11,8 @@ class GistLogger < SocialLogger
     end
 
     @tags ||= ''
-    @tags += "\n\n" unless @tags == ''
+    @tags = "\n\n#{@tags}\n" unless @tags == ''
+    @storage ||= 'icloud'
   end
   attr_accessor :user
 
@@ -59,8 +60,8 @@ class GistLogger < SocialLogger
     }
 
     return false if output.strip == ""
-    entry = "## Gists for #{Time.now.strftime("%m-%d-%Y")}:\n\n#{@tags}#{output}"
-    DayOne.new.to_dayone({ 'content' => entry })
+    entry = "## Gists for #{Time.now.strftime("%m-%d-%Y")}:\n\n#{output}#{@tags}"
+    DayOne.new({ 'storage' => @storage }).to_dayone({ 'content' => entry })
   end
 
 end

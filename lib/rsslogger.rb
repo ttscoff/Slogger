@@ -1,11 +1,3 @@
-=begin
-Checks an RSS feed once a day for that day's posts. You can specify multiple
-feeds to parse in the feeds array.
-
-Uses Markdownify from PHP Markdown to convert post description field to Markdown.
-You can substitute or remove that without issue.
-=end
-
 class RSSLogger < SocialLogger
 
   def initialize(options = {})
@@ -19,7 +11,8 @@ class RSSLogger < SocialLogger
     @starred ||= true
     @feeds ||= []
     @tags ||= ''
-    @tags += "\n\n" unless @tags == ''
+    @tags = "\n\n#{@tags}\n" unless @tags == ''
+    @storage ||= 'icloud'
   end
   attr_accessor :feeds, :markdownify, :starred
 
@@ -43,7 +36,7 @@ class RSSLogger < SocialLogger
   end
 
   def log_rss
-    sl = DayOne.new
+    sl = DayOne.new(({ 'storage' => @storage }))
     today = Time.now - (60 * 60 * 24)
     @feeds.each do |rss_feed|
       rss_content = ""
@@ -65,7 +58,7 @@ class RSSLogger < SocialLogger
           end
 
           options = {}
-          options['content'] = "## [#{item.title}](#{self.permalink(item.link)})\n\n#{@tags}#{content}"
+          options['content'] = "## [#{item.title}](#{self.permalink(item.link)})\n\n#{content}#{@tags}"
           options['datestamp'] = item.pubDate.utc.iso8601
           options['starred'] = @starred
           options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip

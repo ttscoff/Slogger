@@ -50,13 +50,13 @@
 #   1.to_json => "1"
 #
 
-require 'json/common'
+require ENV['SLOGGER_HOME'] + '/lib/json/common'
 module JSON
-  require 'json/version'
+  require ENV['SLOGGER_HOME'] + '/lib/json/version'
 
   begin
-    require 'json/ext'
+    require ENV['SLOGGER_HOME'] + '/lib/json/ext'
   rescue LoadError
-    require 'json/pure'
+    require ENV['SLOGGER_HOME'] + '/lib/json/pure'
   end
 end

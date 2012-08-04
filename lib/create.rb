@@ -1,7 +1,22 @@
 class DayOne < SocialLogger
-  def initialize
-    dayonedir = %x{ls ~/Library/Mobile\\ Documents/|grep dayoneapp}.strip
-    @dayonepath = File.expand_path("~/Library/Mobile\ Documents/#{dayonedir}/Documents/Journal_dayone/")
+  def initialize(options = {})
+    options['storage'] ||= 'icloud'
+    if options['storage'].downcase == 'icloud'
+      dayonedir = %x{ls ~/Library/Mobile\\ Documents/|grep dayoneapp}.strip
+      full_path = File.expand_path("~/Library/Mobile\ Documents/#{dayonedir}/Documents/Journal_dayone/")
+      if File.exists?(full_path)
+        @dayonepath = full_path
+      else
+        raise "Failed to find iCloud storage path"
+        Process.exit(-1)
+      end
+    elsif File.exists?(File.expand_path(options['storage']))
+      @dayonepath = File.expand_path(options['storage'])
+    else
+      raise "Path not specified or doesn't exist: #{options['storage']}"
+      Process.exit(-1)
+    end
+
     @template = ERB.new <<-XMLTEMPLATE
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -29,11 +44,11 @@ XMLTEMPLATE
 
     if @debug || options['debug']
       $stderr.puts "Logging: "+content
-      return
+      return true
     end
 
-    entry = CGI.escapeHTML(content.unpack('C*').pack('U*').gsub(/[^[:punct:]\w\s]+/,' ')) unless content.nil?
-
+    # entry = CGI.escapeHTML(content.unpack('C*').pack('U*').gsub(/[^[:punct:]\w\s]+/,' ')) unless content.nil?
+    entry = CGI.escapeHTML(content) unless content.nil?
     fh = File.new(File.expand_path(@dayonepath+'/entries/'+uuid+".doentry"),'w+')
     fh.puts @template.result(binding)
     fh.close
@@ -51,10 +66,12 @@ XMLTEMPLATE
     end
     target = @dayonepath + '/photos/'+uuid+ext
     begin
+      $stderr.puts "Downloading"
       Net::HTTP.get_response(URI.parse(imageurl)) do |http|
         data = http.body
         open( File.expand_path(target), "wb" ) { |file| file.write(data) }
       end
+      $stderr.puts "Downloaded"
       return self.process_image(target)
     rescue Exception => e
       p e
@@ -63,39 +80,51 @@ XMLTEMPLATE
   end
 
   def process_image(image)
+    $stderr.puts "Processing"
     orig = File.expand_path(image)
-    match = orig.match(/(\..{3,4})/)
+    match = orig.match(/(\..{3,4})$/)
     return false if match.nil?
     ext = match[1]
+    $stderr.puts "sipsing"
     %x{sips -Z 800 "#{orig}"}
+    $stderr.puts "sipsd"
     unless ext =~ /\.jpg$/
       case ext
       when '.jpeg'
         target = orig.gsub(/\.jpeg$/,'.jpg')
         FileUtils.mv(orig,target)
         return target
-      when /\.(png|gif)/
+      when /\.(png|gif)$/
+        $stderr.puts "Extension is #{ext}, converting"
         target = orig.gsub(/#{ext}$/,'.jpg')
         %x{/usr/local/bin/convert "#{orig}" "#{target}"}
         File.delete(orig)
+        $stderr.puts "Converted, returning #{target}"
         return target
       else
-        return false
+        $stderr.puts("No working handler for #{ext} found, returning")
+        return orig
       end
     end
-    return image
+    $stderr.puts "Processed, returning #{orig}"
+    return orig
   end
 
-  def store_single_photo(file, options = {})
+  def store_single_photo(file, options = {}, copy = false)
+
     options['content'] ||= ''
     options['uuid'] ||= %x{uuidgen}.gsub(/-/,'').strip
     options['starred'] ||= false
     options['datestamp'] ||= Time.now.utc.iso8601
+    target_path = File.expand_path(@dayonepath+"/photos/"+options['uuid']+".jpg")
+
+    if copy
+      $stderr.puts "Copying #{file} to #{target_path}"
+      FileUtils.copy(File.expand_path(file),target_path)
+    end
 
     res = self.process_image(File.expand_path(file))
-
-    FileUtils.copy(res,File.expand_path(@dayonepath+"/photos/"+options['uuid']+".jpg")) if res
-
+    $stderr.puts "Processed #{res}"
     return self.to_dayone(options)
   end
 end

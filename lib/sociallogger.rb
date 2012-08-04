@@ -7,6 +7,7 @@ class SocialLogger
   require 'rss'
   require 'erb'
   require 'logger'
+  require 'fileutils'
   root = File.dirname(__FILE__)+'/'
   require root + 'create.rb'
   require root + 'rsslogger.rb'

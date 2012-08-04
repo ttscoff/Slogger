@@ -1,4 +1,4 @@
-require 'json/version'
+require ENV['SLOGGER_HOME'] + '/lib/json/version'
 
 module JSON
   class << self

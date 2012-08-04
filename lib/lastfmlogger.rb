@@ -10,10 +10,12 @@ class LastFMLogger < SocialLogger
     else
       return false
     end
-
+    @tags ||= ''
+    @tags = "\n\n#{@tags}\n" unless @tags == ''
     @debug = config['debug'] || false
     @feeds = [{'title'=>"## Listening To", 'feed' => "http://ws.audioscrobbler.com/2.0/user/#{@user}/recenttracks.rss"},{'title'=>"## Loved Tracks", 'feed' => "http://ws.audioscrobbler.com/2.0/user/#{@user}/lovedtracks.rss"}]
-    @sl = DayOne.new
+    @storage = config['storage'] || 'icloud'
+    @sl = DayOne.new({ 'storage' => @storage })
     @today = Time.now - (60 * 60 * 24)
   end
   attr_accessor :user, :feeds, :debug
@@ -38,7 +40,7 @@ class LastFMLogger < SocialLogger
         content += "* [#{item.title}](#{item.link})\n"
       }
       if content != ''
-        entrytext = "#{rss_feed['title']} for #{@today.strftime('%m-%d-%Y')}\n\n@lastfm @social\n\n" + content + "\n\n"
+        entrytext = "#{rss_feed['title']} for #{@today.strftime('%m-%d-%Y')}\n\n" + content + "\n#{@tags}"
       end
       @sl.to_dayone({'content' => entrytext}) unless entrytext == ''
     end

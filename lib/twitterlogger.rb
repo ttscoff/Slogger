@@ -2,7 +2,7 @@ class TwitterLogger < SocialLogger
   require 'rexml/document'
 
   def initialize(config = {})
-    if config.key? 'twitter_users' || !config['twitter_users'].empty?
+    if config['twitter_users']
       config.each_pair do |att_name, att_val|
         instance_variable_set("@#{att_name}", att_val)
       end
@@ -13,10 +13,12 @@ class TwitterLogger < SocialLogger
     @save_images ||= true
     @storage ||= 'icloud'
     @droplr_domain ||= 'd.pr'
-    @sl = DayOne.new
-    @sl.dayonepath = @storage unless @storage == 'icloud'
+    @storage ||= 'icloud'
+    @sl = DayOne.new({ 'storage' => @storage })
+    $stderr.puts @sl.dayonepath
+    # @sl.dayonepath = @storage unless @storage == 'icloud'
     @tags ||= ''
-    @tags += "\n\n" unless @tags == ''
+    @tags = "\n\n#{@tags}\n" unless @tags == ''
   end
   attr_accessor :user, :save_images, :droplr_domain, :storage
 
@@ -36,11 +38,12 @@ class TwitterLogger < SocialLogger
     images.each do |image|
       options = {}
       options['content'] = image['content']
-      options['udid'] = %x{uuidgen}.gsub(/-/,'').strip
-      path = @sl.save_image(image['url'],options['udid'])
-      if @sl.store_single_photo(path,options)
-        @sl.to_dayone(options)
-      end
+      options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
+      path = @sl.save_image(image['url'],options['uuid'])
+      $stderr.puts "Saved to #{path}"
+
+      @sl.store_single_photo(path,options)
+      $stderr.puts "Generated entry"
     end
     return true
   end
@@ -54,8 +57,12 @@ class TwitterLogger < SocialLogger
     tweets = ''
     images = []
     begin
-      res = Net::HTTP.get_response(url).body
-
+      begin
+        res = Net::HTTP.get_response(url).body
+      rescue Exception => e
+        raise "Failure getting response from Twitter"
+        p e
+      end
       REXML::Document.new(res).elements.each("statuses/status") { |tweet|
         today = Time.now - (60 * 60 * 24)
         tweet_date = Time.parse(tweet.elements['created_at'].text)
@@ -67,6 +74,7 @@ class TwitterLogger < SocialLogger
             tweet_text.gsub!(/#{url.elements['url'].text}/,"[#{url.elements['display_url'].text}](#{url.elements['expanded_url'].text})")
           }
         end
+        begin
         if @save_images
           tweet_images = []
           unless tweet.elements['entities/media'].nil? || tweet.elements['entities/media'].length == 0
@@ -92,6 +100,10 @@ class TwitterLogger < SocialLogger
             tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => final_url[1] } unless final_url.nil?
           end
         end
+        rescue Exception => e
+          raise "Failure gathering images urls"
+          p e
+        end
         if tweet_images.empty?
           tweets += "\n* [[#{tweet_date.strftime('%I:%M %p')}](https://twitter.com/#{user}/#{tweet_id})] #{tweet_text}"
         else
@@ -99,7 +111,13 @@ class TwitterLogger < SocialLogger
         end
       }
       if @save_images && !images.empty?
-        self.download_images(images)
+        begin
+          p images
+          self.download_images(images)
+        rescue Exception => e
+          raise "Failure downloading images"
+          p e
+        end
       end
       return tweets
     rescue Exception => e
@@ -114,11 +132,11 @@ class TwitterLogger < SocialLogger
       tweets = self.get_tweets(user,'timeline')
       favs = self.get_tweets(user,'favorites')
       unless tweets == ''
-        tweets = "## @#{user} on #{Time.now.strftime('%m-%d-%Y')}\n\n#{@tags}#{tweets}"
+        tweets = "## @#{user} on #{Time.now.strftime('%m-%d-%Y')}\n\n#{tweets}#{@tags}"
         @sl.to_dayone({'content' => tweets})
       end
       unless favs == ''
-        favs = "## @#{user} favorites for #{Time.now.strftime('%m-%d-%Y')}\n\n#{@tags}#{favs}"
+        favs = "## @#{user} favorites for #{Time.now.strftime('%m-%d-%Y')}\n\n#{favs}#{@tags}"
         @sl.to_dayone({'content' => favs})
       end
     end
