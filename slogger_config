@@ -1,0 +1,19 @@
+---
+storage: icloud
+
+lastfm_user: ttscoff
+lastfm_tags: @social @music
+
+rss_feeds: [	http://feeds.feedburner.com/BrettTerpstra,
+			 	http://www.tuaw.com/editor/brett-terpstra/rss.xml ]
+rss_tags: @social @writing
+markdownify_rss_posts: true
+star_rss_posts: true
+
+twitter_users: [ ttscoff, MarkedApp ]
+twitter_tags: @social @twitter
+save_images: true
+droplr_domain: ckyp.us
+
+gist_user: ttscoff
+gist_tags: @social @coding

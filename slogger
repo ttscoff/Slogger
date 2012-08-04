@@ -1,0 +1,72 @@
+#!/usr/bin/env ruby
+
+SLOGGER_HOME = File.dirname(File.expand_path(__FILE__))
+ENV['SLOGGER_HOME'] = SLOGGER_HOME
+require SLOGGER_HOME + '/lib/sociallogger.rb'
+require SLOGGER_HOME + '/lib/configtools.rb'
+
+class String
+  def markdownify
+  	contents = ''
+    IO.popen('"$SLOGGER_HOME/lib/html2text"', "r+") do |io|
+
+      Thread.new { self.each_line { |line|
+        io << line
+      }; io.close_write }
+
+      io.each_line do |line|
+        contents << line
+      end
+  	end
+  	contents
+  end
+end
+
+cfg = ConfigTools.new
+log = Logger.new(STDERR)
+if cfg.config_exists?
+	config = cfg.load_config
+	if config.nil?
+		raise "Config should not be nil"
+		Process.exit(-1)
+	end
+
+	storage = config['storage'] || 'icloud'
+
+	if config['lastfm_user']
+		log.info("Loading last.fm logger for user #{config['lastfm_user']}")
+		options = {}
+		options['user'] = config['lastfm_user']
+		options['tags'] = config['lastfm_tags'] || ''
+		options['storage'] = storage
+		LastFMLogger.new(options).log_lastfm
+	end
+	if config['rss_feeds']
+		log.info("Loading RSS logger for feeds #{config['rss_feeds'].join(", ")}")
+		options = {}
+		options['feeds'] = config['rss_feeds']
+		options['markdownify'] = config['markdownify_rss_posts'] || false
+		options['starred'] = config['star_rss_posts'] || false
+		options['tags'] = config['rss_tags'] || ''
+		options['storage'] = storage
+		RSSLogger.new(options).log_rss
+	end
+	if config['twitter_users']
+		log.info("Loading Twitter logger for user(s) #{config['twitter_users'].join(', ')}")
+		options = {}
+		options['twitter_users'] = config['twitter_users']
+		options['tags'] = config['twitter_tags'] || ''
+		options['storage'] = storage
+		TwitterLogger.new(options).log_tweets
+	end
+	if config['gist_user']
+		require ENV['SLOGGER_HOME'] + '/lib/gistlogger.rb'
+		require ENV['SLOGGER_HOME'] + '/lib/json.rb'
+		log.info("Loading gist logger for user #{config['gist_user']}")
+		options = {}
+		options['user'] = config['gist_user']
+		options['tags'] = config['gist_tags'] || ''
+		options['storage'] = storage
+		GistLogger.new(options).log_gists
+	end
+end
