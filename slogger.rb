@@ -87,7 +87,7 @@ if cfg.config_exists?
 	end
 	if config['gist_user']
 		require ENV['SLOGGER_HOME'] + '/lib/gistlogger.rb'
-		require ENV['SLOGGER_HOME'] + '/json.rb'
+		require ENV['SLOGGER_HOME'] + '/lib/json.rb'
 		log.info("Loading gist logger for user #{config['gist_user']}")
 		options = {}
 		options['user'] = config['gist_user']
