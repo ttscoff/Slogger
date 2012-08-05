@@ -102,7 +102,7 @@ class TwitterLogger < SocialLogger
           p e
         end
         if tweet_images.empty?
-          tweets += "\n* [[#{tweet_date.strftime('%I:%M %p')}](https://twitter.com/#{user}/#{tweet_id})] #{tweet_text}"
+          tweets += "\n* [[#{tweet_date.strftime('%I:%M %p')}](https://twitter.com/#{user}/status/#{tweet_id})] #{tweet_text}"
         else
           images.concat(tweet_images)
         end
