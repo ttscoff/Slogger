@@ -1,6 +1,10 @@
 #!/usr/bin/ruby
 
-require 'ftools'
+if RUBY_VERSION.to_f < 1.9
+	require 'fileutils'
+else
+	require 'ftools'
+end
 
 curloc = File.expand_path(File.dirname(__FILE__))
 unless File.exists?(curloc+'/slogger_config')

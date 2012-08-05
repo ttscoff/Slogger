@@ -7,7 +7,11 @@ class SocialLogger
   require 'rss'
   require 'erb'
   require 'logger'
-  require 'fileutils'
+  if RUBY_VERSION.to_f < 1.9
+    require 'ftools'
+  else
+    require 'fileutils'
+  end
   root = File.dirname(__FILE__)+'/'
   require root + 'create.rb'
   require root + 'rsslogger.rb'
