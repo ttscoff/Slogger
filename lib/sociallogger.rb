@@ -7,20 +7,18 @@ class SocialLogger
   require 'rss'
   require 'erb'
   require 'logger'
-  if RUBY_VERSION.to_f < 1.9
-    require 'ftools'
-  else
-    require 'fileutils'
-  end
+  require RUBY_VERSION < "1.9" ? 'ftools' : 'fileutils'
   root = File.dirname(__FILE__)+'/'
   require root + 'create.rb'
   require root + 'rsslogger.rb'
   require root + 'twitterlogger.rb'
   require root + 'lastfmlogger.rb'
   require root + 'redirect.rb'
+
   def initialize(options = {})
     @debug = options['debug'] || false
     @config = options['config'] || {}
   end
   attr_accessor :debug, :config
+
 end
