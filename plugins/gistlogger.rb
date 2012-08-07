@@ -1,29 +1,26 @@
+=begin
+Plugin: Gist Logger
+Description: Logs daily Gists for the specified user
+Author: [Brett Terpstra](http://brettterpstra.com)
+Configuration:
+  gist_user: githubuser
+  gist_tags: "@social @coding"
+Notes:
+
+=end
 # NOTE: Requires json gem
-class GistLogger < SocialLogger
-  def initialize(options = {})
-    if !options['user'].empty?
-      options.each_pair do |att_name, att_val|
-        instance_variable_set("@#{att_name}", att_val)
-      end
-    else
-      raise "No Gist user configured"
-      return false
-    end
+config = {
+  'gist_user' => '',
+  'gist_tags' => '@social @coding',
+}
+$slog.register_plugin({ 'class' => 'RSSLogger', 'config' => config })
 
-    @tags ||= ''
-    @tags = "\n\n#{@tags}\n" unless @tags == ''
-    @storage ||= 'icloud'
-  end
-  attr_accessor :user
+class GistLogger < Slogger
 
-  def e_sh(str)
-    str.to_s.gsub(/(?=[^a-zA-Z0-9_.\/\-\x7F-\xFF\n])/, '\\').gsub(/\n/, "'\n'").sub(/^$/, "''")
-  end
-
-  def log_gists
-
+  def do_log
+    @log.info("Logging gists for #{@config['gist_user']}")
     begin
-      url = URI.parse "https://api.github.com/users/#{@user}/gists"
+      url = URI.parse "https://api.github.com/users/#{@config['gist_user']}/gists"
 
       http = Net::HTTP.new url.host, url.port
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
@@ -60,8 +57,8 @@ class GistLogger < SocialLogger
     }
 
     return false if output.strip == ""
-    entry = "## Gists for #{Time.now.strftime("%m-%d-%Y")}:\n\n#{output}#{@tags}"
-    DayOne.new({ 'storage' => @storage }).to_dayone({ 'content' => entry })
+    entry = "## Gists for #{Time.now.strftime("%m-%d-%Y")}:\n\n#{output}#{@config['gist_tags']}"
+    DayOne.new.to_dayone({ 'content' => entry })
   end
 
 end

@@ -1,25 +1,26 @@
-class TwitterLogger < SocialLogger
-  require 'rexml/document'
+=begin
+Plugin: Twitter Logger
+Description: Logs updates and favorites for specified Twitter users
+Author: [Brett Terpstra](http://brettterpstra.com)
+Configuration:
+  twitter_users: [ "handle1" , "handle2", ... ]
+  save_images: true
+  droplr_domain: d.pr
+  twitter_tags: "@social @blogging"
+Notes:
 
-  def initialize(config = {})
-    if config['twitter_users']
-      config.each_pair do |att_name, att_val|
-        instance_variable_set("@#{att_name}", att_val)
-      end
-    else
-      return false
-    end
+=end
+config = {
+  'twitter_users' => [],
+  'save_images' => true,
+  'droplr_domain' => 'd.pr',
+  'twitter_tags' => '@social @twitter'
+}
+$slog.register_plugin({ 'class' => 'TwitterLogger', 'config' => config })
 
-    @save_images ||= true
-    @storage ||= 'icloud'
-    @droplr_domain ||= 'd.pr'
-    @storage ||= 'icloud'
-    @sl = DayOne.new({ 'storage' => @storage })
-    # @sl.dayonepath = @storage unless @storage == 'icloud'
-    @tags ||= ''
-    @tags = "\n\n#{@tags}\n" unless @tags == ''
-  end
-  attr_accessor :user, :save_images, :droplr_domain, :storage
+require 'rexml/document'
+
+class TwitterLogger < Slogger
 
   def get_body(target, depth = 0)
 
@@ -34,6 +35,7 @@ class TwitterLogger < SocialLogger
   end
 
   def download_images(images)
+
     images.each do |image|
       options = {}
       options['content'] = image['content']
@@ -42,10 +44,12 @@ class TwitterLogger < SocialLogger
 
       @sl.store_single_photo(path,options)
     end
+
     return true
   end
 
   def get_tweets(user,type='timeline')
+    @log.info("Getting Twitter #{type} for #{user}")
     if type == 'favorites'
       url = URI.parse("http://api.twitter.com/1/favorites.xml?count=200&screen_name=#{user}&include_entities=true&count=200")
     else
@@ -105,9 +109,9 @@ class TwitterLogger < SocialLogger
           tweets += "\n* [[#{tweet_date.strftime('%I:%M %p')}](https://twitter.com/#{user}/status/#{tweet_id})] #{tweet_text}"
         else
           images.concat(tweet_images)
-        end
+        end unless tweet_images.nil?
       }
-      if @save_images && !images.empty?
+      if @config['save_images'] && images
         begin
           self.download_images(images)
         rescue Exception => e
@@ -121,10 +125,19 @@ class TwitterLogger < SocialLogger
       p e
       return ''
     end
+
   end
 
-  def log_tweets
-    @twitter_users.each do |user|
+  def do_log
+
+    @config['save_images'] ||= true
+    @config['droplr_domain'] ||= 'd.pr'
+
+    @sl = DayOne.new
+    @config['twitter_tags'] ||= ''
+    @tags = "\n\n#{@config['twitter_tags']}\n" unless @config['twitter_tags'] == ''
+
+    @config['twitter_users'].each do |user|
       tweets = self.get_tweets(user,'timeline')
       favs = self.get_tweets(user,'favorites')
       unless tweets == ''
@@ -137,4 +150,5 @@ class TwitterLogger < SocialLogger
       end
     end
   end
+
 end
