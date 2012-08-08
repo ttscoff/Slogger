@@ -7,11 +7,11 @@ class ConfigTools
   attr_accessor :config_file
 
   def load_config
-    File.open(@config_file, 'r') { |yf| JSON.parse(yf) }
+    File.open(@config_file) { |yf| YAML::load(yf) }
   end
 
   def dump_config (config)
-    File.open(@config_file, 'w') { |yf| yf.puts(config.to_json) }
+    File.open(@config_file, 'w') { |yf| YAML::dump(config, yf) }
   end
 
   def default_config
@@ -24,9 +24,9 @@ class ConfigTools
   def config_exists?
     if !File.exists?(@config_file)
       dump_config( default_config )
-      return false
-      # puts "Please update the configuration file at #{@config_file}."
-      # Process.exit(-1)
+      puts "Please update the configuration file at #{@config_file}."
+      Process.exit(-1)
+      # return false
     else
       return true
     end

@@ -9,29 +9,30 @@ Notes:
   Find your feed at <https://foursquare.com/feeds/> (in RSS option)
 =end
 
-
+default_config = {
+    'feed' => "",
+    'tags' => "@social @checkins"
+}
+$slog.register_plugin({ 'class' => 'FoursquareLogger', 'config' => default_config })
 
 class FoursquareLogger < Slogger
-  default_config = {
-    'foursquare_feed' => "",
-    'foursquare_tags' => "@social @checkins"
-  }
-  $slog.register_plugin({ 'class' => 'FoursquareLogger', 'config' => default_config })
   def do_log
+    p @config
+    config = @config[self.class.name]
     @log.info("Getting FourSquare checkins")
-    if @config['foursquare_feed'].nil? || @config['foursquare_feed'] == ''
+    if config['foursquare_feed'].nil? || config['foursquare_feed'] == ''
       @log.warn("FourSquare feed has not been configured or the feed is invalid, please edit your slogger_config file.")
       return
     end
-    @feed = @config['foursquare_feed']
+    @feed = config['foursquare_feed']
 
-    @config['foursquare_tags'] ||= ''
-    @tags = "\n\n#{@config['foursquare_tags']}\n" unless @config['foursquare_tags'] == ''
-    @debug = @config['debug'] || false
+    config['foursquare_tags'] ||= ''
+    @tags = "\n\n#{config['foursquare_tags']}\n" unless config['foursquare_tags'] == ''
+    @debug = config['debug'] || false
     @today = Time.now - (60 * 60 * 24)
 
     entrytext = ''
-    rss_content = ""
+    rss_content = ''
     begin
       feed_url = URI.parse(@feed)
       feed_url.open do |f|

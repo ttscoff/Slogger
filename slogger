@@ -56,11 +56,10 @@ class Slogger
         Process.exit(-1)
       end
     end
-
   end
 
   def storage_path
-    if @config['storage'].downcase == 'icloud'
+    if !@config.nil? && @config['storage'].downcase == 'icloud'
       dayonedir = %x{ls ~/Library/Mobile\\ Documents/|grep dayoneapp}.strip
       full_path = File.expand_path("~/Library/Mobile\ Documents/#{dayonedir}/Documents/Journal_dayone/")
       if File.exists?(full_path)
@@ -83,11 +82,10 @@ class Slogger
       require file
     end
     @plugins.each do |plugin|
+      _namespace = plugin['class'].to_s
+      @config[_namespace] ||= {}
       plugin['config'].each do |k,v|
-        if @config[k].nil?
-          @config[k] = v
-          new_options = true
-        end
+        @config[_namespace][k] ||= v
       end
       eval(plugin['class']).new.do_log
     end
