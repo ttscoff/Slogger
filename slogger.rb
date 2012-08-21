@@ -55,47 +55,44 @@ class Slogger
         raise "Config should not be nil"
         Process.exit(-1)
       end
+    else
+      @config = cfg.load_config
+      self.read_plugins
+      cfg.dump_config
+      Process.exit(0)
     end
   end
 
   def storage_path
-  	if @config.key?('storage')
-	    if @config['storage'].downcase == 'icloud'
-	      dayonedir = %x{ls ~/Library/Mobile\\ Documents/|grep dayoneapp}.strip
-	      full_path = File.expand_path("~/Library/Mobile\ Documents/#{dayonedir}/Documents/Journal_dayone/")
-	      if File.exists?(full_path)
-	        return full_path
-	      else
-	        raise "Failed to find iCloud storage path"
-	        Process.exit(-1)
-	      end
-	    elsif File.exists?(File.expand_path(@config['storage']))
-	      return File.expand_path(@config['storage'])
-	    else
-	      raise "Path not specified or doesn't exist: #{@config['storage']}"
-	      Process.exit(-1)
-	    end
-	else
-	  raise "Path not specified or doesn't exist: #{@config['storage']}"
-	  return
-	end
+    if @config['storage'].downcase == 'icloud'
+      dayonedir = %x{ls ~/Library/Mobile\\ Documents/|grep dayoneapp}.strip
+      full_path = File.expand_path("~/Library/Mobile\ Documents/#{dayonedir}/Documents/Journal_dayone/")
+      if File.exists?(full_path)
+        return full_path
+      else
+        raise "Failed to find iCloud storage path"
+        Process.exit(-1)
+      end
+    elsif File.exists?(File.expand_path(@config['storage']))
+      return File.expand_path(@config['storage'])
+    else
+      raise "Path not specified or doesn't exist: #{@config['storage']}"
+      Process.exit(-1)
+    end
   end
 
-  def run_plugins
-    new_options = false
+  def read_plugins
     Dir[SLOGGER_HOME + "/plugins/*.rb"].each do |file|
       require file
     end
+  end
+
+  def run_plugins
+    p @plugins
     @plugins.each do |plugin|
-      _namespace = plugin['class'].to_s
-      @config[_namespace] ||= {}
-      plugin['config'].each do |k,v|
-        @config[_namespace][k] ||= v
-      end
-      ConfigTools.new.dump_config(@config)
       eval(plugin['class']).new.do_log
+      # eval(plugin['class']).new.do_log
     end
-    ConfigTools.new.dump_config(@config) if new_options
   end
 
   def register_plugin(plugin)
@@ -131,8 +128,3 @@ if ARGV.length > 0
 else
   $slog.run_plugins
 end
-
-# TODO: Create photos folder automatically if needed
-# TODO: Document plugin architecture
-# TODO: Handle RSS anomolies, fail gracefully
-# TODO: Command line option for increased history span

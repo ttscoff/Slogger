@@ -17,8 +17,14 @@ $slog.register_plugin({ 'class' => 'FoursquareLogger', 'config' => default_confi
 
 class FoursquareLogger < Slogger
   def do_log
-    p @config
-    config = @config[self.class.name]
+    if @config.key?(self.class.name)
+      config = @config[self.class.name]
+    end
+    if config['foursquare_feed'].nil? || config['foursquare_feed'] == ''
+        @log.warn("FourSquare feed has not been configured or the feed is invalid, please edit your slogger_config file.")
+        return
+    end
+
     @log.info("Getting FourSquare checkins")
     if config['foursquare_feed'].nil? || config['foursquare_feed'] == ''
       @log.warn("FourSquare feed has not been configured or the feed is invalid, please edit your slogger_config file.")

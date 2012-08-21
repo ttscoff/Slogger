@@ -16,37 +16,31 @@ Notes:
 =end
 
 config = {
-  'feeds' => [],
-  'markdownify_posts' => false,
-  'star_posts' => false,
-  'tags' => '@social @blogging'
+  'rss_feeds' => [],
+  'markdownify_rss_posts' => false,
+  'star_rss_posts' => false,
+  'rss_tags' => '@social @blogging'
 }
 $slog.register_plugin({ 'class' => 'RSSLogger', 'config' => config })
 
 class RSSLogger < Slogger
   def do_log
-    feeds = []
-    if @config.key?(self.class.name)
-      config = @config[self.class.name]
-      if !config.key?('feeds') || config['feeds'] == []
-        @log.warn("RSS feeds have not been configured or a feed is invalid, please edit your slogger_config file.")
-        return
-      else
-        feeds = config['feeds']
-      end
-    else
-      @log.warn("RSS2 feeds have not been configured or a feed is invalid, please edit your slogger_config file.")
-      return
-    end
-    @log.info("Logging rss posts for feeds #{feeds.join(', ')}")
 
-    markdownify = config['markdownify_posts'] || true
-    starred = config['star_posts'] || true
-    tags = config['tags'] || ''
-    tags = "\n\n#{@tags}\n" unless @tags == ''
+    if @config['rss_feeds']
+      @feeds = @config['rss_feeds']
+    else
+      @log.warn("No RSS feeds configured")
+    end
+
+    @log.info("Logging rss posts for feeds #{@feeds.join(', ')}")
+
+    @markdownify = @config['markdownify_rss_posts'] || true
+    @starred = @config['star_rss_posts'] || true
+    @tags = @config['rss_tags'] || ''
+    @tags = "\n\n#{@tags}\n" unless @tags == ''
 
     today = Time.now - (60 * 60 * 24)
-    feeds.each do |rss_feed|
+    @feeds.each do |rss_feed|
       rss_content = ""
       open(rss_feed) do |f|
         rss_content = f.read
@@ -59,16 +53,16 @@ class RSSLogger < Slogger
           imageurl = false
           image_match = item.content_encoded.match(/src="(http:.*?\.(jpg|png)(\?.*?)?)"/i)
           imageurl = image_match[1] unless image_match.nil?
-          if markdownify
+          if @markdownify
             content = item.description.markdownify
           else
             content = item.description
           end
 
           options = {}
-          options['content'] = "## [#{item.title}](#{self.permalink(item.link)})\n\n#{content}#{tags}"
+          options['content'] = "## [#{item.title}](#{self.permalink(item.link)})\n\n#{content}#{@tags}"
           options['datestamp'] = item.pubDate.utc.iso8601
-          options['starred'] = starred
+          options['starred'] = @starred
           options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
           sl = DayOne.new
           if imageurl

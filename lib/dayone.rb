@@ -12,6 +12,7 @@ class DayOne < Slogger
     fh = File.new(File.expand_path(@dayonepath+'/entries/'+uuid+".doentry"),'w+')
     fh.puts @template.result(binding)
     fh.close
+    puts @dayonepath
     return true
   end
 

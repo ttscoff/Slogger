@@ -13,24 +13,14 @@ config = {
   'gist_user' => '',
   'gist_tags' => '@social @coding',
 }
-$slog.register_plugin({ 'class' => 'GistLogger', 'config' => config })
+$slog.register_plugin({ 'class' => 'RSSLogger', 'config' => config })
 
 class GistLogger < Slogger
 
   def do_log
-    if @config.key?(self.class.name)
-        config = @config[self.class.name]
-        if !config.key?('gist_user') || config['gist_user'] == ''
-          @log.warn("RSS feeds have not been configured or a feed is invalid, please edit your slogger_config file.")
-          return
-        end
-    else
-      @log.warn("Gist user has not been configured, please edit your slogger_config file.")
-      return
-    end
-    @log.info("Logging gists for #{config['gist_user']}")
+    @log.info("Logging gists for #{@config['gist_user']}")
     begin
-      url = URI.parse "https://api.github.com/users/#{config['gist_user']}/gists"
+      url = URI.parse "https://api.github.com/users/#{@config['gist_user']}/gists"
 
       http = Net::HTTP.new url.host, url.port
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
@@ -67,7 +57,7 @@ class GistLogger < Slogger
     }
 
     return false if output.strip == ""
-    entry = "## Gists for #{Time.now.strftime("%m-%d-%Y")}:\n\n#{output}#{config['gist_tags']}"
+    entry = "## Gists for #{Time.now.strftime("%m-%d-%Y")}:\n\n#{output}#{@config['gist_tags']}"
     DayOne.new.to_dayone({ 'content' => entry })
   end
 

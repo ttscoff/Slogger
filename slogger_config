@@ -1,2 +1,25 @@
 --- 
+RSSLogger: 
+  star_posts: true
+  feeds: 
+  - http://feeds.feedburner.com/BrettTerpstra
+  - http://www.tuaw.com/editor/brett-terpstra/rss.xml
+  markdownify_posts: true
+  tags: "@social @blogging"
+LastFMLogger: 
+  lastfm_user: ttscoff
+  lastfm_tags: "@social @music"
+GistLogger: 
+  gist_tags: "@social @coding"
+  gist_user: ttscoff
 storage: icloud
+FoursquareLogger: 
+  feed: ""
+  tags: "@social @checkins"
+TwitterLogger: 
+  twitter_tags: "@social @twitter"
+  save_images: true
+  droplr_domain: ckyp.us
+  twitter_users: 
+  - ttscoff
+  - MarkedApp
