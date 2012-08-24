@@ -10,6 +10,7 @@ Notes:
 =end
 # NOTE: Requires json gem
 config = {
+  'description' => ['Logs daily Gists for the specified user','gist_user should be your Github username'],
   'gist_user' => '',
   'gist_tags' => '@social @coding',
 }

@@ -16,6 +16,11 @@ Notes:
 =end
 
 config = {
+  'description' => ['Logs any RSS feed and checks for new posts for the current day',
+                    'rss_feeds is an array of feeds separated by commas, a single feed is fine, but it should be inside of brackets `[]`',
+                    'markdownify_rss_posts will convert links and emphasis in the post to Markdown for display in Day One',
+                    'star_rss_posts will create a starred post for new RSS posts',
+                    'rss_tags are tags you want to add to every entry, e.g. "@social @blogging"'],
   'feeds' => [],
   'markdownify_posts' => false,
   'star_posts' => false,

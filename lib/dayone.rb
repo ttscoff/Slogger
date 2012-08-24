@@ -73,19 +73,22 @@ class DayOne < Slogger
 
   def store_single_photo(file, options = {}, copy = false)
 
-    options['content'] ||= ''
+    options['content'] ||= File.basename(file,'.jpg')
     options['uuid'] ||= %x{uuidgen}.gsub(/-/,'').strip
     options['starred'] ||= false
     options['datestamp'] ||= Time.now.utc.iso8601
-    target_path = File.expand_path(Slogger.new.storage_path+"/photos/"+options['uuid']+".jpg")
+    photo_dir = File.join(File.expand_path(Slogger.new.storage_path), "photos")
+    Dir.mkdir(photo_dir, 0700) unless File.directory?(photo_dir)
+
+    target_path = File.join(photo_dir,options['uuid']+".jpg")
 
     if copy
       FileUtils.copy(File.expand_path(file),target_path)
+      file = target_path
     end
 
     res = self.process_image(File.expand_path(file))
     if res
-      options['content'] = File.basename(res,'.jpg') if options['content'] == ''
       return self.to_dayone(options)
     end
   end

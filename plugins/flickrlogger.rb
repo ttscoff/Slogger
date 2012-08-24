@@ -1,8 +1,9 @@
 =begin
 Plugin: Flickr Logger
 Description: Logs today's photos from Flickr.
-Get your Flickr ID at <http://idgettr.com/>
-Get your Flickr API key at <http://www.flickr.com/services/apps/create/noncommercial/>
+Notes:
+  Get your Flickr ID at <http://idgettr.com/>
+  Get your Flickr API key at <http://www.flickr.com/services/apps/create/noncommercial/>
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
   flickr_api_key: 'XXXXXXXXXXXXXXXXXXXXXXXXX'
@@ -12,6 +13,10 @@ Notes:
 
 =end
 config = {
+  'flickr_description' => [
+    'Logs today\'s photos from Flickr.',
+    'Get your Flickr ID at <http://idgettr.com/>',
+    'Get your Flickr API key at <http://www.flickr.com/services/apps/create/noncommercial/>'],
   'flickr_api_key' => '',
   'flickr_ids' => [],
   'flickr_tags' => '@social @photo'

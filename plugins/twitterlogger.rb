@@ -11,6 +11,11 @@ Notes:
 
 =end
 config = {
+  'description' => [
+    'Logs updates and favorites for specified Twitter users',
+    'twitter_users should be an array of Twitter usernames, e.g. [ ttscoff, markedapp ]',
+    'save_images (true/false) determines weather TwitterLogger will look for image urls and include them in the entry',
+    'droplr_domain: if you have a custom droplr domain, enter it here, otherwise leave it as d.pr '],
   'twitter_users' => [],
   'save_images' => true,
   'droplr_domain' => 'd.pr',

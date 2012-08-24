@@ -9,10 +9,11 @@ Notes:
 
 =end
 config = {
+  'lastfm_description' => ['Logs songs scrobbled for time period.','lastfm_user is your Last.fm username.'],
   'lastfm_user' => '',
   'lastfm_tags' => '@social @music'
 }
-$slog.register_plugin({ 'class' => 'RSSLogger', 'config' => config })
+$slog.register_plugin({ 'class' => 'LastFMLogger', 'config' => config })
 
 class LastFMLogger < Slogger
 
