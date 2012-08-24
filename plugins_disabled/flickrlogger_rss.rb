@@ -1,18 +1,14 @@
 =begin
 Plugin: Flickr Logger
-Description: Logs today's photos from Flickr.
-Get your Flickr ID at <http://idgettr.com/>
-Get your Flickr API key at <http://www.flickr.com/services/apps/create/noncommercial/>
+Description: Logs today's photos from Flickr. Get your Flickr ID at <http://idgettr.com/>
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
-  flickr_api_key: 'XXXXXXXXXXXXXXXXXXXXXXXXX'
   flickr_ids: [flickr_id1[, flickr_id2...]]
   flickr_tags: "@social @photo"
 Notes:
 
 =end
 config = {
-  'flickr_api_key' => '',
   'flickr_ids' => [],
   'flickr_tags' => '@social @photo'
 }
@@ -53,31 +49,32 @@ class FlickrLogger < Slogger
     sl = DayOne.new
     config['flickr_tags'] ||= ''
     tags = "\n\n#{config['flickr_tags']}\n" unless config['flickr_tags'] == ''
-    today = @timespan.to_i
 
     @log.info("Getting Flickr images for #{config['flickr_ids'].join(', ')}")
-    images = []
+    url = URI.parse("http://api.flickr.com/services/feeds/photos_public.gne?ids=#{config['flickr_ids'].join(',')}")
+
     begin
-      config['flickr_ids'].each do |user|
-
-        open("http://www.flickr.com/services/rest/?method=flickr.people.getPublicPhotos&api_key=#{config['flickr_api_key']}&user_id=#{user}&extras=description,date_upload,url_m&per_page=15") { |f|
-            REXML::Document.new(f.read).elements.each("rsp/photos/photo") { |photo|
-              photo_date = photo.attributes["dateupload"].to_s
-              break unless Time.at(photo_date.to_i) > @timespan
-              url = photo.attributes["url_m"]
-              content = "## " + photo.attributes['title']
-              content += "\n\n" + photo.attributes['content'] unless photo.attributes['content'].nil?
-              images << { 'content' => content, 'date' => Time.at(photo_date.to_i).utc.iso8601, 'url' => url }
-            }
-        }
+      begin
+        res = Net::HTTP.get_response(url).body
+      rescue Exception => e
+        raise "Failure getting response from Flickr"
+        p e
       end
-
+      images = []
+      REXML::Document.new(res).elements.each("feed/entry") { |photo|
+        today = @timespan
+        photo_date = Time.parse(photo.elements['published'].text)
+        break if photo_date < today
+        content = "## " + photo.elements['title'].text
+        url = photo.elements['link'].text
+        content += "\n\n" + photo.elements['content'].text.markdownify unless photo.elements['content'].text == ''
+        images << { 'content' => content, 'date' => photo_date.utc.iso8601, 'url' => url }
+      }
     rescue Exception => e
       puts "Error getting photos for #{config['flickr_ids'].join(', ')}"
       p e
       return ''
     end
-
     if images.length == 0
       @log.info("No new Flickr images found")
       return ''

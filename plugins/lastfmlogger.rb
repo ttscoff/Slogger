@@ -12,7 +12,7 @@ config = {
   'lastfm_user' => '',
   'lastfm_tags' => '@social @music'
 }
-$slog.register_plugin({ 'class' => 'LastFMLogger', 'config' => config })
+$slog.register_plugin({ 'class' => 'RSSLogger', 'config' => config })
 
 class LastFMLogger < Slogger
 
