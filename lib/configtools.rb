@@ -16,7 +16,8 @@ class ConfigTools
 
   def default_config
     config = {
-      'storage' => 'icloud'
+      'storage' => 'icloud',
+      'image_filename_is_title' => true
     }
     config
   end
