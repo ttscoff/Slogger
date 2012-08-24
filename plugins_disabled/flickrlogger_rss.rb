@@ -1,14 +1,15 @@
 =begin
 Plugin: Flickr Logger
-Description: Logs today's photos from Flickr. Get your Flickr ID at <http://idgettr.com/>
+Description: Logs today's photos from Flickr RSS feed. Get your Flickr ID at <http://idgettr.com/>
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
   flickr_ids: [flickr_id1[, flickr_id2...]]
   flickr_tags: "@social @photo"
 Notes:
-
+  - This version uses the RSS feed. This can take up to four hours to update, which is why I wrote the default API version. I'm impatient
 =end
 config = {
+  'description' => ['flickr_ids should be an array with one or more Flickr user ids (http://idgettr.com/)']
   'flickr_ids' => [],
   'flickr_tags' => '@social @photo'
 }
