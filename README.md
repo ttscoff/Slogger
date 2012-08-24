@@ -46,4 +46,3 @@ If you want to edit an existing plugin to change parameters or output, move the 
 - Better handling of varying RSS feeds
 - MOAR PLUGINS
 - Better documentation method and help for individual plugins
-- 
