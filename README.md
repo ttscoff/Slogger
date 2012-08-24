@@ -24,7 +24,9 @@ Slogger indexes various public social services and creates Day One (<http://dayo
 
 1. From within the Slogger folder, run `./slogger` to create the initial configuration file.
 2. Edit the file `slogger_config` that shows up
-    - The only option will be 'storage:', which should be set to either 'icloud' or a path to a Dropbox-synced Journal
+    - The only options will be 'storage:' and 'image_filename_is_title:'
+    - storage: should be set to either 'icloud' or a path to a Dropbox-synced Journal
+    - image_filename_is_title: should be set to true or false. If true, it will use the base filename (without extension) as the title of images imported individually.
 3. Move plugins you want to use into `./plugins/`, and plugins you want to disable into `./plugins_disabled`.
 4. Run `./slogger` again to update the configuration file with enabled plugin options.
 5. Edit `slogger_config` and fill in the necessary parameters for listed configuration settings.
