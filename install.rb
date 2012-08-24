@@ -1,7 +1,5 @@
 #!/usr/bin/ruby
 
-require 'ftools'
-
 curloc = File.expand_path(File.dirname(__FILE__))
 unless File.exists?(curloc+'/slogger_config')
 	puts
@@ -54,13 +52,16 @@ xml=<<LAUNCHCTLPLIST
 </plist>
 LAUNCHCTLPLIST
 
-File.makedirs(File.expand_path("~/Library/LaunchAgents")) unless File.exists?(File.expand_path("~/Library/LaunchAgents"))
+target_dir = File.expand_path("~/Library/LaunchAgents")
+target_file = File.expand_path(target_dir+"/com.brettterpstra.slogger.plist")
 
-open(File.expand_path("~/Library/LaunchAgents/com.brettterpstra.slogger.plist"),'w') { |f|
+Dir.mkdir(target_dir) unless File.exists?(target_dir)
+
+open(target_file,'w') { |f|
 	f.puts xml
-} unless File.exists?(File.expand_path("~/Library/LaunchAgents/com.brettterpstra.slogger.plist"))
+} unless File.exists?(target_file)
 
-%x{launchctl load #{File.expand_path("~/Library/LaunchAgents/com.brettterpstra.slogger.plist")}}
+%x{launchctl load "#{target_file}"}
 puts "done!"
 puts
 puts "----------------------"

@@ -1,2 +1,4 @@
 *.sublime*
 *.bak
+*.taskpaper
+slogger_config
