@@ -45,7 +45,7 @@ class DayOne < Slogger
     return false if match.nil?
     ext = match[1]
     @log.info("Resizing image #{orig}")
-    orig = %x{orig="#{orig}";sips -Z 800 --out $TMPDIR/${orig##*/} "$orig";echo $TMPDIR${orig##*/}}
+    %x{sips -Z 800 "#{orig}"}
     unless ext =~ /\.jpg$/
       case ext
       when '.jpeg'
