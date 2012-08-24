@@ -136,3 +136,5 @@ end
 # TODO: Document plugin architecture
 # TODO: Handle RSS anomolies, fail gracefully
 # TODO: Command line option for increased history span
+# TODO: Command line option for undo
+# TODO: Sort plugin options

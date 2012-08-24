@@ -65,10 +65,15 @@ class TwitterLogger < Slogger
         p e
       end
       REXML::Document.new(res).elements.each("statuses/status") { |tweet|
-        today = Time.now - (60 * 60 * 24)
+        today = @timespan
         tweet_date = Time.parse(tweet.elements['created_at'].text)
         break if tweet_date < today
         tweet_text = tweet.elements['text'].text.gsub(/\n/,"\n\t")
+        if type == 'favorites'
+          # TODO: Prepend favorite's username/link
+          screen_name = tweet.elements['user/screen_name'].text
+          tweet_text = "[#{screen_name}](http://twitter.com/#{screen_name}): #{tweet_text}"
+        end
         tweet_id = tweet.elements['id'].text
         unless tweet.elements['entities/urls'].nil? || tweet.elements['entities/urls'].length == 0
           tweet.elements.each("entities/urls/url") { |url|
@@ -76,40 +81,40 @@ class TwitterLogger < Slogger
           }
         end
         begin
-        if config['save_images']
-          tweet_images = []
-          unless tweet.elements['entities/media'].nil? || tweet.elements['entities/media'].length == 0
-            tweet.elements.each("entities/media/creative") { |img|
-              tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => img.elements['media_url'].text }
-            }
-          end
+          if config['save_images']
+            tweet_images = []
+            unless tweet.elements['entities/media'].nil? || tweet.elements['entities/media'].length == 0
+              tweet.elements.each("entities/media/creative") { |img|
+                tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => img.elements['media_url'].text }
+              }
+            end
 
-          tweet_text.scan(/\((http:\/\/twitpic.com\/\w+?)\)/).each do |picurl|
-            final_url = self.get_body(picurl[0]).match(/"(http:\/\/(\w+).cloudfront.net\/photos\/full\/[^"]+?)"/)
-            tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => final_url[1] } unless final_url.nil?
+            tweet_text.scan(/\((http:\/\/twitpic.com\/\w+?)\)/).each do |picurl|
+              final_url = self.get_body(picurl[0]).match(/"(http:\/\/(\w+).cloudfront.net\/photos\/full\/[^"]+?)"/)
+              tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => final_url[1] } unless final_url.nil?
+            end
+            tweet_text.scan(/\((http:\/\/campl.us\/\w+?)\)/).each do |picurl|
+              final_url = self.get_body(picurl[0]).match(/"(http:\/\/pics.campl.us\/f\/c\/.+?)"/)
+              tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => final_url[1] } unless final_url.nil?
+            end
+            tweet_text.scan(/\((http:\/\/#{config['droplr_domain']}\/\w+?)\)/).each do |picurl|
+              final_url = self.get_body(picurl[0]).match(/"(https:\/\/s3.amazonaws.com\/files.droplr.com\/.+?)"/)
+              tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => final_url[1] } unless final_url.nil?
+            end
+            tweet_text.scan(/\((http:\/\/instagr\.am\/\w\/\w+?\/)\)/).each do |picurl|
+              final_url = self.get_body(picurl[0]).match(/"(http:\/\/distillery.*?\.instagram\.com\/[a-z0-9_]+\.jpg)"/i)
+              tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => final_url[1] } unless final_url.nil?
+            end
           end
-          tweet_text.scan(/\((http:\/\/campl.us\/\w+?)\)/).each do |picurl|
-            final_url = self.get_body(picurl[0]).match(/"(http:\/\/pics.campl.us\/f\/c\/.+?)"/)
-            tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => final_url[1] } unless final_url.nil?
-          end
-          tweet_text.scan(/\((http:\/\/#{config['droplr_domain']}\/\w+?)\)/).each do |picurl|
-            final_url = self.get_body(picurl[0]).match(/"(https:\/\/s3.amazonaws.com\/files.droplr.com\/.+?)"/)
-            tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => final_url[1] } unless final_url.nil?
-          end
-          tweet_text.scan(/\((http:\/\/instagr\.am\/\w\/\w+?\/)\)/).each do |picurl|
-            final_url = self.get_body(picurl[0]).match(/"(http:\/\/distillery.*?\.instagram\.com\/[a-z0-9_]+\.jpg)"/i)
-            tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => final_url[1] } unless final_url.nil?
-          end
-        end
         rescue Exception => e
           raise "Failure gathering images urls"
           p e
         end
-        if tweet_images.empty?
+        if tweet_images.nil?
           tweets += "\n* [[#{tweet_date.strftime('%I:%M %p')}](https://twitter.com/#{user}/status/#{tweet_id})] #{tweet_text}"
         else
           images.concat(tweet_images)
-        end unless tweet_images.nil?
+        end
       }
       if config['save_images'] && images
         begin
