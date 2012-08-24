@@ -8,13 +8,13 @@ Slogger indexes various public social services and creates Day One (<http://dayo
 
 ## Features ##
 
-- Slogger 2.x uses a plugin architecture to allow extensibility.
+- Slogger 2.x uses a plugin architecture to allow easy extension
     - Default plugins:
         -  Gist (gists created in the last 24 hours. Title and description only, logged as a single digest)
-        -  Flickr (images uploaded in the last 24 hours, each as an individual post)
+        -  Flickr (images uploaded in the last 24 hours, each as an individual post. Can handle multiple accounts)
         -  Last.fm (Scrobbled songs for the current day)
-        -  RSS feeds (designed to pull in your blog posts with leading image and excerpt (optionally markdownified))
-        -  Twitter (Tweets and Favorites for the day as digest entries)
+        -  RSS feeds (designed to pull in your blog posts with leading image and excerpt (optionally markdownified). Handles multiple feeds)
+        -  Twitter (Tweets and Favorites for the day as digest entries, handles multiple Twitter accounts)
         -  Foursquare (Checkins for the day)
 - Slogger can be called with a single argument that is a path to a local image, and an entry will be created for that image.
     - You can use this with a folder action or launchd task to add files from a folder connected to something like <http://IFTTT.com>. Any images added to the watched folder will be turned into journal entries.
@@ -30,6 +30,6 @@ Slogger indexes various public social services and creates Day One (<http://dayo
 5. Edit `slogger_config` and fill in the necessary parameters for listed configuration settings.
 6. Next time you run `./slogger`, it will execute the plugins and generate your log entries. Run it manually to test, and then automate it using Lingon (launchd) or other scheduling app.
 
-## Plugins ##
+## Plugin development ##
 
 *Documentation coming*.
