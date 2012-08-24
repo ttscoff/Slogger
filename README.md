@@ -32,4 +32,4 @@ Slogger indexes various public social services and creates Day One (<http://dayo
 
 ## Plugin development ##
 
-*Documentation coming*.
+*Documentation coming*. See `plugin_template.rb` to get started.
