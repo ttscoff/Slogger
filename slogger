@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 MAJOR_VERSION = 2.0
-MINOR_VERSION = 2
+MINOR_VERSION = 3
 require 'open-uri'
 require 'net/http'
 require 'net/https'

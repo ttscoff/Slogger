@@ -15,6 +15,7 @@ Notes:
 config = {
   'flickr_description' => [
     'Logs today\'s photos from Flickr.',
+    'flickr_ids is an array of one or more IDs',
     'Get your Flickr ID at <http://idgettr.com/>',
     'Get your Flickr API key at <http://www.flickr.com/services/apps/create/noncommercial/>'],
   'flickr_api_key' => '',

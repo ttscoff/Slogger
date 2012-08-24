@@ -73,7 +73,7 @@ class DayOne < Slogger
 
   def store_single_photo(file, options = {}, copy = false)
 
-    options['content'] ||= File.basename(file,'.jpg')
+    options['content'] ||= File.basename(file,'.jpg') if @config['image_filename_is_title']
     options['uuid'] ||= %x{uuidgen}.gsub(/-/,'').strip
     options['starred'] ||= false
     options['datestamp'] ||= Time.now.utc.iso8601
