@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Slogger by ttscoff</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/pygment_trac.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header>
+        <h1 class="header">Slogger</h1>
+        <p class="header">Social logging script for Day One</p>
+
+        <ul>
+          <li class="download"><a class="buttons" href="https://github.com/ttscoff/Slogger/zipball/master">Download ZIP</a></li>
+          <li class="download"><a class="buttons" href="https://github.com/ttscoff/Slogger/tarball/master">Download TAR</a></li>
+          <li><a class="buttons github" href="https://github.com/ttscoff/Slogger">View On GitHub</a></li>
+        </ul>
+
+        <p class="header">This project is maintained by <a class="header name" href="https://github.com/ttscoff">ttscoff</a></p>
+
+
+      </header>
+      <section>
+        <h3>Slogger: Social logging script for Day One</h3>
+
+<h2>Description</h2>
+
+<p>Slogger indexes various public social services and creates Day One (<a href="http://dayoneapp.com/">http://dayoneapp.com/</a>) journal entries for them. It allows you to keep a personal journal that collects your online social life automatically, all in one place.</p>
+
+<h2>Features</h2>
+
+<ul>
+<li>Slogger 2.x uses a plugin architecture to allow easy extension
+
+<ul>
+<li>Default plugins:
+
+<ul>
+<li> Gist (gists created in the last 24 hours. Title and description only, logged as a single digest)</li>
+<li> Flickr (images uploaded in the last 24 hours, each as an individual post. Can handle multiple accounts)</li>
+<li> Last.fm (Scrobbled songs for the current day)</li>
+<li> RSS feeds (designed to pull in your blog posts with leading image and excerpt (optionally markdownified). Handles multiple feeds)</li>
+<li> Twitter (Tweets and Favorites for the day as digest entries, handles multiple Twitter accounts)</li>
+<li> Foursquare (Checkins for the day)</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Slogger can be called with a single argument that is a path to a local image, and an entry will be created for that image.
+
+<ul>
+<li>You can use this with a folder action or launchd task to add files from a folder connected to something like <a href="http://IFTTT.com">http://IFTTT.com</a>. Any images added to the watched folder will be turned into journal entries.
+
+<ul>
+<li> Note that Slogger does not delete the original image, so your script needs to move files out of the folder manually to avoid double-processing.</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul><h2>Usage</h2>
+
+<ol>
+<li>From within the Slogger folder, run <code>./slogger</code> to create the initial configuration file.</li>
+<li>Edit the file <code>slogger_config</code> that shows up
+
+<ul>
+<li>The only option will be 'storage:', which should be set to either 'icloud' or a path to a Dropbox-synced Journal</li>
+</ul>
+</li>
+<li>Move plugins you want to use into <code>./plugins/</code>, and plugins you want to disable into <code>./plugins_disabled</code>.</li>
+<li>Run <code>./slogger</code> again to update the configuration file with enabled plugin options.</li>
+<li>Edit <code>slogger_config</code> and fill in the necessary parameters for listed configuration settings.</li>
+<li>Next time you run <code>./slogger</code>, it will execute the plugins and generate your log entries. Run it manually to test, and then automate it using Lingon (launchd) or other scheduling app.</li>
+</ol><h2>Plugin development</h2>
+
+<p><em>Documentation coming</em>. See <code>plugin_template.rb</code> to get started.</p>
+      </section>
+      <footer>
+        <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
+      </footer>
+    </div>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+		          <script type="text/javascript">
+            var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+            document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+          </script>
+          <script type="text/javascript">
+            try {
+              var pageTracker = _gat._getTracker("UA-34296025-1");
+            pageTracker._trackPageview();
+            } catch(err) {}
+          </script>
+
+  </body>
+</html>
