@@ -35,7 +35,6 @@ class FoursquareLogger < Slogger
     config['foursquare_tags'] ||= ''
     @tags = "\n\n#{config['foursquare_tags']}\n" unless config['foursquare_tags'] == ''
     @debug = config['debug'] || false
-    @today = Time.now - (60 * 60 * 24)
 
     entrytext = ''
     rss_content = ''

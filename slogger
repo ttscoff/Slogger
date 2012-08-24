@@ -41,14 +41,14 @@ end
 
 class Slogger
 
-  attr_accessor :config, :dayonepath, :plugins
+  attr_accessor :config, :dayonepath, :plugins, :timespan
   def initialize
 
     cfg = ConfigTools.new
     @log = Logger.new(STDERR)
     @template = self.template
     @plugins = []
-
+    @timespan = Time.now - (60 * 60 * 24)
     if cfg.config_exists?
       @config = cfg.load_config
       if @config.nil?

@@ -12,7 +12,6 @@ class DayOne < Slogger
     fh = File.new(File.expand_path(@dayonepath+'/entries/'+uuid+".doentry"),'w+')
     fh.puts @template.result(binding)
     fh.close
-    puts @dayonepath
     return true
   end
 
@@ -46,24 +45,25 @@ class DayOne < Slogger
     return false if match.nil?
     ext = match[1]
     @log.info("Resizing image #{orig}")
-    %x{sips -Z 800 "#{orig}"}
+    orig = %x{orig="#{orig}";sips -Z 800 --out $TMPDIR/${orig##*/} "$orig";echo $TMPDIR${orig##*/}}
     unless ext =~ /\.jpg$/
       case ext
       when '.jpeg'
         target = orig.gsub(/\.jpeg$/,'.jpg')
         FileUtils.mv(orig,target)
         return target
-      when /\.(png|gif)$/
-        if File.exists?('/usr/local/bin/convert')
-          target = orig.gsub(/#{ext}$/,'.jpg')
-          @log.info("Converting #{orig} to JPEG")
-          %x{/usr/local/bin/convert "#{orig}" "#{target}"}
-          File.delete(orig)
-          return target
-        else
-          @log.warn("Image could not be converted to JPEG format and may not show up in Day One. Please install ImageMagick.")
-          return orig
-        end
+      when /\.(png|gif|tiff)$/
+        # if File.exists?('/usr/local/bin/convert')
+        #   target = orig.gsub(/#{ext}$/,'.jpg')
+        #   @log.info("Converting #{orig} to JPEG")
+        #   %x{/usr/local/bin/convert "#{orig}" "#{target}"}
+        #   File.delete(orig)
+        #   return target
+        # else
+        #   @log.warn("Image could not be converted to JPEG format and may not show up in Day One. Please install ImageMagick.")
+        #   return orig
+        # end
+        return orig
       else
         return orig
       end
@@ -84,6 +84,9 @@ class DayOne < Slogger
     end
 
     res = self.process_image(File.expand_path(file))
-    return self.to_dayone(options)
+    if res
+      options['content'] = File.basename(res,'.jpg') if options['content'] == ''
+      return self.to_dayone(options)
+    end
   end
 end

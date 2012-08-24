@@ -45,7 +45,7 @@ class RSSLogger < Slogger
     tags = config['tags'] || ''
     tags = "\n\n#{@tags}\n" unless @tags == ''
 
-    today = Time.now - (60 * 60 * 24)
+    today = @timespan
     feeds.each do |rss_feed|
       rss_content = ""
       open(rss_feed) do |f|
@@ -66,7 +66,7 @@ class RSSLogger < Slogger
           end
 
           options = {}
-          options['content'] = "## [#{item.title}](#{self.permalink(item.link)})\n\n#{content}#{tags}"
+          options['content'] = "## [#{item.title}](#{item.link})\n\n#{content}#{tags}"
           options['datestamp'] = item.pubDate.utc.iso8601
           options['starred'] = starred
           options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip

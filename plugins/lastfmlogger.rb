@@ -36,7 +36,7 @@ class LastFMLogger < Slogger
     feeds = [{'title'=>"## Listening To", 'feed' => "http://ws.audioscrobbler.com/2.0/user/#{config['lastfm_user']}/recenttracks.rss"},{'title'=>"## Loved Tracks", 'feed' => "http://ws.audioscrobbler.com/2.0/user/#{config['lastfm_user']}/lovedtracks.rss"}]
 
 
-    today = Time.now - (60 * 60 * 24)
+    today = @timespan
 
     @log.info("Getting Last.fm playists for #{config['lastfm_user']}")
 

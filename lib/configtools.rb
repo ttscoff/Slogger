@@ -24,7 +24,7 @@ class ConfigTools
   def config_exists?
     if !File.exists?(@config_file)
       dump_config( default_config )
-      puts "Please update the configuration file at #{@config_file}."
+      puts "Please update the configuration file at #{@config_file} then run Slogger again."
       Process.exit(-1)
       # return false
     else
