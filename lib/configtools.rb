@@ -1,4 +1,5 @@
 require 'yaml'
+
 class ConfigTools
   def initialize(options = {})
     @config_file = options['config_file'] || File.expand_path(File.dirname(__FILE__)+'/../slogger_config')
@@ -13,26 +14,21 @@ class ConfigTools
     File.open(@config_file, 'w') { |yf| YAML::dump(config, yf) }
   end
 
+  def default_config
+    config = {
+      'storage' => 'icloud'
+    }
+    config
+  end
+
   def config_exists?
     if !File.exists?(@config_file)
-      dump_config( {
-        'lastfm_user' => '',
-        'rss_feeds' => [],
-        'markdownify_rss_posts' => false,
-        'star_rss_posts' => false,
-        'twitter_users' => [],
-        'save_images' => true,
-        'droplr_domain' => 'd.pr',
-        'gist_user' => '',
-        'rss_tags' => '@social @blogging',
-        'lastfm_tags' => '@social @music',
-        'twitter_tags' => '@social @twitter',
-        'gist_tags' => '@social @coding',
-        'storage' => 'icloud'
-      } )
-      puts "Please update the configuration file at #{@config_file}."
+      dump_config( default_config )
+      puts "Please update the configuration file at #{@config_file} then run Slogger again."
       Process.exit(-1)
+      # return false
+    else
+      return true
     end
-    return true
   end
 end
