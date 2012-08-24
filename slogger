@@ -137,9 +137,10 @@ else
   $slog.run_plugins
 end
 
-# TODO: Create photos folder automatically if needed
 # TODO: Document plugin architecture
 # TODO: Handle RSS anomolies, fail gracefully
-# TODO: Command line option for increased history span
+# TODO: Command line option for defining timespan to pull for
 # TODO: Command line option for undo
-# TODO: Sort plugin options
+# TODO: Command line help (slogger -h)
+# TODO: Sort plugin options, extract descriptions to MD file w/command line option to display (slogger --plugins)
+# TODO: GUI
