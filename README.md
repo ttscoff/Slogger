@@ -36,7 +36,9 @@ Slogger indexes various public social services and creates Day One (<http://dayo
 
 ## Plugin development ##
 
-*Documentation coming*. See `plugin_template.rb` to get started.
+*More documentation coming*. See `plugin_template.rb` to get started.
+
+If you want to edit an existing plugin to change parameters or output, move the original to `plugins_disabled` and make a copy with a new name in `plugins`. It will make it easier to update in the future without losing your changes.
 
 ## Todo ##
 
