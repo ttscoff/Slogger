@@ -31,7 +31,17 @@ Slogger indexes various public social services and creates Day One (<http://dayo
 4. Run `./slogger` again to update the configuration file with enabled plugin options.
 5. Edit `slogger_config` and fill in the necessary parameters for listed configuration settings.
 6. Next time you run `./slogger`, it will execute the plugins and generate your log entries. Run it manually to test, and then automate it using Lingon (launchd) or other scheduling app.
+7. You can install a launchd task that will automatically run at 11:50pm every night by running `install.rb`. It's the same as Lingon would create, but all automatic and everything.
+    - To uninstall, delete `~/Library/LaunchAgents/com.brettterpstra.slogger` and log out and back in.
 
 ## Plugin development ##
 
 *Documentation coming*. See `plugin_template.rb` to get started.
+
+## Todo ##
+
+- Command line options for timespan, undo, configuration, etc.
+- Better handling of varying RSS feeds
+- MOAR PLUGINS
+- Better documentation method and help for individual plugins
+- 
