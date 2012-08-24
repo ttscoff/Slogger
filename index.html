@@ -30,9 +30,7 @@
 
       </header>
       <section>
-        <h3>Slogger: Social logging script for Day One</h3>
-
-<h2>Description</h2>
+        <h2>Description</h2>
 
 <p>Slogger indexes various public social services and creates Day One (<a href="http://dayoneapp.com/">http://dayoneapp.com/</a>) journal entries for them. It allows you to keep a personal journal that collects your online social life automatically, all in one place.</p>
 
@@ -73,16 +71,33 @@
 <li>Edit the file <code>slogger_config</code> that shows up
 
 <ul>
-<li>The only option will be 'storage:', which should be set to either 'icloud' or a path to a Dropbox-synced Journal</li>
+<li>The only options will be 'storage:' and 'image_filename_is_title:'</li>
+<li>storage: should be set to either 'icloud' or a path to a Dropbox-synced Journal</li>
+<li>image_filename_is_title: should be set to true or false. If true, it will use the base filename (without extension) as the title of images imported individually.</li>
 </ul>
 </li>
 <li>Move plugins you want to use into <code>./plugins/</code>, and plugins you want to disable into <code>./plugins_disabled</code>.</li>
 <li>Run <code>./slogger</code> again to update the configuration file with enabled plugin options.</li>
 <li>Edit <code>slogger_config</code> and fill in the necessary parameters for listed configuration settings.</li>
 <li>Next time you run <code>./slogger</code>, it will execute the plugins and generate your log entries. Run it manually to test, and then automate it using Lingon (launchd) or other scheduling app.</li>
+<li>You can install a launchd task that will automatically run at 11:50pm every night by running <code>install.rb</code>. It's the same as Lingon would create, but all automatic and everything.
+
+<ul>
+<li>To uninstall, delete <code>~/Library/LaunchAgents/com.brettterpstra.slogger</code> and log out and back in.</li>
+</ul>
+</li>
 </ol><h2>Plugin development</h2>
 
 <p><em>Documentation coming</em>. See <code>plugin_template.rb</code> to get started.</p>
+
+<h2>Todo</h2>
+
+<ul>
+<li>Command line options for timespan, undo, configuration, etc.</li>
+<li>Better handling of varying RSS feeds</li>
+<li>MOAR PLUGINS</li>
+<li>Better documentation method and help for individual plugins</li>
+</ul>
       </section>
       <footer>
         <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
