@@ -179,7 +179,7 @@ if ARGV.length > 0
   if File.exists?(File.expand_path(ARGV[0]))
     DayOne.new.store_single_photo(ARGV[0],{},true)
   else
-    raise "File #{ARGV[0]} not found."
+    raise "File \"#{ARGV[0]}\" not found."
   end
 else
   $stdout.puts "Initializing Slogger v#{MAJOR_VERSION} (#{MAJOR_VERSION}.#{MINOR_VERSION}.#{BUILD_NUMBER})..."
