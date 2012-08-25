@@ -8,7 +8,7 @@ class DayOne < Slogger
     # entry = CGI.escapeHTML(content.unpack('C*').pack('U*').gsub(/[^[:punct:]\w\s]+/,' ')) unless content.nil?
     entry = CGI.escapeHTML(content) unless content.nil?
     @dayonepath = storage_path
-    @log.info("Saving entry to #{@dayonepath}/entries/#{uuid}.doentry")
+    @log.info("Saving entry to entries/#{uuid}.doentry")
     fh = File.new(File.expand_path(@dayonepath+'/entries/'+uuid+".doentry"),'w+')
     fh.puts @template.result(binding)
     fh.close
@@ -29,10 +29,10 @@ class DayOne < Slogger
     begin
       Net::HTTP.get_response(URI.parse(imageurl)) do |http|
         data = http.body
-        @log.info("Retrieving image: #{imageurl} to #{target}")
+        @log.info("Retrieving image -\n           Source: #{imageurl}\n      Target UUID: #{uuid}")
         open( File.expand_path(target), "wb" ) { |file| file.write(data) }
       end
-      return self.process_image(target)
+      return target
     rescue Exception => e
       p e
       return false
@@ -44,8 +44,8 @@ class DayOne < Slogger
     match = orig.match(/(\..{3,4})$/)
     return false if match.nil?
     ext = match[1]
-    @log.info("Resizing image #{orig}")
-    %x{sips -Z 800 "#{orig}"}
+    @log.info("Resizing image #{File.basename(orig)}")
+    res = %x{sips -Z 800 "#{orig}" 2>&1}
     unless ext =~ /\.jpg$/
       case ext
       when '.jpeg'

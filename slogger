@@ -14,9 +14,10 @@ require RUBY_VERSION < "1.9" ? 'ftools' : 'fileutils'
 SLOGGER_HOME = File.dirname(File.expand_path(__FILE__))
 ENV['SLOGGER_HOME'] = SLOGGER_HOME
 
-require SLOGGER_HOME + '/lib/sociallogger.rb'
-require SLOGGER_HOME + '/lib/configtools.rb'
-require SLOGGER_HOME + '/lib/json.rb'
+require SLOGGER_HOME + '/lib/sociallogger'
+require SLOGGER_HOME + '/lib/configtools'
+require SLOGGER_HOME + '/lib/json'
+require SLOGGER_HOME + '/lib/oauth'
 
 class String
   def markdownify
@@ -42,11 +43,26 @@ end
 
 class Slogger
 
-  attr_accessor :config, :dayonepath, :plugins, :timespan
+  attr_accessor :config, :dayonepath, :plugins, :timespan, :log
   def initialize
-
     cfg = ConfigTools.new
+
     @log = Logger.new(STDERR)
+    original_formatter = Logger::Formatter.new
+    @log.datetime_format = '%d'
+    @log.level = 1
+    @log.progname = self.class.name
+    @log.formatter = proc { |severity, datetime, progname, msg|
+      abbr_sev = case severity
+        when 'WARN' then "> "
+        when 'ERROR' then " !"
+        when 'FATAL' then "!!"
+        else "  "
+      end
+      "#{abbr_sev}#{datetime.strftime('%H:%M:%S')} #{progname} -> #{msg}\n"
+      # original_formatter.call(severity, datetime, progname, msg.dump)
+    }
+
     @template = self.template
     @plugins = []
     @timespan = Time.now - (60 * 60 * 24)
@@ -89,6 +105,7 @@ class Slogger
     end
     @plugins.each do |plugin|
       _namespace = plugin['class'].to_s
+
       @config[_namespace] ||= {}
       plugin['config'].each do |k,v|
         @config[_namespace][k] ||= v
@@ -123,8 +140,10 @@ XMLTEMPLATE
   end
 end
 
-require SLOGGER_HOME + '/lib/redirect.rb'
-require SLOGGER_HOME + '/lib/dayone.rb'
+require SLOGGER_HOME + '/lib/redirect'
+require SLOGGER_HOME + '/lib/dayone'
+$stdout.puts "Initializing Slogger v#{MAJOR_VERSION} (#{MAJOR_VERSION}.#{MINOR_VERSION})..."
+
 $slog = Slogger.new
 $slog.dayonepath = $slog.storage_path
 if ARGV.length > 0
