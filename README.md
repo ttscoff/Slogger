@@ -15,6 +15,8 @@ Slogger indexes various public social services and creates Day One (<http://dayo
         -  Last.fm (Scrobbled songs for the current day)
         -  RSS feeds (designed to pull in your blog posts with leading image and excerpt (optionally markdownified). Handles multiple feeds)
         -  Twitter (Tweets and Favorites for the day as digest entries, handles multiple Twitter accounts)
+        -  Instapaper (Unread and/or individual folders)
+    - In-progress plugins:
         -  Foursquare (Checkins for the day)
 - Slogger can be called with a single argument that is a path to a local image, and an entry will be created for that image.
     - You can use this with a folder action or launchd task to add files from a folder connected to something like <http://IFTTT.com>. Any images added to the watched folder will be turned into journal entries.
@@ -34,11 +36,21 @@ Slogger indexes various public social services and creates Day One (<http://dayo
 7. You can install a launchd task that will automatically run at 11:50pm every night by running `install.rb`. It's the same as Lingon would create, but all automatic and everything.
     - To uninstall, delete `~/Library/LaunchAgents/com.brettterpstra.slogger` and log out and back in.
 
+## Command line options ##
+
+    Usage: slogger [-dq] [-r X] [/path/to/image.jpg]
+        -d, --develop            Develop mode
+        -q, --quiet              Run quietly (no notifications/messages)
+        -r, --retries COUNT      Maximum number of retries per plugin (int)
+        -h, --help               Display this screen
+
 ## Plugin development ##
 
 *More documentation coming*. See `plugin_template.rb` to get started.
 
 If you want to edit an existing plugin to change parameters or output, move the original to `plugins_disabled` and make a copy with a new name in `plugins`. It will make it easier to update in the future without losing your changes.
+
+When developing plugins you can create a directory called 'plugins_develop' in the same folder as 'plugins' and work on new plugins in there. When you run slogger, use './slogger -d' to only run plugins in the develop folder while testing.
 
 ## Todo ##
 
