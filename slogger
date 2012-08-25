@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 MAJOR_VERSION = 2.0
-MINOR_VERSION = 5
+MINOR_VERSION = 6
 BUILD_NUMBER = 1
 require 'open-uri'
 require 'net/http'
@@ -37,7 +37,7 @@ class String
   end
 
   def e_sh
-    self.to_s.gsub(/(?=[^a-zA-Z0-9_.\/\-\x7F-\xFF\n])/, '\\').gsub(/\n/, "'\n'").sub(/^$/, "''")
+    self.to_s.gsub(/(?=[^a-zA-Z0-9_.\/\-\n])/, '\\').gsub(/\n/, "'\n'").sub(/^$/, "''")
   end
 
 end
