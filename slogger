@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 MAJOR_VERSION = 2.0
-MINOR_VERSION = 5
+MINOR_VERSION = 6
 BUILD_NUMBER = 1
 require 'open-uri'
 require 'net/http'
@@ -11,7 +11,7 @@ require 'rss'
 require 'erb'
 require 'logger'
 require 'optparse'
-require RUBY_VERSION < "1.9" ? 'ftools' : 'fileutils'
+require 'fileutils'
 
 SLOGGER_HOME = File.dirname(File.expand_path(__FILE__))
 ENV['SLOGGER_HOME'] = SLOGGER_HOME
@@ -37,7 +37,7 @@ class String
   end
 
   def e_sh
-    self.to_s.gsub(/(?=[^a-zA-Z0-9_.\/\-\x7F-\xFF\n])/, '\\').gsub(/\n/, "'\n'").sub(/^$/, "''")
+    self.to_s.gsub(/(?=[^a-zA-Z0-9_.\/\-\n])/, '\\').gsub(/\n/, "'\n'").sub(/^$/, "''")
   end
 
 end
@@ -179,7 +179,7 @@ if ARGV.length > 0
   if File.exists?(File.expand_path(ARGV[0]))
     DayOne.new.store_single_photo(ARGV[0],{},true)
   else
-    raise "File #{ARGV[0]} not found."
+    raise "File \"#{ARGV[0]}\" not found."
   end
 else
   $stdout.puts "Initializing Slogger v#{MAJOR_VERSION} (#{MAJOR_VERSION}.#{MINOR_VERSION}.#{BUILD_NUMBER})..."
