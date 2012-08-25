@@ -11,7 +11,7 @@ require 'rss'
 require 'erb'
 require 'logger'
 require 'optparse'
-require RUBY_VERSION < "1.9" ? 'ftools' : 'fileutils'
+require 'fileutils'
 
 SLOGGER_HOME = File.dirname(File.expand_path(__FILE__))
 ENV['SLOGGER_HOME'] = SLOGGER_HOME
