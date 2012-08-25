@@ -49,7 +49,7 @@ class RSSLogger < Slogger
     feeds.each do |rss_feed|
       retries = 0
       success = false
-      until success || retries == @config[:max_retries]
+      until success || retries == @options[:max_retries]
         if parse_feed(rss_feed)
           success = true
         else

@@ -43,10 +43,10 @@ end
 
 class Slogger
 
-  attr_accessor :config, :dayonepath, :plugins, :timespan, :log
+  attr_accessor :config, :dayonepath, :plugins, :timespan, :log, :options
   def initialize
     cfg = ConfigTools.new
-
+    @options = {}
     @log = Logger.new(STDERR)
     original_formatter = Logger::Formatter.new
     @log.datetime_format = '%d'
@@ -59,7 +59,7 @@ class Slogger
         when 'FATAL' then "!!"
         else "  "
       end
-      output = @config[:quiet] ? '' : "#{abbr_sev}#{datetime.strftime('%H:%M:%S')} #{progname} -> #{msg}\n"
+      output = @options[:quiet] ? '' : "#{abbr_sev}#{datetime.strftime('%H:%M:%S')} #{progname} -> #{msg}\n"
       output
       # original_formatter.call(severity, datetime, progname, msg.dump)
     }
@@ -101,7 +101,7 @@ class Slogger
 
   def run_plugins
     new_options = false
-    plugin_dir = @config[:develop] ? "/plugins_develop/*.rb" : "/plugins/*.rb"
+    plugin_dir = @options[:develop] ? "/plugins_develop/*.rb" : "/plugins/*.rb"
     Dir[SLOGGER_HOME + plugin_dir].each do |file|
       require file
     end
@@ -151,17 +151,17 @@ $slog.dayonepath = $slog.storage_path
 
 optparse = OptionParser.new do|opts|
   opts.banner = "Usage: slogger [-dq] [-r X] [/path/to/image.jpg]"
-  $slog.config[:develop] = false
+  $slog.options[:develop] = false
   opts.on( '-d','--develop', 'Develop mode' ) do
-    $slog.config[:develop] = true
+    $slog.options[:develop] = true
   end
-  $slog.config[:quiet] = false
+  $slog.options[:quiet] = false
   opts.on( '-q','--quiet', 'Run quietly (no notifications/messages)' ) do
-   $slog.config[:quiet] = true
+   $slog.options[:quiet] = true
   end
-  $slog.config[:max_retries] = 1
+  $slog.options[:max_retries] = 1
   opts.on( '-r','--retries COUNT', 'Maximum number of retries per plugin (int)' ) do |count|
-    $slog.config[:max_retries] = count.to_i
+    $slog.options[:max_retries] = count.to_i
   end
   opts.on( '-h', '--help', 'Display this screen' ) do
     puts opts

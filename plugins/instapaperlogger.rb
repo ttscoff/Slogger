@@ -27,7 +27,7 @@ class InstapaperLogger < Slogger
   def do_log
     if config.key?(self.class.name)
       config = @config[self.class.name]
-      if !config.key?('instapaper_feeds') || config['instapaper_feeds'] == []
+      if !config.key?('instapaper_feeds') || config['instapaper_feeds'] == [] || config['instapaper_feeds'].empty?
         @log.warn("Instapaper feeds have not been configured, please edit your slogger_config file.")
         return
       end
