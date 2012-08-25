@@ -1,6 +1,7 @@
 #!/usr/bin/env ruby
 MAJOR_VERSION = 2.0
 MINOR_VERSION = 5
+BUILD_NUMBER = 1
 require 'open-uri'
 require 'net/http'
 require 'net/https'
@@ -144,7 +145,6 @@ end
 
 require SLOGGER_HOME + '/lib/redirect'
 require SLOGGER_HOME + '/lib/dayone'
-$stdout.puts "Initializing Slogger v#{MAJOR_VERSION} (#{MAJOR_VERSION}.#{MINOR_VERSION})..."
 
 $slog = Slogger.new
 $slog.dayonepath = $slog.storage_path
@@ -163,6 +163,10 @@ optparse = OptionParser.new do|opts|
   opts.on( '-r','--retries COUNT', 'Maximum number of retries per plugin (int)' ) do |count|
     $slog.options[:max_retries] = count.to_i
   end
+  opts.on( '-v', '--version', 'Display the version number') do
+    $stdout.puts("Slogger version #{MAJOR_VERSION}.#{MINOR_VERSION}.#{BUILD_NUMBER}")
+    exit
+  end
   opts.on( '-h', '--help', 'Display this screen' ) do
     puts opts
     exit
@@ -178,7 +182,7 @@ if ARGV.length > 0
     raise "File #{ARGV[0]} not found."
   end
 else
-  puts "Running"
+  $stdout.puts "Initializing Slogger v#{MAJOR_VERSION} (#{MAJOR_VERSION}.#{MINOR_VERSION}.#{BUILD_NUMBER})..."
   $slog.run_plugins
 end
 
