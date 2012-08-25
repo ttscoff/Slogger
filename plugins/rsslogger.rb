@@ -45,13 +45,34 @@ class RSSLogger < Slogger
     end
     @log.info("Logging rss posts for feeds #{feeds.join(', ')}")
 
+
+    feeds.each do |rss_feed|
+      retries = 0
+      success = false
+      until success || retries == @config[:max_retries]
+        if parse_feed(rss_feed)
+          success = true
+        else
+          retries += 1
+          @log.error("Error parsing #{rss_feed}, retrying (#{retries})")
+          sleep 2
+        end
+      end
+
+      unless success
+        @log.fatal("Could not parse feed #{rss_feed}")
+      end
+    end
+  end
+
+  def parse_feed(rss_feed)
     markdownify = config['markdownify_posts'] || true
     starred = config['star_posts'] || true
     tags = config['tags'] || ''
     tags = "\n\n#{@tags}\n" unless @tags == ''
 
     today = @timespan
-    feeds.each do |rss_feed|
+    begin
       rss_content = ""
       open(rss_feed) do |f|
         rss_content = f.read
@@ -85,7 +106,11 @@ class RSSLogger < Slogger
           break
         end
       }
+    rescue Exception => e
+      p e
+      return false
     end
+    return true
   end
 
   def permalink(uri,redirect_count=0)

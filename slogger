@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 MAJOR_VERSION = 2.0
-MINOR_VERSION = 3
+MINOR_VERSION = 4
 require 'open-uri'
 require 'net/http'
 require 'net/https'
@@ -9,6 +9,7 @@ require 'cgi'
 require 'rss'
 require 'erb'
 require 'logger'
+require 'optparse'
 require RUBY_VERSION < "1.9" ? 'ftools' : 'fileutils'
 
 SLOGGER_HOME = File.dirname(File.expand_path(__FILE__))
@@ -58,7 +59,8 @@ class Slogger
         when 'FATAL' then "!!"
         else "  "
       end
-      "#{abbr_sev}#{datetime.strftime('%H:%M:%S')} #{progname} -> #{msg}\n"
+      output = @config[:quiet] ? '' : "#{abbr_sev}#{datetime.strftime('%H:%M:%S')} #{progname} -> #{msg}\n"
+      output
       # original_formatter.call(severity, datetime, progname, msg.dump)
     }
 
@@ -99,7 +101,8 @@ class Slogger
 
   def run_plugins
     new_options = false
-    Dir[SLOGGER_HOME + "/plugins/*.rb"].each do |file|
+    plugin_dir = @config[:develop] ? "/plugins_develop/*.rb" : "/plugins/*.rb"
+    Dir[SLOGGER_HOME + plugin_dir].each do |file|
       require file
     end
     @plugins.each do |plugin|
@@ -145,6 +148,29 @@ $stdout.puts "Initializing Slogger v#{MAJOR_VERSION} (#{MAJOR_VERSION}.#{MINOR_V
 
 $slog = Slogger.new
 $slog.dayonepath = $slog.storage_path
+
+optparse = OptionParser.new do|opts|
+  opts.banner = "Usage: slogger [-dq] [-r X] [/path/to/image.jpg]"
+  $slog.config[:develop] = false
+  opts.on( '-d','--develop', 'Develop mode' ) do
+    $slog.config[:develop] = true
+  end
+  $slog.config[:quiet] = false
+  opts.on( '-q','--quiet', 'Run quietly (no notifications/messages)' ) do
+   $slog.config[:quiet] = true
+  end
+  $slog.config[:max_retries] = 1
+  opts.on( '-r','--retries COUNT', 'Maximum number of retries per plugin (int)' ) do |count|
+    $slog.config[:max_retries] = count.to_i
+  end
+  opts.on( '-h', '--help', 'Display this screen' ) do
+    puts opts
+    exit
+  end
+end
+
+optparse.parse!
+
 if ARGV.length > 0
   if File.exists?(File.expand_path(ARGV[0]))
     DayOne.new.store_single_photo(ARGV[0],{},true)
@@ -152,6 +178,7 @@ if ARGV.length > 0
     raise "File #{ARGV[0]} not found."
   end
 else
+  puts "Running"
   $slog.run_plugins
 end
 
