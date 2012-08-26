@@ -80,7 +80,7 @@ class RSSLogger < Slogger
 
       rss = RSS::Parser.parse(rss_content, false)
       rss.items.each { |item|
-        item_date = Time.parse(item.pubDate.to_s)
+        item_date = Time.parse(item.date.to_s)
         if item_date > today
           imageurl = false
           image_match = item.description.match(/src="(http:.*?\.(jpg|png)(\?.*?)?)"/i)
@@ -93,7 +93,7 @@ class RSSLogger < Slogger
 
           options = {}
           options['content'] = "## [#{item.title.gsub(/\n+/,' ').strip}](#{item.link})\n\n#{content.strip}#{tags}"
-          options['datestamp'] = item.pubDate.utc.iso8601
+          options['datestamp'] = item.date.utc.iso8601
           options['starred'] = starred
           options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
           sl = DayOne.new
