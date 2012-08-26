@@ -10,8 +10,10 @@ Notes:
 =end
 
 default_config = {
-    'feed' => "",
-    'tags' => "@social @checkins"
+  'description' => [
+  'foursquare_feed must refer to the address of your personal feed.','Your feed should be available at <https://foursquare.com/feeds/>'],
+  'foursquare_feed' => "",
+  'foursquare_tags' => "@social @checkins"
 }
 $slog.register_plugin({ 'class' => 'FoursquareLogger', 'config' => default_config })
 
@@ -50,11 +52,11 @@ class FoursquareLogger < Slogger
     content = ''
     rss = RSS::Parser.parse(rss_content, false)
     rss.items.each { |item|
-      break if Time.parse(item.pubDate.to_s) < @today
+      break if Time.parse(item.pubDate.to_s) < @timespan
       content += "* [#{item.title}](#{item.link})\n"
     }
     if content != ''
-      entrytext = "## Foursquare Checkins for #{@today.strftime('%m-%d-%Y')}\n\n" + content + "\n#{@tags}"
+      entrytext = "## Foursquare Checkins for #{@timespan.strftime('%m-%d-%Y')}\n\n" + content + "\n#{@tags}"
     end
     DayOne.new.to_dayone({'content' => entrytext}) unless entrytext == ''
   end
