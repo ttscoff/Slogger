@@ -68,6 +68,7 @@ class TwitterLogger < Slogger
       rescue Exception => e
         raise "Failure getting response from Twitter"
         p e
+        return false
       end
       REXML::Document.new(res).elements.each("statuses/status") { |tweet|
         today = @timespan
@@ -133,7 +134,7 @@ class TwitterLogger < Slogger
     rescue Exception => e
       puts "Error getting #{type} for #{user}"
       p e
-      return ''
+      return false
     end
 
   end
@@ -158,8 +159,33 @@ class TwitterLogger < Slogger
     tags = "\n\n#{config['twitter_tags']}\n" unless config['twitter_tags'] == ''
 
     config['twitter_users'].each do |user|
-      tweets = self.get_tweets(user,'timeline')
-      favs = self.get_tweets(user,'favorites')
+      retries = 0
+      success = false
+      until success
+        tweets = self.get_tweets(user,'timeline')
+        if tweets
+          success = true
+        else
+          break if $options[:max_retries] == retries
+          retries += 1
+          @log.error("Error parsing Tweets for #{user}, retrying (#{retries}/#{$options[:max_retries]})")
+          sleep 2
+        end
+      end
+      retries = 0
+      success = false
+      until success
+        favs = self.get_tweets(user,'favorites')
+        if favs
+          success = true
+        else
+          break if $options[:max_retries] == retries
+          retries += 1
+          @log.error("Error parsing Favorites for #{user}, retrying (#{retries}/#{$options[:max_retries]})")
+          sleep 2
+        end
+      end
+
       unless tweets == ''
         tweets = "## @#{user} on #{Time.now.strftime('%m-%d-%Y')}\n\n#{tweets}#{tags}"
         sl.to_dayone({'content' => tweets})

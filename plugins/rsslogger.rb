@@ -83,17 +83,17 @@ class RSSLogger < Slogger
         item_date = Time.parse(item.date.to_s)
         if item_date > today
           imageurl = false
-          image_match = item.description.match(/src="(http:.*?\.(jpg|png)(\?.*?)?)"/i)
+          image_match = item.description.match(/src="(http:.*?\.(jpg|png)(\?.*?)?)"/i) rescue nil
           imageurl = image_match[1] unless image_match.nil?
           if markdownify
-            content = item.description.markdownify
+            content = item.description.markdownify rescue ''
           else
-            content = item.description
+            content = item.description rescue ''
           end
 
           options = {}
           options['content'] = "## [#{item.title.gsub(/\n+/,' ').strip}](#{item.link})\n\n#{content.strip}#{tags}"
-          options['datestamp'] = item.date.utc.iso8601
+          options['datestamp'] = item.date.utc.iso8601 rescue item.dc_date.utc.iso8601
           options['starred'] = starred
           options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
           sl = DayOne.new
