@@ -8,7 +8,7 @@ class DayOne < Slogger
     # entry = CGI.escapeHTML(content.unpack('C*').pack('U*').gsub(/[^[:punct:]\w\s]+/,' ')) unless content.nil?
     entry = CGI.escapeHTML(content) unless content.nil?
     @dayonepath = storage_path
-    @log.info("-> Saving entry to entries/#{uuid}.doentry")
+    @log.info("=====[ Saving entry to entries/#{uuid}.doentry ]")
     fh = File.new(File.expand_path(@dayonepath+'/entries/'+uuid+".doentry"),'w+')
     fh.puts @template.result(binding)
     fh.close
