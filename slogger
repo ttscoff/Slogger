@@ -67,7 +67,7 @@ class Slogger
 
     @template = self.template
     @plugins = []
-    @timespan = Time.now - (60 * 60 * 24)
+    @timespan = Time.now - ((60 * 60 * 24) * $options[:timespan])
     if cfg.config_exists?
       @config = cfg.load_config
       if @config.nil?
@@ -111,9 +111,12 @@ class Slogger
 
       @config[_namespace] ||= {}
       plugin['config'].each do |k,v|
-        @config[_namespace][k] ||= v
+        if @config[_namespace][k].nil?
+          new_options = true
+          @config[_namespace][k] ||= v
+        end
       end
-      ConfigTools.new.dump_config(@config)
+      # ConfigTools.new.dump_config(@config)
       eval(plugin['class']).new.do_log
     end
     ConfigTools.new.dump_config(@config) if new_options
@@ -152,6 +155,10 @@ optparse = OptionParser.new do|opts|
   $options[:develop] = false
   opts.on( '-d','--develop', 'Develop mode' ) do
     $options[:develop] = true
+  end
+  $options[:timespan] = 1
+  opts.on( 't', '--timespan DAYS', 'Days of history to collect') do |days|
+    $options[:timespan] = days.to_i
   end
   $options[:quiet] = false
   opts.on( '-q','--quiet', 'Run quietly (no notifications/messages)' ) do
