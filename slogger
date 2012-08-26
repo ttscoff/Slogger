@@ -44,10 +44,10 @@ end
 
 class Slogger
 
-  attr_accessor :config, :dayonepath, :plugins, :timespan, :log, :options
+  attr_accessor :config, :dayonepath, :plugins
+  attr_reader :timespan, :log
   def initialize
     cfg = ConfigTools.new
-    @options = {}
     @log = Logger.new(STDERR)
     original_formatter = Logger::Formatter.new
     @log.datetime_format = '%d'
@@ -60,7 +60,7 @@ class Slogger
         when 'FATAL' then "!!"
         else "  "
       end
-      output = @options[:quiet] ? '' : "#{abbr_sev}#{datetime.strftime('%H:%M:%S')} #{progname} -> #{msg}\n"
+      output = $options[:quiet] ? '' : "#{abbr_sev}#{datetime.strftime('%H:%M:%S')} #{progname} -> #{msg}\n"
       output
       # original_formatter.call(severity, datetime, progname, msg.dump)
     }
@@ -102,7 +102,7 @@ class Slogger
 
   def run_plugins
     new_options = false
-    plugin_dir = @options[:develop] ? "/plugins_develop/*.rb" : "/plugins/*.rb"
+    plugin_dir = $options[:develop] ? "/plugins_develop/*.rb" : "/plugins/*.rb"
     Dir[SLOGGER_HOME + plugin_dir].each do |file|
       require file
     end
@@ -146,22 +146,20 @@ end
 require SLOGGER_HOME + '/lib/redirect'
 require SLOGGER_HOME + '/lib/dayone'
 
-$slog = Slogger.new
-$slog.dayonepath = $slog.storage_path
-
+$options = {}
 optparse = OptionParser.new do|opts|
   opts.banner = "Usage: slogger [-dq] [-r X] [/path/to/image.jpg]"
-  $slog.options[:develop] = false
+  $options[:develop] = false
   opts.on( '-d','--develop', 'Develop mode' ) do
-    $slog.options[:develop] = true
+    $options[:develop] = true
   end
-  $slog.options[:quiet] = false
+  $options[:quiet] = false
   opts.on( '-q','--quiet', 'Run quietly (no notifications/messages)' ) do
-   $slog.options[:quiet] = true
+   $options[:quiet] = true
   end
-  $slog.options[:max_retries] = 1
+  $options[:max_retries] = 1
   opts.on( '-r','--retries COUNT', 'Maximum number of retries per plugin (int)' ) do |count|
-    $slog.options[:max_retries] = count.to_i
+    $options[:max_retries] = count.to_i
   end
   opts.on( '-v', '--version', 'Display the version number') do
     $stdout.puts("Slogger version #{MAJOR_VERSION}.#{MINOR_VERSION}.#{BUILD_NUMBER}")
@@ -174,6 +172,9 @@ optparse = OptionParser.new do|opts|
 end
 
 optparse.parse!
+
+$slog = Slogger.new
+$slog.dayonepath = $slog.storage_path
 
 if ARGV.length > 0
   if File.exists?(File.expand_path(ARGV[0]))

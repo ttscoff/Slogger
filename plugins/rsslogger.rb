@@ -45,16 +45,16 @@ class RSSLogger < Slogger
     end
     @log.info("Logging rss posts for feeds #{feeds.join(', ')}")
 
-
     feeds.each do |rss_feed|
       retries = 0
       success = false
-      until success || retries == @options[:max_retries]
+      until success
         if parse_feed(rss_feed)
           success = true
         else
+          break if $options[:max_retries] == retries
           retries += 1
-          @log.error("Error parsing #{rss_feed}, retrying (#{retries})")
+          @log.error("Error parsing #{rss_feed}, retrying (#{retries}/#{$options[:max_retries]})")
           sleep 2
         end
       end
@@ -83,7 +83,7 @@ class RSSLogger < Slogger
         item_date = Time.parse(item.pubDate.to_s)
         if item_date > today
           imageurl = false
-          image_match = item.content_encoded.match(/src="(http:.*?\.(jpg|png)(\?.*?)?)"/i)
+          image_match = item.description.match(/src="(http:.*?\.(jpg|png)(\?.*?)?)"/i)
           imageurl = image_match[1] unless image_match.nil?
           if markdownify
             content = item.description.markdownify
@@ -92,7 +92,7 @@ class RSSLogger < Slogger
           end
 
           options = {}
-          options['content'] = "## [#{item.title}](#{item.link})\n\n#{content}#{tags}"
+          options['content'] = "## [#{item.title.gsub(/\n+/,' ').strip}](#{item.link})\n\n#{content.strip}#{tags}"
           options['datestamp'] = item.pubDate.utc.iso8601
           options['starred'] = starred
           options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
