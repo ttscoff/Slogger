@@ -21,17 +21,18 @@ class FoursquareLogger < Slogger
   def do_log
     if @config.key?(self.class.name)
       config = @config[self.class.name]
-    end
-    if config['foursquare_feed'].nil? || config['foursquare_feed'] == ''
-        @log.warn("FourSquare feed has not been configured or the feed is invalid, please edit your slogger_config file.")
+      if !config.key?('foursquare_feed') || config['foursquare_feed'] == ''
+        @log.warn("FourSquare feed has not been configured, please edit your slogger_config file.")
         return
+      else
+        @feed = config['foursquare_feed']
+      end
+    else
+      @log.warn("FourSquare feed has not been configured, please edit your slogger_config file.")
+      return
     end
 
     @log.info("Getting FourSquare checkins")
-    if config['foursquare_feed'].nil? || config['foursquare_feed'] == ''
-      @log.warn("FourSquare feed has not been configured or the feed is invalid, please edit your slogger_config file.")
-      return
-    end
     @feed = config['foursquare_feed']
 
     config['foursquare_tags'] ||= ''
