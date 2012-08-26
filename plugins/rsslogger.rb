@@ -3,24 +3,24 @@ Plugin: RSS Logger
 Description: Logs any RSS feed and checks for new posts for the current day
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
-  rss_feeds: [ "feed url 1" , "feed url 2", ... ]
-  markdownify_rss_posts: true
-  star_rss_posts: true
-  rss_tags: "@social @blogging"
+  feeds: [ "feed url 1" , "feed url 2", ... ]
+  markdownify_posts: true
+  star_posts: true
+  tags: "@social @blogging"
 Notes:
   - if found, the first image in the post will be saved as the main image for the entry
   - rss_feeds is an array of feeds separated by commas, a single feed is fine, but it should be inside of brackets `[]`
-  - markdownify_rss_posts will convert links and emphasis in the post to Markdown for display in Day One
-  - star_rss_posts will create a starred post for new RSS posts
+  - markdownify_posts will convert links and emphasis in the post to Markdown for display in Day One
+  - star_posts will create a starred post for new RSS posts
   - rss_tags are tags you want to add to every entry, e.g. "@social @blogging"
 =end
 
 config = {
   'description' => ['Logs any RSS feed and checks for new posts for the current day',
-                    'rss_feeds is an array of feeds separated by commas, a single feed is fine, but it should be inside of brackets `[]`',
-                    'markdownify_rss_posts will convert links and emphasis in the post to Markdown for display in Day One',
-                    'star_rss_posts will create a starred post for new RSS posts',
-                    'rss_tags are tags you want to add to every entry, e.g. "@social @blogging"'],
+                    'feeds is an array of feeds separated by commas, a single feed is fine, but it should be inside of brackets `[]`',
+                    'markdownify_posts will convert links and emphasis in the post to Markdown for display in Day One',
+                    'star_posts will create a starred post for new RSS posts',
+                    'tags are tags you want to add to every entry, e.g. "@social @blogging"'],
   'feeds' => [],
   'markdownify_posts' => false,
   'star_posts' => false,
