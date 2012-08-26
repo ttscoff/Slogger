@@ -2,7 +2,7 @@ require 'yaml'
 
 class ConfigTools
   def initialize(options = {})
-    YAML::ENGINE.yamler = 'syck'
+    YAML::ENGINE.yamler = 'syck' if defined?(YAML::ENGINE)
     @config_file = options['config_file'] || File.expand_path(File.dirname(__FILE__)+'/../slogger_config')
   end
   attr_accessor :config_file
