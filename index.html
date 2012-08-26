@@ -48,7 +48,9 @@
 <li> Last.fm (Scrobbled songs for the current day)</li>
 <li> RSS feeds (designed to pull in your blog posts with leading image and excerpt (optionally markdownified). Handles multiple feeds)</li>
 <li> Twitter (Tweets and Favorites for the day as digest entries, handles multiple Twitter accounts)</li>
+<li> Instapaper (Unread and/or individual folders)</li>
 <li> Foursquare (Checkins for the day)</li>
+<li> Pinboard (Daily digest with descriptions and option for tags)</li>
 </ul>
 </li>
 </ul>
@@ -67,7 +69,7 @@
 </ul><h2>Usage</h2>
 
 <ol>
-<li>From within the Slogger folder, run <code>./slogger</code> to create the initial configuration file.</li>
+<li>From within the Slogger folder, run <code>./slogger</code> to create the initial configuration file. If this doesn't work, you may need to make the file executable: <code>chmod a+x slogger</code> from within the Slogger folder.</li>
 <li>Edit the file <code>slogger_config</code> that shows up
 
 <ul>
@@ -78,7 +80,7 @@
 </li>
 <li>Move plugins you want to use into <code>./plugins/</code>, and plugins you want to disable into <code>./plugins_disabled</code>.</li>
 <li>Run <code>./slogger</code> again to update the configuration file with enabled plugin options.</li>
-<li>Edit <code>slogger_config</code> and fill in the necessary parameters for listed configuration settings.</li>
+<li>Edit <code>slogger_config</code> again and fill in the necessary parameters for listed configuration settings.</li>
 <li>Next time you run <code>./slogger</code>, it will execute the plugins and generate your log entries. Run it manually to test, and then automate it using Lingon (launchd) or other scheduling app.</li>
 <li>You can install a launchd task that will automatically run at 11:50pm every night by running <code>install.rb</code>. It's the same as Lingon would create, but all automatic and everything.
 
@@ -86,11 +88,40 @@
 <li>To uninstall, delete <code>~/Library/LaunchAgents/com.brettterpstra.slogger</code> and log out and back in.</li>
 </ul>
 </li>
-</ol><h2>Plugin development</h2>
+</ol><h2>Command line options</h2>
+
+<pre><code>Usage: slogger [-dq] [-r X] [/path/to/image.jpg]
+    -d, --develop            Develop mode
+    -t, --timespan           The day range to gather (default 1)
+    -q, --quiet              Run quietly (no notifications/messages)
+    -r, --retries COUNT      Maximum number of retries per plugin (int)
+    -h, --help               Display this screen
+</code></pre>
+
+<h2>Plugin development</h2>
 
 <p><em>More documentation coming</em>. See <code>plugin_template.rb</code> to get started.</p>
 
 <p>If you want to edit an existing plugin to change parameters or output, move the original to <code>plugins_disabled</code> and make a copy with a new name in <code>plugins</code>. It will make it easier to update in the future without losing your changes.</p>
+
+<p>When developing plugins you can create a directory called 'plugins_develop' in the same folder as 'plugins' and work on new plugins in there. When you run slogger, use <code>./slogger -d</code> to only run plugins in the develop folder while testing.</p>
+
+<p><code>@log</code> is a global logger object. use <code>@log.info("Message")</code> (or <code>warn</code>/<code>error</code>/<code>fatal</code>) to generate log messages using the default formatter.</p>
+
+<p><code>@config</code> is the global configuration object. Your plugin settings will be stored under <code>@config[PluginClassName]</code>.</p>
+
+<p><code>$options</code> contains options parsed from the command line. Use <code>$options[:optionname]</code> to read the setting.</p>
+
+<ul>
+<li>
+<code>:develop</code> whether Slogger was run in develop mode</li>
+<li>
+<code>:timespan</code> the timespan passed from the command line as number of days (int)</li>
+<li>
+<code>:quiet</code> suppresses log messages. This affects the log formatter and shouldn't generally be needed. Just create log messages using <code>@log</code> and if :quiet is true, they'll be suppressed.</li>
+<li>
+<code>:retries</code> is the number of retries to attempt on any given operation. Create loops in network calls and parsing routines to allow for retry on failure, and use <code>$options[:retries]</code> to determine how many times to iterate.</li>
+</ul><p><code>@timespan</code> is available to all plugins and contains a date object based on the timespan setting. This defaults to 24 hours prior to the run.</p>
 
 <h2>Todo</h2>
 
