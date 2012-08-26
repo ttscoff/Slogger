@@ -16,8 +16,8 @@ Slogger indexes various public social services and creates Day One (<http://dayo
         -  RSS feeds (designed to pull in your blog posts with leading image and excerpt (optionally markdownified). Handles multiple feeds)
         -  Twitter (Tweets and Favorites for the day as digest entries, handles multiple Twitter accounts)
         -  Instapaper (Unread and/or individual folders)
-    - In-progress plugins:
         -  Foursquare (Checkins for the day)
+        -  Pinboard (Daily digest with descriptions and option for tags)
 - Slogger can be called with a single argument that is a path to a local image, and an entry will be created for that image.
     - You can use this with a folder action or launchd task to add files from a folder connected to something like <http://IFTTT.com>. Any images added to the watched folder will be turned into journal entries.
         -  Note that Slogger does not delete the original image, so your script needs to move files out of the folder manually to avoid double-processing.
@@ -40,6 +40,7 @@ Slogger indexes various public social services and creates Day One (<http://dayo
 
     Usage: slogger [-dq] [-r X] [/path/to/image.jpg]
         -d, --develop            Develop mode
+        -t, --timespan           The day range to gather (default 1)
         -q, --quiet              Run quietly (no notifications/messages)
         -r, --retries COUNT      Maximum number of retries per plugin (int)
         -h, --help               Display this screen
@@ -51,6 +52,19 @@ Slogger indexes various public social services and creates Day One (<http://dayo
 If you want to edit an existing plugin to change parameters or output, move the original to `plugins_disabled` and make a copy with a new name in `plugins`. It will make it easier to update in the future without losing your changes.
 
 When developing plugins you can create a directory called 'plugins_develop' in the same folder as 'plugins' and work on new plugins in there. When you run slogger, use './slogger -d' to only run plugins in the develop folder while testing.
+
+`@log` is a global logger object. use `@log.info("Message")` (or `warn`/`error`/`fatal`) to generate log messages using the default formatter.
+
+`@config` is the global configuration object. Your plugin settings will be stored under `@config[PluginClassName]`.
+
+`$options` contains options parsed from the command line. Use `$options[:optionname]` to read the setting.
+
+- `:develop` whether Slogger was run in develop mode
+- `:timespan` the timespan passed from the command line as number of days (int)
+- `:quiet` suppresses log messages. This affects the log formatter and shouldn't generally be needed. Just create log messages using `@log` and if :quiet is true, they'll be suppressed.
+- `:retries` is the number of retries to attempt on any given operation. Create loops in network calls and parsing routines to allow for retry on failure, and use `$options[:retries]` to determine how many times to iterate.
+
+`@timespan` is available to all plugins and contains a date object based on the timespan setting. This defaults to 24 hours prior to the run.
 
 ## Todo ##
 
