@@ -24,14 +24,14 @@ Slogger indexes various public social services and creates Day One (<http://dayo
 
 ## Usage ##
 
-1. From within the Slogger folder, run `./slogger` to create the initial configuration file.
+1. From within the Slogger folder, run `./slogger` to create the initial configuration file. If this doesn't work, you may need to make the file executable: `chmod a+x slogger` from within the Slogger folder.
 2. Edit the file `slogger_config` that shows up
     - The only options will be 'storage:' and 'image_filename_is_title:'
     - storage: should be set to either 'icloud' or a path to a Dropbox-synced Journal
     - image_filename_is_title: should be set to true or false. If true, it will use the base filename (without extension) as the title of images imported individually.
 3. Move plugins you want to use into `./plugins/`, and plugins you want to disable into `./plugins_disabled`.
 4. Run `./slogger` again to update the configuration file with enabled plugin options.
-5. Edit `slogger_config` and fill in the necessary parameters for listed configuration settings.
+5. Edit `slogger_config` again and fill in the necessary parameters for listed configuration settings.
 6. Next time you run `./slogger`, it will execute the plugins and generate your log entries. Run it manually to test, and then automate it using Lingon (launchd) or other scheduling app.
 7. You can install a launchd task that will automatically run at 11:50pm every night by running `install.rb`. It's the same as Lingon would create, but all automatic and everything.
     - To uninstall, delete `~/Library/LaunchAgents/com.brettterpstra.slogger` and log out and back in.
@@ -51,7 +51,7 @@ Slogger indexes various public social services and creates Day One (<http://dayo
 
 If you want to edit an existing plugin to change parameters or output, move the original to `plugins_disabled` and make a copy with a new name in `plugins`. It will make it easier to update in the future without losing your changes.
 
-When developing plugins you can create a directory called 'plugins_develop' in the same folder as 'plugins' and work on new plugins in there. When you run slogger, use './slogger -d' to only run plugins in the develop folder while testing.
+When developing plugins you can create a directory called 'plugins_develop' in the same folder as 'plugins' and work on new plugins in there. When you run slogger, use `./slogger -d` to only run plugins in the develop folder while testing.
 
 `@log` is a global logger object. use `@log.info("Message")` (or `warn`/`error`/`fatal`) to generate log messages using the default formatter.
 

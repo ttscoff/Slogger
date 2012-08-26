@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 MAJOR_VERSION = 2.0
 MINOR_VERSION = 8
-BUILD_NUMBER = 1
+BUILD_NUMBER = 4
 require 'open-uri'
 require 'net/http'
 require 'net/https'
@@ -56,11 +56,16 @@ class Slogger
     @log.formatter = proc { |severity, datetime, progname, msg|
       abbr_sev = case severity
         when 'WARN' then "> "
-        when 'ERROR' then " !"
+        when 'ERROR' then "! "
         when 'FATAL' then "!!"
         else "  "
       end
-      output = $options[:quiet] ? '' : "#{abbr_sev}#{datetime.strftime('%H:%M:%S')} #{progname} -> #{msg}\n"
+      spacer_count = 20 - progname.length
+      spacer = ''
+      spacer_count.times do
+        spacer += ' '
+      end
+      output = $options[:quiet] ? '' : "#{abbr_sev}#{datetime.strftime('%H:%M:%S')} #{spacer}#{progname}: #{msg}\n"
       output
       # original_formatter.call(severity, datetime, progname, msg.dump)
     }
