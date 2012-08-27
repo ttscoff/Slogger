@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 MAJOR_VERSION = 2.0
-MINOR_VERSION = 8
-BUILD_NUMBER = 4
+MINOR_VERSION = 9
+BUILD_NUMBER = 0
 require 'open-uri'
 require 'net/http'
 require 'net/https'
@@ -109,7 +109,15 @@ class Slogger
     new_options = false
     plugin_dir = $options[:develop] ? "/plugins_develop/*.rb" : "/plugins/*.rb"
     Dir[SLOGGER_HOME + plugin_dir].each do |file|
-      require file
+      if $options[:onlyrun]
+        $options[:onlyrun].each { |plugin_frag|
+          if File.basename(file) =~ /^#{plugin_frag}/i
+            require file
+          end
+        }
+      else
+        require file
+      end
     end
     @plugins.each do |plugin|
       _namespace = plugin['class'].to_s
@@ -157,12 +165,26 @@ require SLOGGER_HOME + '/lib/dayone'
 $options = {}
 optparse = OptionParser.new do|opts|
   opts.banner = "Usage: slogger [-dq] [-r X] [/path/to/image.jpg]"
+  $options[:config_file] = File.expand_path(File.dirname(__FILE__)+'/slogger_config')
+  opts.on( '-c', '--config FILE', 'Specify configuration file to use') do |file|
+    file = File.expand_path(file)
+    if File.exists?(file)
+      $options[:config_file] = file
+    else
+      raise "Config file #{file} not found"
+      Process.exit(-1)
+    end
+  end
   $options[:develop] = false
   opts.on( '-d','--develop', 'Develop mode' ) do
     $options[:develop] = true
   end
+  $options[:onlyrun] = false
+  opts.on( '-o','--onlyrun NAME[,NAME2...]','Only run plugins matching items in comma-delimited string') do |plugin_string|
+    $options[:onlyrun] = plugin_string.split(/,/).map {|frag| frag.strip }
+  end
   $options[:timespan] = 1
-  opts.on( 't', '--timespan DAYS', 'Days of history to collect') do |days|
+  opts.on( '-t', '--timespan DAYS', 'Days of history to collect') do |days|
     $options[:timespan] = days.to_i
   end
   $options[:quiet] = false
