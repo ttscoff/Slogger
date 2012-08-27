@@ -38,12 +38,16 @@ Slogger indexes various public social services and creates Day One (<http://dayo
 
 ## Command line options ##
 
+    $ ./slogger -h
     Usage: slogger [-dq] [-r X] [/path/to/image.jpg]
-        -d, --develop            Develop mode
-        -t, --timespan           The day range to gather (default 1)
-        -q, --quiet              Run quietly (no notifications/messages)
-        -r, --retries COUNT      Maximum number of retries per plugin (int)
-        -h, --help               Display this screen
+        -c, --config FILE                Specify alternate configuration file
+        -d, --develop                    Develop mode
+        -o, --onlyrun NAME[,NAME2...]    Only run plugins matching items in comma-delimited string (partial names ok)
+        -t, --timespan DAYS              Days of history to collect
+        -q, --quiet                      Run quietly (no notifications/messages)
+        -r, --retries COUNT              Maximum number of retries per plugin (int)
+        -v, --version                    Display the version number
+        -h, --help                       Display this screen
 
 ## Plugin development ##
 
