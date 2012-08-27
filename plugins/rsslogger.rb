@@ -66,7 +66,11 @@ class RSSLogger < Slogger
   end
 
   def parse_feed(rss_feed)
-    markdownify = config['markdownify_posts'] || true
+    markdownify = config['markdownify_posts']
+    unless (markdownify.is_a? TrueClass or markdownify.is_a? FalseClass)
+      markdownify = true
+    end
+
     starred = config['star_posts'] || true
     tags = config['tags'] || ''
     tags = "\n\n#{@tags}\n" unless @tags == ''
