@@ -47,7 +47,7 @@ class Slogger
   attr_accessor :config, :dayonepath, :plugins
   attr_reader :timespan, :log
   def initialize
-    cfg = ConfigTools.new
+    cfg = ConfigTools.new({'config_file' => $options[:config_file]})
     @log = Logger.new(STDERR)
     original_formatter = Logger::Formatter.new
     @log.datetime_format = '%d'
@@ -132,7 +132,7 @@ class Slogger
       # ConfigTools.new.dump_config(@config)
       eval(plugin['class']).new.do_log
     end
-    ConfigTools.new.dump_config(@config) if new_options
+    ConfigTools.new({'config_file' => $options[:config_file]}).dump_config(@config)
   end
 
   def register_plugin(plugin)
@@ -168,12 +168,7 @@ optparse = OptionParser.new do|opts|
   $options[:config_file] = File.expand_path(File.dirname(__FILE__)+'/slogger_config')
   opts.on( '-c', '--config FILE', 'Specify configuration file to use') do |file|
     file = File.expand_path(file)
-    if File.exists?(file)
-      $options[:config_file] = file
-    else
-      raise "Config file #{file} not found"
-      Process.exit(-1)
-    end
+    $options[:config_file] = file
   end
   $options[:develop] = false
   opts.on( '-d','--develop', 'Develop mode' ) do
