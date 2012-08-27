@@ -32,12 +32,12 @@ class RSSLogger < Slogger
   def do_log
     feeds = []
     if @config.key?(self.class.name)
-      config = @config[self.class.name]
-      if !config.key?('feeds') || config['feeds'] == []
+      @rssconfig = @config[self.class.name]
+      if !@rssconfig.key?('feeds') || @rssconfig['feeds'] == []
         @log.warn("RSS feeds have not been configured or a feed is invalid, please edit your slogger_config file.")
         return
       else
-        feeds = config['feeds']
+        feeds = @rssconfig['feeds']
       end
     else
       @log.warn("RSS2 feeds have not been configured or a feed is invalid, please edit your slogger_config file.")
@@ -66,10 +66,16 @@ class RSSLogger < Slogger
   end
 
   def parse_feed(rss_feed)
-    markdownify = config['markdownify_posts'] || true
-    starred = config['star_posts'] || true
-    tags = config['tags'] || ''
-    tags = "\n\n#{@tags}\n" unless @tags == ''
+    markdownify = @rssconfig['markdownify_posts']
+    unless (markdownify.is_a? TrueClass or markdownify.is_a? FalseClass)
+      markdownify = true
+    end
+    starred = @rssconfig['star_posts']
+    unless (starred.is_a? TrueClass or starred.is_a? FalseClass)
+      starred = true
+    end
+    tags = @rssconfig['tags'] || ''
+    tags = "\n\n#{tags}\n" unless tags == ''
 
     today = @timespan
     begin
