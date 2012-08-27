@@ -82,6 +82,36 @@ class Slogger
     end
   end
 
+  def undo_slogger(count = 1)
+    runlog = SLOGGER_HOME+'/runlog.txt'
+    if File.exists?(runlog)
+      undo_to = ''
+      File.open(runlog,'r') do |f|
+        runs = f.read.split(/\n/)
+        if runs.length >= count
+          undo_to = runs[count*-1].match(/^\[(.*?)\]/)[1]
+        end
+      end
+      $stderr.puts undo_to
+      tnow = Time.now
+      elapsed = tnow - Time.parse(undo_to) # elapsed time in seconds
+      files = %x{find "#{self.storage_path}" -newerct '#{elapsed.floor} seconds ago' -type f}.split(/\n/)
+      files.each do |file|
+        FileUtils.mv(file,ENV['HOME']+'/.Trash/')
+      end
+      @log.info("Moved #{files.length} entries to Trash")
+    else
+      @log.fatal("Run log does not exist.")
+      Process.exit(-1)
+    end
+  end
+
+  def log_run
+    File.open(SLOGGER_HOME+'/runlog.txt', 'a') { |f|
+      f.puts "[#{Time.now.strftime('%c')}] Slogger v#{MAJOR_VERSION} (#{MAJOR_VERSION}.#{MINOR_VERSION}.#{BUILD_NUMBER}) #{$options.inspect}"
+    }
+  end
+
   def storage_path
   	if @config.key?('storage')
 	    if @config['storage'].downcase == 'icloud'
@@ -190,6 +220,10 @@ optparse = OptionParser.new do|opts|
   opts.on( '-r','--retries COUNT', 'Maximum number of retries per plugin (int)' ) do |count|
     $options[:max_retries] = count.to_i
   end
+  $options[:undo] = false
+  opts.on( '-u', '--undo COUNT', 'Undo the last COUNT runs') do |count|
+    $options[:undo] = count.to_i
+  end
   opts.on( '-v', '--version', 'Display the version number') do
     $stdout.puts("Slogger version #{MAJOR_VERSION}.#{MINOR_VERSION}.#{BUILD_NUMBER}")
     exit
@@ -212,8 +246,14 @@ if ARGV.length > 0
     raise "File \"#{ARGV[0]}\" not found."
   end
 else
-  $stdout.puts "Initializing Slogger v#{MAJOR_VERSION} (#{MAJOR_VERSION}.#{MINOR_VERSION}.#{BUILD_NUMBER})..."
-  $slog.run_plugins
+  unless $options[:undo]
+    $stdout.puts "Initializing Slogger v#{MAJOR_VERSION} (#{MAJOR_VERSION}.#{MINOR_VERSION}.#{BUILD_NUMBER})..."
+    $slog.log_run
+    $slog.run_plugins
+  else
+    $stdout.puts "Undoing the last #{$options[:undo].to_s} runs..."
+    $slog.undo_slogger($options[:undo])
+  end
 end
 
 # TODO: Document plugin architecture
