@@ -18,6 +18,7 @@ Slogger indexes various public social services and creates Day One (<http://dayo
         -  Instapaper (Unread and/or individual folders)
         -  Foursquare (Checkins for the day)
         -  Pinboard (Daily digest with descriptions and option for tags)
+        -  Pocket (Digest list of links, read and unread, posted to Pocket)
 - Slogger can be called with a single argument that is a path to a local image, and an entry will be created for that image.
     - You can use this with a folder action or launchd task to add files from a folder connected to something like <http://IFTTT.com>. Any images added to the watched folder will be turned into journal entries.
         -  Note that Slogger does not delete the original image, so your script needs to move files out of the folder manually to avoid double-processing.
