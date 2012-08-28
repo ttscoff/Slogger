@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 MAJOR_VERSION = 2.0
 MINOR_VERSION = 10
-BUILD_NUMBER = 1
+BUILD_NUMBER = 2
 require 'open-uri'
 require 'net/http'
 require 'net/https'
@@ -72,13 +72,18 @@ class Slogger
 
     @template = self.template
     @plugins = []
-    @timespan = Time.now - ((60 * 60 * 24) * $options[:timespan])
+
     if cfg.config_exists?
       @config = cfg.load_config
       if @config.nil?
         raise "Config should not be nil"
         Process.exit(-1)
       end
+    end
+    if $options[:since_last_run] && @config.key?('last_run_time') && !@config['last_run_time'].nil?
+      @timespan = Time.parse(@config['last_run_time'])
+    else
+      @timespan = Time.now - ((60 * 60 * 24) * $options[:timespan])
     end
   end
 
@@ -136,6 +141,7 @@ class Slogger
   end
 
   def run_plugins
+    @config['last_run_time'] = Time.now.strftime('%c')
     new_options = false
     plugin_dir = $options[:develop] ? "/plugins_develop/*.rb" : "/plugins/*.rb"
     Dir[SLOGGER_HOME + plugin_dir].each do |file|
@@ -158,6 +164,7 @@ class Slogger
           new_options = true
           @config[_namespace][k] ||= v
         end
+        @config[_namespace][_namespace+"_last_run"] = Time.now.strftime('%c')
       end
       # ConfigTools.new.dump_config(@config)
       eval(plugin['class']).new.do_log
@@ -219,6 +226,10 @@ optparse = OptionParser.new do|opts|
   $options[:max_retries] = 1
   opts.on( '-r','--retries COUNT', 'Maximum number of retries per plugin (int)' ) do |count|
     $options[:max_retries] = count.to_i
+  end
+  $options[:since_last_run] = false
+  opts.on( '-s','--since-last', 'Set the timespan to the last run date' ) do
+   $options[:since_last_run] = true
   end
   $options[:undo] = false
   opts.on( '-u', '--undo COUNT', 'Undo the last COUNT runs') do |count|

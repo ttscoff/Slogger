@@ -47,8 +47,13 @@ Slogger indexes various public social services and creates Day One (<http://dayo
         -t, --timespan DAYS              Days of history to collect
         -q, --quiet                      Run quietly (no notifications/messages)
         -r, --retries COUNT              Maximum number of retries per plugin (int)
+        -s, --since-last                 Set the timespan to the last run date
         -v, --version                    Display the version number
         -h, --help                       Display this screen
+
+> **Note:** You can use the `-s` option to only log since the last run date, handy if you want to run Slogger more than once per day or are testing plugins. 
+>
+> You can also use `-o` to run only a certain plugin in the standard plugin directory: just provide it with enough of the name to be unique, e.g. `slogger -o gist`.
 
 ## Plugin development ##
 
