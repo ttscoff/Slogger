@@ -52,16 +52,14 @@ class GistLogger < Slogger
 
     return false if res.nil?
     json = JSON.parse(res)
-    now = Time.now()
-    yesterday = now - (60 * 60 * 24)
 
     output = ""
 
     json.each {|gist|
       date = Time.parse(gist['created_at'])
-      if date > yesterday
+      if date > @timespan
         output += "* Created [Gist ##{gist['id']}](#{gist["html_url"]})\n"
-        output += "    * #{gist["description"]}\n"
+        output += "    * #{gist["description"]}\n" unless gist["description"].nil?
       else
         break
       end
