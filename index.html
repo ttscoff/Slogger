@@ -51,6 +51,7 @@
 <li> Instapaper (Unread and/or individual folders)</li>
 <li> Foursquare (Checkins for the day)</li>
 <li> Pinboard (Daily digest with descriptions and option for tags)</li>
+<li> Pocket (Digest list of links, read and unread, posted to Pocket)</li>
 </ul>
 </li>
 </ul>
@@ -90,12 +91,16 @@
 </li>
 </ol><h2>Command line options</h2>
 
-<pre><code>Usage: slogger [-dq] [-r X] [/path/to/image.jpg]
-    -d, --develop            Develop mode
-    -t, --timespan           The day range to gather (default 1)
-    -q, --quiet              Run quietly (no notifications/messages)
-    -r, --retries COUNT      Maximum number of retries per plugin (int)
-    -h, --help               Display this screen
+<pre><code>$ ./slogger -h
+Usage: slogger [-dq] [-r X] [/path/to/image.jpg]
+    -c, --config FILE                Specify alternate configuration file
+    -d, --develop                    Develop mode
+    -o, --onlyrun NAME[,NAME2...]    Only run plugins matching items in comma-delimited string (partial names ok)
+    -t, --timespan DAYS              Days of history to collect
+    -q, --quiet                      Run quietly (no notifications/messages)
+    -r, --retries COUNT              Maximum number of retries per plugin (int)
+    -v, --version                    Display the version number
+    -h, --help                       Display this screen
 </code></pre>
 
 <h2>Plugin development</h2>
@@ -122,15 +127,6 @@
 <li>
 <code>:retries</code> is the number of retries to attempt on any given operation. Create loops in network calls and parsing routines to allow for retry on failure, and use <code>$options[:retries]</code> to determine how many times to iterate.</li>
 </ul><p><code>@timespan</code> is available to all plugins and contains a date object based on the timespan setting. This defaults to 24 hours prior to the run.</p>
-
-<h2>Todo</h2>
-
-<ul>
-<li>Command line options for timespan, undo, configuration, etc.</li>
-<li>Better handling of varying RSS feeds</li>
-<li>MOAR PLUGINS</li>
-<li>Better documentation method and help for individual plugins</li>
-</ul>
       </section>
       <footer>
         <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
