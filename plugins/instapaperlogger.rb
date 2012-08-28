@@ -42,7 +42,7 @@ class InstapaperLogger < Slogger
     today = @timespan.to_i
 
     @log.info("Getting Instapaper posts for #{config['instapaper_feeds'].length} accounts")
-    output = "## Instapaper reading\n\n"
+    output = ''
 
     config['instapaper_feeds'].each do |rss_feed|
       begin
@@ -52,7 +52,7 @@ class InstapaperLogger < Slogger
         end
 
         rss = RSS::Parser.parse(rss_content, false)
-        feed_output = "#### #{rss.channel.title}\n\n"
+        feed_output = ''
         rss.items.each { |item|
           item_date = Time.parse(item.pubDate.to_s)
           if item_date > @timespan
@@ -62,15 +62,17 @@ class InstapaperLogger < Slogger
             break
           end
         }
-        output += feed_output + "\n"
+        output += "#### #{rss.channel.title}\n\n" + feed_output + "\n" unless feed_output == ''
       rescue Exception => e
         puts "Error getting posts for #{rss_feed}"
         p e
         return ''
       end
     end
-    options = {}
-    options['content'] = "#{output}#{tags}"
-    sl.to_dayone(options)
+    unless output == ''
+      options = {}
+      options['content'] = "## Instapaper reading\n\n#{output}#{tags}"
+      sl.to_dayone(options)
+    end
   end
 end

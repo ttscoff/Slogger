@@ -43,7 +43,7 @@ class PinboardLogger < Slogger
     today = @timespan.to_i
 
     @log.info("Getting Pinboard bookmarks for #{config['pinboard_feeds'].length} feeds")
-    output = "## Pinboard bookmarks\n\n"
+    output = ''
 
     config['pinboard_feeds'].each do |rss_feed|
       begin
@@ -53,7 +53,7 @@ class PinboardLogger < Slogger
         end
 
         rss = RSS::Parser.parse(rss_content, false)
-        feed_output = "#### [#{rss.channel.title}](#{rss.channel.link})\n\n"
+        feed_output = ''
         rss.items.each { |item|
           item_date = Time.parse(item.date.to_s)
           if item_date > @timespan
@@ -68,15 +68,17 @@ class PinboardLogger < Slogger
             break
           end
         }
-        output += feed_output + "\n"
+        output += "#### [#{rss.channel.title}](#{rss.channel.link})\n\n" + feed_output + "\n" unless feed_output == ''
       rescue Exception => e
         puts "Error getting posts for #{rss_feed}"
         p e
         return ''
       end
     end
-    options = {}
-    options['content'] = "#{output}#{tags}"
-    sl.to_dayone(options)
+    unless output == ''
+      options = {}
+      options['content'] = "## Pinboard bookmarks\n\n#{output}#{tags}"
+      sl.to_dayone(options)
+    end
   end
 end
