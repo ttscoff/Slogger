@@ -69,7 +69,7 @@ class InstapaperLogger < Slogger
         return ''
       end
     end
-    unless output == ''
+    unless output.strip == ''
       options = {}
       options['content'] = "## Instapaper reading\n\n#{output}#{tags}"
       sl.to_dayone(options)
