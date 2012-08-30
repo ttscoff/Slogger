@@ -3,15 +3,16 @@ Plugin: GetGlue Logger
 Description: Brief description (one line)
 Author: [Dom Barnes](http://dombarnes.com)
 Configuration:
-  getglue_feed: "http://feeds.getglue.com/checkins/AbCDeFG_HijK"
-  getglue_tags "@social @entertainment"
+  getglue_username: Used for h1 in journal entry
+  getglue_feed: Retrieve this from your GetGlue profile page (http://getglue.com/username). You will need to view source to find this.
 Notes:
-  - Retrieve this from your GetGlue profile page (http://getglue.com/username). You will need to view source to find this.
+  - multi-line notes with additional description and information (optional)
 =end
 
 config = {
   'description' => ['GetGlue logger grabs all your activity including checkins, likes and stickers',
                     'You will need the RSS feed of your Activity stream.'],
+  'getglue_username' => 'getglue',
   'getglue_feed' => "",
   'tags' => '@social @entertainment'
 }
@@ -31,6 +32,9 @@ class GetglueLogger < Slogger
       if !config.key?('getglue_username') || config['getglue_username'] == []
         @log.warn("GetGlue has not been configured or an option is invalid, please edit your slogger_config file.")
         return
+      else
+        # set any local variables as needed
+        username = config['getglue_username']
       end
     else
       @log.warn("GetGlue has not been configured or a feed is invalid, please edit your slogger_config file.")
@@ -42,7 +46,7 @@ class GetglueLogger < Slogger
     tags = config['tags'] || ''
     tags = "\n\n#{@tags}\n" unless @tags == ''
 
-    today = @timespan.to_i
+    today = @timespan
 
     # Perform necessary functions to retrieve posts
     entrytext = ''
@@ -71,13 +75,13 @@ class GetglueLogger < Slogger
     if content != ''
       options = {}
       options['content'] = "## GetGlue Activity for #{@timespan.strftime('%m-%d-%Y')}\n\n#{content} #{tags}"
-   #   options['datestamp'] = @timespan.
+      options['datestamp'] = @timespan.utc.iso8601
       options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
 
-       # Create a journal entry
-       # to_dayone accepts all of the above options as a hash
-       # generates an entry base on the datestamp key or defaults to "now"
-      
+
+      # Create a journal entry
+      # to_dayone accepts all of the above options as a hash
+      # generates an entry base on the datestamp key or defaults to "now"
       sl = DayOne.new
       sl.to_dayone(options)
     end
