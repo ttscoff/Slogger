@@ -67,7 +67,6 @@ class Slogger
       end
       output = $options[:quiet] ? '' : "#{abbr_sev}#{datetime.strftime('%H:%M:%S')} #{spacer}#{progname}: #{msg}\n"
       output
-      # original_formatter.call(severity, datetime, progname, msg.dump)
     }
 
     @template = self.template
@@ -135,7 +134,7 @@ class Slogger
 	      Process.exit(-1)
 	    end
 	else
-	  raise "Path not specified or doesn't exist: #{@config['storage']}"
+	  raise "Path for Day One journal is not specified or doesn't exist. Change your path in slogger_config and run ./slogger again: #{@config['storage']}"
 	  return
 	end
   end
@@ -266,11 +265,3 @@ else
     $slog.undo_slogger($options[:undo])
   end
 end
-
-# TODO: Document plugin architecture
-# TODO: Handle RSS anomolies, fail gracefully
-# TODO: Command line option for defining timespan to pull for
-# TODO: Command line option for undo
-# TODO: Command line help (slogger -h)
-# TODO: Sort plugin options, extract descriptions to MD file w/command line option to display (slogger --plugins)
-# TODO: GUI
