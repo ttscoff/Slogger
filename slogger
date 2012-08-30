@@ -130,7 +130,7 @@ class Slogger
 	    elsif File.exists?(File.expand_path(@config['storage']))
 	      return File.expand_path(@config['storage'])
 	    else
-	      raise "Path not specified or doesn't exist: #{@config['storage']}"
+        raise "Path for Day One journal is not specified or doesn't exist. Change your path in slogger_config and run ./slogger again: #{@config['storage']}"
 	      Process.exit(-1)
 	    end
 	else
