@@ -57,10 +57,8 @@ class AppNetLogger < Slogger
         rss.items.each { |item|
           item_date = Time.parse(item.date.to_s)
           if item_date > @timespan
-            pbcontent = true
             content = ''
-            post_tags = ''
-            feed_output += "* [#{item.pubDate.strftime('%I:%M %p')}](#{item.link}) #{item.title.gsub(/^\w+?: /,'').strip}#{content}\n#{post_tags}"
+            feed_output += "* [#{item.pubDate.strftime('%I:%M %p')}](#{item.link}) #{item.title.gsub(/^\w+?: /,'').strip}#{content}"
           else
             break
           end
