@@ -39,7 +39,7 @@ class AppNetLogger < Slogger
 
     sl = DayOne.new
     config['appnet_tags'] ||= ''
-    # tags = "\n\n#{config['appnet_tags']}\n" unless config['appnet_tags'] == ''
+    tags = "\n\n#{config['appnet_tags']}\n" unless config['appnet_tags'] == ''
     today = @timespan.to_i
 
     @log.info("Getting App.net posts for #{config['appnet_feeds'].length} feeds")
@@ -74,7 +74,7 @@ class AppNetLogger < Slogger
     end
     unless output == ''
       options = {}
-      options['content'] = "## App.net posts\n\n#{output}"
+      options['content'] = "## App.net posts\n\n#{output}#{tags}"
       sl.to_dayone(options)
     end
   end
