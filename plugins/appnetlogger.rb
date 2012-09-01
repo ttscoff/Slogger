@@ -17,7 +17,7 @@ config = {
     'appnet_feeds is an array of one or more App.net posts feeds'],
   'appnet_feeds' => [ ],
   'appnet_tags' => '@social @appnet',
-  'appnet_save_hashtags' => false
+  'appnet_save_replies' => false
 }
 $slog.register_plugin({ 'class' => 'AppNetLogger', 'config' => config })
 
@@ -43,6 +43,9 @@ class AppNetLogger < Slogger
     today = @timespan.to_i
 
     @log.info("Getting App.net posts for #{config['appnet_feeds'].length} feeds")
+    if config['save_appnet_replies']
+      @log.info("replies: true")
+    end
     output = ''
     
     config['appnet_feeds'].each do |rss_feed|
@@ -58,7 +61,14 @@ class AppNetLogger < Slogger
           item_date = Time.parse(item.date.to_s)
           if item_date > @timespan
             content = ''
-            feed_output += "* [#{item.pubDate.strftime('%I:%M %p')}](#{item.link}) #{item.title.gsub(/^\w+?: /,'').strip}#{content}"
+            item.title = item.title.gsub(/^\w+?: /,'').strip    # remove username at front of post
+            if item.title =~ /^@/
+              if config['appnet_save_replies'] == true
+                feed_output += "* [#{item.pubDate.strftime('%I:%M %p')}](#{item.link}) #{item.title}#{content}\n"
+              end
+            else
+              feed_output += "* [#{item.pubDate.strftime('%I:%M %p')}](#{item.link}) #{item.title}#{content}\n"
+            end
           else
             break
           end
