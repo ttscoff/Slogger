@@ -23,7 +23,7 @@ require 'rexml/document'
 
 class PocketLogger < Slogger
   def do_log
-    if config.key?(self.class.name)
+    if @config.key?(self.class.name)
       config = @config[self.class.name]
       if !config.key?('pocket_username') || config['pocket_username'].nil?
         @log.warn("Pocket username has not been configured, please edit your slogger_config file.")

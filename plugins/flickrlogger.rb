@@ -45,7 +45,7 @@ class FlickrLogger < Slogger
   end
 
   def do_log
-    if config.key?(self.class.name)
+    if @config.key?(self.class.name)
         config = @config[self.class.name]
         if !config.key?('flickr_ids') || config['flickr_ids'] == []
           @log.warn("Flickr users have not been configured, please edit your slogger_config file.")
