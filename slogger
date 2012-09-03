@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 MAJOR_VERSION = 2.0
 MINOR_VERSION = 10
-BUILD_NUMBER = 3
+BUILD_NUMBER = 4
 require 'open-uri'
 require 'net/http'
 require 'net/https'
@@ -85,6 +85,7 @@ class Slogger
     else
       @timespan = Time.now - ((60 * 60 * 24) * $options[:timespan])
     end
+    @config['image_filename_is_title'] ||= false
   end
 
   def undo_slogger(count = 1)
