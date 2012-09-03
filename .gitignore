@@ -2,6 +2,7 @@
 *.bak
 *.taskpaper
 *.develop
+.DS_Store
 slogger_config
 slogger.rb
 plugins_develop
