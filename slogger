@@ -85,6 +85,7 @@ class Slogger
     else
       @timespan = Time.now - ((60 * 60 * 24) * $options[:timespan])
     end
+    @config['image_filename_is_title'] ||= false
   end
 
   def undo_slogger(count = 1)
