@@ -26,7 +26,7 @@ require 'rss/dublincore'
 
 class PinboardLogger < Slogger
   def do_log
-    if config.key?(self.class.name)
+    if @config.key?(self.class.name)
       config = @config[self.class.name]
       if !config.key?('pinboard_feeds') || config['pinboard_feeds'] == [] || config['pinboard_feeds'].empty?
         @log.warn("Pinboard feeds have not been configured, please edit your slogger_config file.")
