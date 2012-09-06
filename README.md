@@ -32,7 +32,7 @@ Slogger indexes various public social services and creates Day One (<http://dayo
     - storage: should be set to either 'icloud' or a path to a
 Dropbox-synced Journal (e.g. '/Users/username/Dropbox/Apps/Day One/Journal.dayone')
     - image_filename_is_title: should be set to true or false. If true, it will use the base filename (without extension) as the title of images imported individually.
-3. Move plugins you want to use from `/plugins_disabled/` into `/plugins/`.
+3. Move any additional plugins you want to use from `/plugins_disabled/` into `/plugins/`.
 4. Run `./slogger` again to update the configuration file with enabled plugin options.
 5. Edit `slogger_config` again and fill in the necessary parameters for listed configuration settings.
 6. Next time you run `./slogger`, it will execute the plugins and generate your log entries. 
