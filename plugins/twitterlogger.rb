@@ -118,7 +118,7 @@ class TwitterLogger < Slogger
           p e
         end
         tweets += "\n* [[#{tweet_date.strftime('%I:%M %p')}](https://twitter.com/#{user}/status/#{tweet_id})] #{tweet_text}"
-        unless tweet_images.nil?
+        unless tweet_images.empty?
           images.concat(tweet_images)
         end
       }
