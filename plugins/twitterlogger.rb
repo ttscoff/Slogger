@@ -47,7 +47,7 @@ class TwitterLogger < Slogger
       options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
       sl = DayOne.new
       path = sl.save_image(image['url'],options['uuid'])
-      sl.store_single_photo(path,options)
+      sl.store_single_photo(path,options) unless path == false
     end
 
     return true

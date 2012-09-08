@@ -42,7 +42,7 @@ class FlickrLogger < Slogger
       puts options['datestamp']
       sl = DayOne.new
       path = sl.save_image(image['url'],options['uuid'])
-      sl.store_single_photo(path,options)
+      sl.store_single_photo(path,options) unless path == false
     end
 
     return true
@@ -80,13 +80,13 @@ class FlickrLogger < Slogger
                 photo_date = DateTime.parse(photo.attributes["datetaken"] + zone)
                 photo_date = photo_date.strftime('%s').to_s
                 break unless Time.at(photo_date.to_i).utc > @timespan.utc
-                image_date = Time.at(photo_date.to_i).utc.iso8601                
-              else 
+                image_date = Time.at(photo_date.to_i).utc.iso8601
+              else
                 # import images in dayone using the date/time when the photo was taken
                 photo_date = photo.attributes["dateupload"].to_s
                 break unless Time.at(photo_date.to_i) > @timespan
                 image_date = Time.at(photo_date.to_i).utc.iso8601
-              end              
+              end
               url = photo.attributes["url_m"]
               content = "## " + photo.attributes['title']
               content += "\n\n" + photo.attributes['content'] unless photo.attributes['content'].nil?
