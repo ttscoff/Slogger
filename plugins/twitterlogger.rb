@@ -186,7 +186,7 @@ class TwitterLogger < Slogger
         end
       end
       unless tweets == ''
-        tweets = "## Tweets\n\n ### Posts by @#{user} on #{Time.now.strftime('%m-%d-%Y')}\n\n#{tweets}#{tags}"
+        tweets = "## Tweets\n\n### Posts by @#{user} on #{Time.now.strftime('%m-%d-%Y')}\n\n#{tweets}#{tags}"
         sl.to_dayone({'content' => tweets})
       end
       unless favs == ''
