@@ -39,7 +39,6 @@ class FlickrLogger < Slogger
       options['content'] = image['content']
       options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
       options['datestamp'] = image['date']
-      puts options['datestamp']
       sl = DayOne.new
       path = sl.save_image(image['url'],options['uuid'])
       sl.store_single_photo(path,options) unless path == false

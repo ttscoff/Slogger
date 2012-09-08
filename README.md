@@ -13,13 +13,15 @@ Slogger indexes various public social services and creates Day One (<http://dayo
         -  Gist (gists created in the last 24 hours. Title and description only, logged as a single digest)
         -  Flickr (images uploaded in the last 24 hours, each as an individual post. Can handle multiple accounts)
         -  Last.fm (Scrobbled songs for the current day)
-        -  RSS feeds (designed to pull in your blog posts with leading image and excerpt (optionally markdownified). Handles multiple feeds)
+        -  Blog entries (designed to pull in your blog posts with leading image and excerpt (optionally markdownified). Handles multiple feeds)
+        -  RSS Feeds (logs any feed entries for the given timespan as a digest entry, handles multiple feeds)
         -  Twitter (Tweets and Favorites for the day as digest entries, handles multiple Twitter accounts)
         -  Instapaper (Unread and/or individual folders)
         -  Foursquare (Checkins for the day)
         -  Pinboard (Daily digest with descriptions and option for tags)
         -  Pocket (Digest list of links, read and unread, posted to Pocket)
         -  Goodreads books marked read for the day, one entry each with book cover image, ratings and your review. Inserted at the date marked finished.
+        -  App.net
 - Slogger can be called with a single argument that is a path to a local image, and an entry will be created for that image.
     - You can use this with a folder action or launchd task to add files from a folder connected to something like <http://IFTTT.com>. Any images added to the watched folder will be turned into journal entries.
         -  Note that Slogger does not delete the original image, so your script needs to move files out of the folder manually to avoid double-processing.
@@ -52,17 +54,20 @@ Dropbox-synced Journal (e.g. '/Users/username/Dropbox/Apps/Day One/Journal.dayon
     Usage: slogger [-dq] [-r X] [/path/to/image.jpg]
         -c, --config FILE                Specify alternate configuration file
         -d, --develop                    Develop mode
+        -h, --help                       Display this screen
         -o, --onlyrun NAME[,NAME2...]    Only run plugins matching items in comma-delimited string (partial names ok)
-        -t, --timespan DAYS              Days of history to collect
         -q, --quiet                      Run quietly (no notifications/messages)
         -r, --retries COUNT              Maximum number of retries per plugin (int)
         -s, --since-last                 Set the timespan to the last run date
+        -t, --timespan DAYS              Days of history to collect
+        -u, --undo COUNT                 Undo the last COUNT runs
         -v, --version                    Display the version number
-        -h, --help                       Display this screen
 
 > **Note:** You can use the `-s` option to only log since the last run date, handy if you want to run Slogger more than once per day or are testing plugins. 
 >
 > You can also use `-o` to run only a certain plugin in the standard plugin directory: just provide it with enough of the name to be unique, e.g. `slogger -o gist`.
+>
+> The `-u X` option will undo the last X runs. This works by checking the timestamp of the run and deleting any entries created after that timestamp. **It should not be used if you have manually created entries since the last Slogger run.** It also does not remove the run timestamps from the list, so running `./slogger -u 4` will remove the entries created by the last four runs, and then running `./slogger -u 5` will undo one more run in history.
 
 ## Plugin development ##
 
