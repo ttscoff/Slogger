@@ -30,7 +30,11 @@
 
       </header>
       <section>
-        <h2>Description</h2>
+        <h2>Upgrade Note</h2>
+
+<p><em>If you are upgrading from a version prior to 2.0.12, please remove the RSSLogger section from <code>slogger_config</code> and regenerate it by running slogger again. A new section will be added in addition to RSSLogger called Bloglogger. RSSLogger now logs all entries for the timespan as a single digest entry, whereas Bloglogger loads each item found as an individual "post."</em></p>
+
+<h2>Description</h2>
 
 <p>Slogger indexes various public social services and creates Day One (<a href="http://dayoneapp.com/">http://dayoneapp.com/</a>) journal entries for them. It allows you to keep a personal journal that collects your online social life automatically, all in one place.</p>
 
@@ -46,12 +50,15 @@
 <li> Gist (gists created in the last 24 hours. Title and description only, logged as a single digest)</li>
 <li> Flickr (images uploaded in the last 24 hours, each as an individual post. Can handle multiple accounts)</li>
 <li> Last.fm (Scrobbled songs for the current day)</li>
-<li> RSS feeds (designed to pull in your blog posts with leading image and excerpt (optionally markdownified). Handles multiple feeds)</li>
+<li> Blog entries (designed to pull in your blog posts with leading image and excerpt (optionally markdownified). Handles multiple feeds)</li>
+<li> RSS Feeds (logs any feed entries for the given timespan as a digest entry, handles multiple feeds)</li>
 <li> Twitter (Tweets and Favorites for the day as digest entries, handles multiple Twitter accounts)</li>
 <li> Instapaper (Unread and/or individual folders)</li>
 <li> Foursquare (Checkins for the day)</li>
 <li> Pinboard (Daily digest with descriptions and option for tags)</li>
 <li> Pocket (Digest list of links, read and unread, posted to Pocket)</li>
+<li> Goodreads books marked read for the day, one entry each with book cover image, ratings and your review. Inserted at the date marked finished.</li>
+<li> App.net</li>
 </ul>
 </li>
 </ul>
@@ -67,7 +74,7 @@
 </li>
 </ul>
 </li>
-</ul><h2>Usage</h2>
+</ul><h2>Configure</h2>
 
 <ol>
 <li>From within the Slogger folder, run <code>./slogger</code> to create the initial configuration file. If this doesn't work, you may need to make the file executable: <code>chmod a+x slogger</code> from within the Slogger folder.</li>
@@ -75,18 +82,26 @@
 
 <ul>
 <li>The only options will be 'storage:' and 'image_filename_is_title:'</li>
-<li>storage: should be set to either 'icloud' or a path to a Dropbox-synced Journal</li>
+<li>storage: should be set to either 'icloud' or a path to a
+Dropbox-synced Journal (e.g. '/Users/username/Dropbox/Apps/Day One/Journal.dayone')</li>
 <li>image_filename_is_title: should be set to true or false. If true, it will use the base filename (without extension) as the title of images imported individually.</li>
 </ul>
 </li>
-<li>Move plugins you want to use into <code>./plugins/</code>, and plugins you want to disable into <code>./plugins_disabled</code>.</li>
+<li>Move any additional plugins you want to use from <code>/plugins_disabled/</code> into <code>/plugins/</code>.</li>
 <li>Run <code>./slogger</code> again to update the configuration file with enabled plugin options.</li>
 <li>Edit <code>slogger_config</code> again and fill in the necessary parameters for listed configuration settings.</li>
-<li>Next time you run <code>./slogger</code>, it will execute the plugins and generate your log entries. Run it manually to test, and then automate it using Lingon (launchd) or other scheduling app.</li>
+<li>Next time you run <code>./slogger</code>, it will execute the plugins and generate your log entries. </li>
+</ol><h2>Usage</h2>
+
+<ol>
+<li>From within the Slogger folder, run <code>./slogger</code> to run the data
+capture for the plugins you have in you <code>/plugins/</code> directory. </li>
+<li>You may run <code>./slogger</code> manually to test, or if you do not with to automate the process.</li>
+<li>If you wish to automate slogger use Lingon (launchd) or other scheduling app.</li>
 <li>You can install a launchd task that will automatically run at 11:50pm every night by running <code>install.rb</code>. It's the same as Lingon would create, but all automatic and everything.
 
 <ul>
-<li>To uninstall, delete <code>~/Library/LaunchAgents/com.brettterpstra.slogger</code> and log out and back in.</li>
+<li>To uninstall the launchd task, run the command <code>rm ~/Library/LaunchAgents/com.brettterpstra.slogger</code> and then log out and back in.</li>
 </ul>
 </li>
 </ol><h2>Command line options</h2>
@@ -95,19 +110,22 @@
 Usage: slogger [-dq] [-r X] [/path/to/image.jpg]
     -c, --config FILE                Specify alternate configuration file
     -d, --develop                    Develop mode
+    -h, --help                       Display this screen
     -o, --onlyrun NAME[,NAME2...]    Only run plugins matching items in comma-delimited string (partial names ok)
-    -t, --timespan DAYS              Days of history to collect
     -q, --quiet                      Run quietly (no notifications/messages)
     -r, --retries COUNT              Maximum number of retries per plugin (int)
     -s, --since-last                 Set the timespan to the last run date
+    -t, --timespan DAYS              Days of history to collect
+    -u, --undo COUNT                 Undo the last COUNT runs
     -v, --version                    Display the version number
-    -h, --help                       Display this screen
 </code></pre>
 
 <blockquote>
 <p><strong>Note:</strong> You can use the <code>-s</code> option to only log since the last run date, handy if you want to run Slogger more than once per day or are testing plugins. </p>
 
 <p>You can also use <code>-o</code> to run only a certain plugin in the standard plugin directory: just provide it with enough of the name to be unique, e.g. <code>slogger -o gist</code>.</p>
+
+<p>The <code>-u X</code> option will undo the last X runs. This works by checking the timestamp of the run and deleting any entries created after that timestamp. <strong>It should not be used if you have manually created entries since the last Slogger run.</strong> It also does not remove the run timestamps from the list, so running <code>./slogger -u 4</code> will remove the entries created by the last four runs, and then running <code>./slogger -u 5</code> will undo one more run in history.</p>
 </blockquote>
 
 <h2>Plugin development</h2>
