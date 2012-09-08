@@ -6,7 +6,7 @@ Configuration:
   blog_feeds: [ "feed url 1" , "feed url 2", ... ]
   markdownify_posts: true
   star_posts: true
-  blog_tags: "@social @rss"
+  blog_tags: "@social @blogging"
 Notes:
   - if found, the first image in the post will be saved as the main image for the entry
   - blog_feeds is an array of feeds separated by commas, a single feed is fine, but it should be inside of brackets `[]`
@@ -24,7 +24,7 @@ config = {
   'blog_feeds' => [],
   'markdownify_posts' => false,
   'star_posts' => false,
-  'blog_tags' => '@social @rss'
+  'blog_tags' => '@social @blogging'
 }
 $slog.register_plugin({ 'class' => 'BlogLogger', 'config' => config })
 
@@ -32,18 +32,18 @@ class BlogLogger < Slogger
   def do_log
     feeds = []
     if @config.key?(self.class.name)
-      @rssconfig = @config[self.class.name]
-      if !@rssconfig.key?('blog_feeds') || @rssconfig['blog_feeds'] == []
+      @blogconfig = @config[self.class.name]
+      if !@blogconfig.key?('blog_feeds') || @blogconfig['blog_feeds'] == []
         @log.warn("Blog feeds have not been configured or a feed is invalid, please edit your slogger_config file.")
         return
       else
-        feeds = @rssconfig['blog_feeds']
+        feeds = @blogconfig['blog_feeds']
       end
     else
       @log.warn("Blog feeds have not been configured or a feed is invalid, please edit your slogger_config file.")
       return
     end
-    @log.info("Logging posts for feeds #{blog_feeds.join(', ')}")
+    @log.info("Logging posts for feeds #{feeds.join(', ')}")
 
     feeds.each do |rss_feed|
       retries = 0
@@ -66,15 +66,15 @@ class BlogLogger < Slogger
   end
 
   def parse_feed(rss_feed)
-    markdownify = @rssconfig['markdownify_posts']
+    markdownify = @blogconfig['markdownify_posts']
     unless (markdownify.is_a? TrueClass or markdownify.is_a? FalseClass)
       markdownify = true
     end
-    starred = @rssconfig['star_posts']
+    starred = @blogconfig['star_posts']
     unless (starred.is_a? TrueClass or starred.is_a? FalseClass)
       starred = true
     end
-    tags = @rssconfig['blog_tags'] || ''
+    tags = @blogconfig['blog_tags'] || ''
     tags = "\n\n#{tags}\n" unless tags == ''
 
     today = @timespan

@@ -79,13 +79,12 @@ class RSSLogger < Slogger
         end
       }
 
-      options = {}
-      options['content'] = "## #{rss.title.gsub(/\n+/,' ').strip}\n\n#{feed_items.reverse.join("\n")}#{tags}"
-      options['datestamp'] = item.date.utc.iso8601 rescue item.dc_date.utc.iso8601
-      options['starred'] = starred
-      options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
-      sl = DayOne.new
-      sl.to_dayone(options)
+      if feed_items.length > 0
+        options = {}
+        options['content'] = "## #{rss.channel.title.gsub(/\n+/,' ').strip}\n\n#{feed_items.reverse.join("\n")}#{tags}"
+        sl = DayOne.new
+        sl.to_dayone(options)
+      end
     rescue Exception => e
       p e
       return false
