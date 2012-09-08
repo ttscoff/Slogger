@@ -60,7 +60,7 @@ class TwitterLogger < Slogger
     else
       url = URI.parse("http://api.twitter.com/1/statuses/user_timeline.xml?screen_name=#{user}&count=200&exclude_replies=true&include_entities=true")
     end
-    tweets = ''
+    tweets = []
     images = []
     begin
       begin
@@ -117,7 +117,7 @@ class TwitterLogger < Slogger
           raise "Failure gathering images urls"
           p e
         end
-        tweets += "\n* [[#{tweet_date.strftime('%I:%M %p')}](https://twitter.com/#{user}/status/#{tweet_id})] #{tweet_text}"
+        tweets.push("* [[#{tweet_date.strftime('%I:%M %p')}](https://twitter.com/#{user}/status/#{tweet_id})] #{tweet_text}")
         unless tweet_images.empty?
           images.concat(tweet_images)
         end
@@ -130,7 +130,7 @@ class TwitterLogger < Slogger
           p e
         end
       end
-      return tweets
+      return tweets.reverse.join("\n")
     rescue Exception => e
       puts "Error getting #{type} for #{user}"
       p e
