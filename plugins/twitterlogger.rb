@@ -47,7 +47,7 @@ class TwitterLogger < Slogger
       options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
       sl = DayOne.new
       path = sl.save_image(image['url'],options['uuid'])
-      sl.store_single_photo(path,options)
+      sl.store_single_photo(path,options) unless path == false
     end
 
     return true
@@ -118,7 +118,7 @@ class TwitterLogger < Slogger
           p e
         end
         tweets += "\n* [[#{tweet_date.strftime('%I:%M %p')}](https://twitter.com/#{user}/status/#{tweet_id})] #{tweet_text}"
-        unless tweet_images.nil?
+        unless tweet_images.empty?
           images.concat(tweet_images)
         end
       }
@@ -186,11 +186,11 @@ class TwitterLogger < Slogger
         end
       end
       unless tweets == ''
-        tweets = "## @#{user} on #{Time.now.strftime('%m-%d-%Y')}\n\n#{tweets}#{tags}"
+        tweets = "## Tweets\n\n ### Posts by @#{user} on #{Time.now.strftime('%m-%d-%Y')}\n\n#{tweets}#{tags}"
         sl.to_dayone({'content' => tweets})
       end
       unless favs == ''
-        favs = "## @#{user} favorites for #{Time.now.strftime('%m-%d-%Y')}\n\n#{favs}#{tags}"
+        favs = "## Favorite Tweets\n\n### Favorites from @#{user} for #{Time.now.strftime('%m-%d-%Y')}\n\n#{favs}#{tags}"
         sl.to_dayone({'content' => favs})
       end
     end

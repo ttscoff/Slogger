@@ -30,7 +30,12 @@ class DayOne < Slogger
       Net::HTTP.get_response(URI.parse(imageurl)) do |http|
         data = http.body
         @log.info("Retrieving image -\n           Source: #{imageurl}\n      Target UUID: #{uuid}")
-        open( File.expand_path(target), "wb" ) { |file| file.write(data) }
+        if data == false || data == 'false'
+          @log.warn("Download failed")
+          return false
+        else
+          open( File.expand_path(target), "wb" ) { |file| file.write(data) }
+        end
       end
       return target
     rescue Exception => e

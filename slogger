@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 MAJOR_VERSION = 2.0
-MINOR_VERSION = 11
-BUILD_NUMBER = 0
+MINOR_VERSION = 12
+BUILD_NUMBER = 1
 require 'open-uri'
 require 'net/http'
 require 'net/https'
@@ -251,8 +251,15 @@ $slog = Slogger.new
 $slog.dayonepath = $slog.storage_path
 
 if ARGV.length > 0
-  if File.exists?(File.expand_path(ARGV[0]))
-    DayOne.new.store_single_photo(ARGV[0],{},true)
+  path = File.expand_path(ARGV[0])
+  if File.exists?(path)
+    unless path =~ /\.(jpg|png|gif)/i
+      File.open(path,'r') do | f |
+        DayOne.new.to_dayone({ 'content' => f.read })
+      end
+    else
+      DayOne.new.store_single_photo(ARGV[0],{},true)
+    end
   else
     raise "File \"#{ARGV[0]}\" not found."
   end

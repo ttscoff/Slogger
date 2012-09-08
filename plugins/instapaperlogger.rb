@@ -64,7 +64,7 @@ class InstapaperLogger < Slogger
         }
         output += "#### #{rss.channel.title}\n\n" + feed_output + "\n" unless feed_output == ''
       rescue Exception => e
-        puts "Error getting posts for #{rss_feed}"
+        raise "Error getting posts for #{rss_feed}"
         p e
         return ''
       end

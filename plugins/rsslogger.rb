@@ -1,30 +1,21 @@
 =begin
 Plugin: RSS Logger
-Description: Logs any RSS feed and checks for new posts for the current day
+Description: Logs any RSS feed as a digest and checks for new posts for the current day
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
   feeds: [ "feed url 1" , "feed url 2", ... ]
-  markdownify_posts: true
-  star_posts: true
-  tags: "@social @blogging"
+  tags: "@social @rss"
 Notes:
-  - if found, the first image in the post will be saved as the main image for the entry
   - rss_feeds is an array of feeds separated by commas, a single feed is fine, but it should be inside of brackets `[]`
-  - markdownify_posts will convert links and emphasis in the post to Markdown for display in Day One
-  - star_posts will create a starred post for new RSS posts
-  - rss_tags are tags you want to add to every entry, e.g. "@social @blogging"
+  - rss_tags are tags you want to add to every entry, e.g. "@social @rss"
 =end
 
 config = {
-  'description' => ['Logs any RSS feed and checks for new posts for the current day',
+  'description' => ['Logs any RSS feed as a digest and checks for new posts for the current day',
                     'feeds is an array of feeds separated by commas, a single feed is fine, but it should be inside of brackets `[]`',
-                    'markdownify_posts will convert links and emphasis in the post to Markdown for display in Day One',
-                    'star_posts will create a starred post for new RSS posts',
-                    'tags are tags you want to add to every entry, e.g. "@social @blogging"'],
+                    'tags are tags you want to add to every entry, e.g. "@social @rss"'],
   'feeds' => [],
-  'markdownify_posts' => false,
-  'star_posts' => false,
-  'tags' => '@social @blogging'
+  'tags' => '@social @rss'
 }
 $slog.register_plugin({ 'class' => 'RSSLogger', 'config' => config })
 
@@ -66,14 +57,7 @@ class RSSLogger < Slogger
   end
 
   def parse_feed(rss_feed)
-    markdownify = @rssconfig['markdownify_posts']
-    unless (markdownify.is_a? TrueClass or markdownify.is_a? FalseClass)
-      markdownify = true
-    end
-    starred = @rssconfig['star_posts']
-    unless (starred.is_a? TrueClass or starred.is_a? FalseClass)
-      starred = true
-    end
+
     tags = @rssconfig['tags'] || ''
     tags = "\n\n#{tags}\n" unless tags == ''
 
@@ -85,33 +69,22 @@ class RSSLogger < Slogger
       end
 
       rss = RSS::Parser.parse(rss_content, false)
+      feed_items = []
       rss.items.each { |item|
         item_date = Time.parse(item.date.to_s)
         if item_date > today
-          imageurl = false
-          image_match = item.description.match(/src="(http:.*?\.(jpg|png)(\?.*?)?)"/i) rescue nil
-          imageurl = image_match[1] unless image_match.nil?
-          if markdownify
-            content = item.description.markdownify rescue ''
-          else
-            content = item.description rescue ''
-          end
-
-          options = {}
-          options['content'] = "## [#{item.title.gsub(/\n+/,' ').strip}](#{item.link})\n\n#{content.strip}#{tags}"
-          options['datestamp'] = item.date.utc.iso8601 rescue item.dc_date.utc.iso8601
-          options['starred'] = starred
-          options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
-          sl = DayOne.new
-          if imageurl
-            sl.to_dayone(options) if sl.save_image(imageurl,options['uuid'])
-          else
-            sl.to_dayone(options)
-          end
+          feed_items.push("* [#{item.title.gsub(/\n+/,' ').strip}](#{item.link})")
         else
           break
         end
       }
+
+      if feed_items.length > 0
+        options = {}
+        options['content'] = "## #{rss.channel.title.gsub(/\n+/,' ').strip}\n\n#{feed_items.reverse.join("\n")}#{tags}"
+        sl = DayOne.new
+        sl.to_dayone(options)
+      end
     rescue Exception => e
       p e
       return false
