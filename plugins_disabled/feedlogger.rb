@@ -84,7 +84,16 @@ class FeedLogger < Slogger
 
       feed = FeedNormalizer::FeedNormalizer.parse open(feed_url)
       feed.entries.each { |entry|
-        entry_date = Time.parse(entry.date_published.to_s)
+        entry_date = nil
+        if (entry.date_published and entry.date_published.to_s.length() > 0)
+          entry_date = Time.parse(entry.date_published.to_s)
+        elsif (entry.last_updated and entry.last_updated.to_s.length() > 0)
+          @log.info("Entry #{entry.title} - no published date found\n\t\tUsing last update date instead.")
+          entry_date = Time.parse(entry.last_updated.to_s)
+        else
+          @log.info("Entry #{entry.title} - no published date found\n\t\tUsing current Time instead.")
+          entry_date = Time.now()
+        end
         if entry_date > today
           @log.info("parsing #{entry.title} w/ date: #{entry.date_published}")
           imageurl = false
