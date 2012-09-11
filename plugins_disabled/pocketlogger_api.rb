@@ -27,6 +27,7 @@ config = {
 $slog.register_plugin({ 'class' => 'PocketLogger', 'config' => config })
 
 require 'rexml/document'
+require 'oauth'
 #require 'ruby-debug'
 
 class PocketLogger < Slogger
