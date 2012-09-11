@@ -27,6 +27,7 @@ config = {
 $slog.register_plugin({ 'class' => 'GoodreadsLogger', 'config' => config })
 
 class GoodreadsLogger < Slogger
+#    Debugger.start
   def do_log
     feed = ''
     if @config.key?(self.class.name)
@@ -89,10 +90,12 @@ class GoodreadsLogger < Slogger
         item_date = Time.parse(item.elements['pubDate'].text)
         if item_date > @timespan
           imageurl = false
+          #  need to filter out unread items, can do it by those that have a rating assigned to them
+            #debugger
+          break if item.elements['user_rating'].text=="0"
           if save_image
             imageurl = item.elements['book_large_image_url'].text rescue false
           end
-
           content += "* Author: #{item.elements['author_name'].text}\n" rescue ''
           content += "* Average rating: #{item.elements['average_rating'].text}\n" rescue ''
           content += "* My rating: #{item.elements['user_rating'].text}\n" rescue ''

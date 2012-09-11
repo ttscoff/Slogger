@@ -60,7 +60,7 @@ class TwitterLogger < Slogger
     else
       url = URI.parse("http://api.twitter.com/1/statuses/user_timeline.xml?screen_name=#{user}&count=200&exclude_replies=true&include_entities=true")
     end
-    tweets = ''
+    tweets = []
     images = []
     begin
       begin
@@ -95,13 +95,21 @@ class TwitterLogger < Slogger
               }
             end
 
+              # new logic for the picture links and added yfrog (nr)
             tweet_text.scan(/\((http:\/\/twitpic.com\/\w+?)\)/).each do |picurl|
-              final_url = self.get_body(picurl[0]).match(/"(http:\/\/(\w+).cloudfront.net\/photos\/full\/[^"]+?)"/)
-              tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => final_url[1] } unless final_url.nil?
+              aurl=URI.parse(picurl[0])
+              burl="http://twitpic.com/show/large#{aurl.path}"
+              curl = RedirectFollower.new(burl).resolve
+              final_url=curl.url
+              tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => final_url } unless final_url.nil?
+              #tweet_images=[tweet_text,tweet_date.utc.iso8601,final_url] unless final_url.nil?
             end
             tweet_text.scan(/\((http:\/\/campl.us\/\w+?)\)/).each do |picurl|
-              final_url = self.get_body(picurl[0]).match(/"(http:\/\/pics.campl.us\/f\/c\/.+?)"/)
-              tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => final_url[1] } unless final_url.nil?
+              aurl=URI.parse(picurl[0])
+              burl="http://campl.us/#{aurl.path}:800px"
+              curl = RedirectFollower.new(burl).resolve
+              final_url=curl.url
+              tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => final_url } unless final_url.nil?
             end
             # Drop.lr downloads temporarily broken
             # tweet_text.scan(/\((http:\/\/#{@twitter_config['droplr_domain']}\/\w+?)\)/).each do |picurl|
@@ -109,16 +117,24 @@ class TwitterLogger < Slogger
             #   tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => picurl[0]+"+" } # unless final_url.nil?
             # end
             tweet_text.scan(/\((http:\/\/instagr\.am\/\w\/\w+?\/)\)/).each do |picurl|
-              final_url = self.get_body(picurl[0]).match(/"(http:\/\/distillery.*?\.instagram\.com\/[a-z0-9_]+\.jpg)"/i)
-              tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => final_url[1] } unless final_url.nil?
+              final_url=self.get_body(ilink).match(/http:\/\/distilleryimage.....[a-z]+.com[\W][a-z0-9_]+.jpg/)
+              tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => final_url[0] } unless final_url.nil?
+            end
+            tweet_text.scan(/http:\/\/[\w\.]*yfrog\.com\/[\w]+/).each do |picurl|
+              aurl=URI.parse(picurl)
+              burl="http://yfrog.com#{aurl.path}:medium"
+              curl = RedirectFollower.new(burl).resolve
+              final_url=curl.url
+              tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => final_url } unless final_url.nil?
             end
           end
         rescue Exception => e
           raise "Failure gathering images urls"
           p e
         end
-        tweets += "\n* [[#{tweet_date.strftime('%I:%M %p')}](https://twitter.com/#{user}/status/#{tweet_id})] #{tweet_text}"
-        unless tweet_images.empty?
+        if tweet_images.empty?
+          tweets.push("* [[#{tweet_date.strftime('%I:%M %p')}](https://twitter.com/#{user}/status/#{tweet_id})] #{tweet_text}")
+        else
           images.concat(tweet_images)
         end
       }
@@ -130,7 +146,7 @@ class TwitterLogger < Slogger
           p e
         end
       end
-      return tweets
+      return tweets.reverse.join("\n")
     rescue Exception => e
       puts "Error getting #{type} for #{user}"
       p e
@@ -186,7 +202,7 @@ class TwitterLogger < Slogger
         end
       end
       unless tweets == ''
-        tweets = "## Tweets\n\n ### Posts by @#{user} on #{Time.now.strftime('%m-%d-%Y')}\n\n#{tweets}#{tags}"
+        tweets = "## Tweets\n\n### Posts by @#{user} on #{Time.now.strftime('%m-%d-%Y')}\n\n#{tweets}#{tags}"
         sl.to_dayone({'content' => tweets})
       end
       unless favs == ''
