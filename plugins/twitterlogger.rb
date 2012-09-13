@@ -117,7 +117,7 @@ class TwitterLogger < Slogger
             #   tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => picurl[0]+"+" } # unless final_url.nil?
             # end
             tweet_text.scan(/\((http:\/\/instagr\.am\/\w\/\w+?\/)\)/).each do |picurl|
-              final_url=self.get_body(ilink).match(/http:\/\/distilleryimage.....[a-z]+.com[\W][a-z0-9_]+.jpg/)
+              final_url=self.get_body(picurl[0]).match(/http:\/\/distilleryimage.....[a-z]+.com[\W][a-z0-9_]+.jpg/)
               tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => final_url[0] } unless final_url.nil?
             end
             tweet_text.scan(/http:\/\/[\w\.]*yfrog\.com\/[\w]+/).each do |picurl|
@@ -129,7 +129,7 @@ class TwitterLogger < Slogger
             end
           end
         rescue Exception => e
-          raise "Failure gathering images urls"
+          @log.warn("Failure gathering image urls")
           p e
         end
         if tweet_images.empty?
@@ -138,7 +138,7 @@ class TwitterLogger < Slogger
           images.concat(tweet_images)
         end
       }
-      if @twitter_config['save_images'] && images
+      if @twitter_config['save_images'] && images != []
         begin
           self.download_images(images)
         rescue Exception => e
