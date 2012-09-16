@@ -85,6 +85,7 @@ class FacebookIFTTTLogger < Slogger
 				  options['content'] = "#### FacebookIFTTT\n\n#{line}\n\n#{tags}"
           ready = false
 			 elsif line =~ regDate
+			 	  line = line.strip
 				  line = line.gsub(regDate, "")
 				  line = line.gsub(" at ", ' ')
 				  line = line.gsub(',', '')
