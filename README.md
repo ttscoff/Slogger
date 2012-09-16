@@ -1,4 +1,4 @@
-Support Slogger by contributing to <iframe style="border:0;margin:0;padding:0;" src="https://www.gittip.com/ttscoff/widget.html" width="48pt" height="20pt"></iframe>
+Support Slogger by contributing to my [GitTip fund](https://www.gittip.com/ttscoff/).
 
 ## Upgrade Note ##
 
