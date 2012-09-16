@@ -30,7 +30,9 @@
 
       </header>
       <section>
-        <h2>Upgrade Note</h2>
+        <p>Support Slogger by contributing to </p>
+
+<h2>Upgrade Note</h2>
 
 <p><em>If you are upgrading from a version prior to 2.0.12, please remove the RSSLogger section from <code>slogger_config</code> and regenerate it by running slogger again. A new section will be added in addition to RSSLogger called Bloglogger. RSSLogger now logs all entries for the timespan as a single digest entry, whereas Bloglogger loads each item found as an individual "post."</em></p>
 
@@ -63,13 +65,13 @@
 </li>
 </ul>
 </li>
-<li>Slogger can be called with a single argument that is a path to a local image, and an entry will be created for that image.
+<li>Slogger can be called with a single argument that is a path to a local image or text file, and an entry will be created containing its contents.
 
 <ul>
 <li>You can use this with a folder action or launchd task to add files from a folder connected to something like <a href="http://IFTTT.com">http://IFTTT.com</a>. Any images added to the watched folder will be turned into journal entries.
 
 <ul>
-<li> Note that Slogger does not delete the original image, so your script needs to move files out of the folder manually to avoid double-processing.</li>
+<li> Note that Slogger does not delete the original file, so your script needs to move files out of the folder manually to avoid double-processing.</li>
 </ul>
 </li>
 </ul>
