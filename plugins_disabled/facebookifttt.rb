@@ -61,7 +61,6 @@ class FacebookIFTTTLogger < Slogger
 
     @log.info("Logging FacebookIFTTTLogger posts at #{inputFile}")
 
-    r = /^(\- )+\Z/
     regPost = /^Post: /
     regDate = /^Date: /
     ampm    = /(AM|PM)\Z/
@@ -79,7 +78,6 @@ class FacebookIFTTTLogger < Slogger
     f.close
 
     content.each do |line|
-      unless line =~ r || line.nil?
 			 if line =~ regPost
 			   	line = line.gsub(regPost, "")
 				  options['content'] = "#### FacebookIFTTT\n\n#{line}\n\n#{tags}"
