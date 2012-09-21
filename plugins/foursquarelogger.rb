@@ -33,7 +33,6 @@ class FoursquareLogger < Slogger
     end
 
     @log.info("Getting FourSquare checkins")
-    @feed = config['foursquare_feed']
 
     config['foursquare_tags'] ||= ''
     @tags = "\n\n#{config['foursquare_tags']}\n" unless config['foursquare_tags'] == ''
@@ -42,13 +41,21 @@ class FoursquareLogger < Slogger
     entrytext = ''
     rss_content = ''
     begin
-      feed_url = URI.parse(@feed)
-      feed_url.open do |f|
-        rss_content = f.read
+      url = URI.parse(@feed)
+
+      http = Net::HTTP.new url.host, url.port
+      http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+      http.use_ssl = true
+
+      res = nil
+
+      http.start do |agent|
+        rss_content = agent.get(url.path).read_body
       end
+
     rescue Exception => e
-      raise "ERROR fetching Foursquare feed"
-      p e
+      @log.error("ERROR fetching Foursquare feed")
+      # p e
     end
     content = ''
     rss = RSS::Parser.parse(rss_content, false)
