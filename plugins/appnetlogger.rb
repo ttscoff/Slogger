@@ -46,15 +46,23 @@ class AppNetLogger < Slogger
       @log.info("replies: true")
     end
     output = ''
-    
+
     config['appnet_usernames'].each do |user|
       begin
         rss_feed = "https://alpha-api.app.net/feed/rss/users/@"+ user + "/posts"
-        rss_content = ""
-        open(rss_feed) do |f|
-          rss_content = f.read
+
+        url = URI.parse rss_feed
+
+        http = Net::HTTP.new url.host, url.port
+        http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        http.use_ssl = true
+
+        rss_content = nil
+
+        http.start do |agent|
+          rss_content = agent.get(url.path).read_body
         end
-                
+
         rss = RSS::Parser.parse(rss_content, true)
         feed_output = ''
         rss.items.each { |item|
