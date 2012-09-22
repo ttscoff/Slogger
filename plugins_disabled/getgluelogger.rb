@@ -74,7 +74,7 @@ class GetglueLogger < Slogger
     # all options have default fallbacks, so you only need to create the options you want to specify
     if content != ''
       options = {}
-      options['content'] = "## GetGlue Activity for #{@timespan.strftime('%m-%d-%Y')}\n\n#{content} #{tags}"
+      options['content'] = "## GetGlue Activity for #{Time.now.strftime("%m-%d-%Y")}\n\n#{content} #{tags}"
       options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
 
 
