@@ -75,7 +75,6 @@ class GetglueLogger < Slogger
     if content != ''
       options = {}
       options['content'] = "## GetGlue Activity for #{@timespan.strftime('%m-%d-%Y')}\n\n#{content} #{tags}"
-      options['datestamp'] = @timespan.utc.iso8601
       options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
 
 
