@@ -69,7 +69,8 @@ class AppNetLogger < Slogger
           item_date = Time.parse(item.date.to_s)
           if item_date > @timespan
             content = ''
-            item.title = item.title.gsub(/^\w+?: /,'').strip    # remove username at front of post
+            item.title = item.title.gsub(/^#{user}: /,'').strip   # remove user's own name from front of post
+            item.title = item.title.gsub(/\n/,"\n    ")           # fix for multi-line posts displayed in markdown
             if item.title =~ /^@/
               if config['appnet_save_replies'] == true
                 feed_output += "* [#{item.pubDate.strftime('%I:%M %p')}](#{item.link}) #{item.title}#{content}\n"
