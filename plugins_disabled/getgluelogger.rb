@@ -67,7 +67,7 @@ class GetglueLogger < Slogger
       content += "* [#{item.pubDate.strftime('%H:%M %p')}](#{item.link}) - #{item.title}\n"
     }
     if content != ''
-      entrytext = "## GetGlue Checkins for #{@timespan.strftime('%m-%d-%Y')}\n\n" + content + "\n#{@tags}"
+      entrytext = "## GetGlue Checkins for #{Time.now.strftime("%m-%d-%Y")}}\n\n" + content + "\n#{@tags}"
     end
 
     # create an options array to pass to 'to_dayone'
