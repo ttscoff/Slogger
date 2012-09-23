@@ -38,7 +38,7 @@
 
 <h2>Description</h2>
 
-<p>Slogger indexes various public social services and creates Day One (<a href="http://dayoneapp.com/">http://dayoneapp.com/</a>) journal entries for them. It allows you to keep a personal journal that collects your online social life automatically, all in one place.</p>
+<p>Slogger indexes various public social services and creates Day One (<a href="http://dayoneapp.com/">http://dayoneapp.com/</a>) journal entries or plain text Markdown files for them. It allows you to keep a personal journal that collects your online social life automatically, all in one place.</p>
 
 <h2>Features</h2>
 
@@ -123,7 +123,14 @@
 <li> Inserted at the date marked finished.</li>
 </ul>
 </li>
-<li> App.net</li>
+<li> App.net
+
+<ul>
+<li> App.net posts for the current day<br>
+</li>
+</ul>
+</li>
+<li> OmniFocus complete tasks for the day</li>
 </ul>
 </li>
 </ul>
@@ -147,8 +154,14 @@
 
 <ul>
 <li>The only options will be 'storage:' and 'image_filename_is_title:'</li>
-<li>storage: should be set to either 'icloud' or a path to a
-Dropbox-synced Journal (e.g. '/Users/username/Dropbox/Apps/Day One/Journal.dayone')</li>
+<li>storage: should be one of
+
+<ul>
+<li> 'icloud'</li>
+<li> a path to a Dropbox-synced Journal (e.g. '/Users/username/Dropbox/Apps/Day One/Journal.dayone')</li>
+<li> a path to a folder for storing markdown files and related images (if the path doesn't end in "Journal.dayone", markdown storage is triggered automatically)</li>
+</ul>
+</li>
 <li>image_filename_is_title: should be set to true or false. If true, it will use the base filename (without extension) as the title of images imported individually.</li>
 </ul>
 </li>
@@ -161,7 +174,7 @@ Dropbox-synced Journal (e.g. '/Users/username/Dropbox/Apps/Day One/Journal.dayon
 <ol>
 <li>From within the Slogger folder, run <code>./slogger</code> to run the data
 capture for the plugins you have in you <code>/plugins/</code> directory. </li>
-<li>You may run <code>./slogger</code> manually to test, or if you do not with to automate the process.</li>
+<li>You may run <code>./slogger</code> manually to test, or if you do not wish to automate the process.</li>
 <li>If you wish to automate slogger use Lingon (launchd) or other scheduling app.</li>
 <li>You can install a launchd task that will automatically run at 11:50pm every night by running <code>install.rb</code>. It's the same as Lingon would create, but all automatic and everything.
 
