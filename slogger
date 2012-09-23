@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 MAJOR_VERSION = 2.0
-MINOR_VERSION = 13
-BUILD_NUMBER = 4
+MINOR_VERSION = 14
+BUILD_NUMBER = 0
 
 require 'open-uri'
 require 'net/http'
@@ -70,7 +70,6 @@ class Slogger
       output
     }
 
-    @template = self.template
     @plugins = []
 
     if cfg.config_exists?
@@ -86,6 +85,8 @@ class Slogger
       @timespan = Time.now - ((60 * 60 * 24) * $options[:timespan])
     end
     @config['image_filename_is_title'] ||= false
+    @dayonepath = self.storage_path
+    @template = self.template
   end
 
   def undo_slogger(count = 1)
@@ -178,7 +179,10 @@ class Slogger
   end
 
   def template
-    ERB.new <<-XMLTEMPLATE
+    markdown = @dayonepath =~ /Journal[\._]dayone\/?$/ ? false : true
+
+    unless markdown
+      ERB.new <<-XMLTEMPLATE
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -194,6 +198,16 @@ class Slogger
 </dict>
 </plist>
 XMLTEMPLATE
+    else
+      ERB.new <<-MARKDOWNTEMPLATE
+Title: Journal entry for <%= datestamp %>
+Date: <%= datestamp %>
+Starred: <%= starred %>
+
+<%= entry %>
+
+MARKDOWNTEMPLATE
+    end
   end
 end
 

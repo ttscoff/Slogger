@@ -1,15 +1,41 @@
 class DayOne < Slogger
   def to_dayone(options = {})
+    @dayonepath = storage_path
+    markdown = @dayonepath =~ /Journal[._]dayone\/?$/ ? false : true
     content = options['content'] || ''
-    uuid = options['uuid'] || %x{uuidgen}.gsub(/-/,'').strip
+    unless markdown
+      uuid = options['uuid'] || %x{uuidgen}.gsub(/-/,'').strip
+      datestamp = options['datestamp'] || Time.now.utc.iso8601
+      entry = CGI.escapeHTML(content) unless content.nil?
+    else
+      img_path = false
+      uuid = options['uuid'] || false
+      if uuid
+        for ext in %w[jpg jpeg gif tiff svg png]
+          img_path = "../photos/#{uuid}.#{ext}" if File.exists?(@dayonepath+"/photos/#{uuid}.#{ext}")
+        end
+      end
+      entry = content.nil? ? '' : content
+      if img_path
+        entry = "![](#{img_path})\n\n" + entry
+      end
+      uuid = Time.now.strftime('%Y-%m-%d_%I%M%S')+"_"+(rand(5000).to_s)
+      if options['datestamp']
+        datestamp = Date.parse(options['datestamp']).strftime('%x')
+      else
+        datestamp = Time.now.strftime('%x')
+      end
+    end
     starred = options['starred'] || false
-    datestamp = options['datestamp'] || Time.now.utc.iso8601
 
     # entry = CGI.escapeHTML(content.unpack('C*').pack('U*').gsub(/[^[:punct:]\w\s]+/,' ')) unless content.nil?
-    entry = CGI.escapeHTML(content) unless content.nil?
-    @dayonepath = storage_path
-    @log.info("=====[ Saving entry to entries/#{uuid}.doentry ]")
-    fh = File.new(File.expand_path(@dayonepath+'/entries/'+uuid+".doentry"),'w+')
+
+    # @dayonepath = storage_path
+    @log.info("=====[ Saving entry to entries/#{uuid} ]")
+    ext = markdown ? ".md" : ".doentry"
+    entry_dir = File.join(File.expand_path(@dayonepath), "entries")
+    Dir.mkdir(entry_dir, 0700) unless File.directory?(entry_dir)
+    fh = File.new("#{entry_dir}/#{uuid}#{ext}",'w+')
     fh.puts @template.result(binding)
     fh.close
     return true
