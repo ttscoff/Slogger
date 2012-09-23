@@ -6,7 +6,7 @@ Support Slogger by contributing to my [GitTip fund](https://www.gittip.com/ttsco
 
 ## Description ##
 
-Slogger indexes various public social services and creates Day One (<http://dayoneapp.com/>) journal entries for them. It allows you to keep a personal journal that collects your online social life automatically, all in one place.
+Slogger indexes various public social services and creates Day One (<http://dayoneapp.com/>) journal entries or plain text Markdown files for them. It allows you to keep a personal journal that collects your online social life automatically, all in one place.
 
 ## Features ##
 
@@ -54,8 +54,10 @@ Slogger indexes various public social services and creates Day One (<http://dayo
 1. From within the Slogger folder, run `./slogger` to create the initial configuration file. If this doesn't work, you may need to make the file executable: `chmod a+x slogger` from within the Slogger folder.
 2. Edit the file `slogger_config` that shows up
     - The only options will be 'storage:' and 'image_filename_is_title:'
-    - storage: should be set to either 'icloud' or a path to a
-Dropbox-synced Journal (e.g. '/Users/username/Dropbox/Apps/Day One/Journal.dayone')
+    - storage: should be one of
+        -  'icloud'
+        -  a path to a Dropbox-synced Journal (e.g. '/Users/username/Dropbox/Apps/Day One/Journal.dayone')
+        -  a path to a folder for storing markdown files and related images (if the path doesn't end in "Journal.dayone", markdown storage is triggered automatically)
     - image_filename_is_title: should be set to true or false. If true, it will use the base filename (without extension) as the title of images imported individually.
 3. Move any additional plugins you want to use from `/plugins_disabled/` into `/plugins/`.
 4. Run `./slogger` again to update the configuration file with enabled plugin options.
