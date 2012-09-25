@@ -66,8 +66,8 @@ class TwitterLogger < Slogger
       begin
         res = Net::HTTP.get_response(url).body
       rescue Exception => e
-        raise "Failure getting response from Twitter"
-        p e
+        @log.warn("Failure getting response from Twitter")
+        # p e
         return false
       end
       REXML::Document.new(res).elements.each("statuses/status") { |tweet|
@@ -142,14 +142,14 @@ class TwitterLogger < Slogger
         begin
           self.download_images(images)
         rescue Exception => e
-          raise "Failure downloading images"
-          p e
+          @log.warn("Failure downloading images")
+          # p e
         end
       end
       return tweets.reverse.join("\n")
     rescue Exception => e
-      puts "Error getting #{type} for #{user}"
-      p e
+      @log.warn("Error getting #{type} for #{user}")
+      # p e
       return false
     end
 
