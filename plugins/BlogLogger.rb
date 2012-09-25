@@ -93,11 +93,18 @@ class BlogLogger < Slogger
         item_date = Time.parse(item.date.to_s)
         if item_date > today
 
-          content_encoded = (item.methods.include? 'content_encoded') ? item.content_encoded : ''
-          content = @blogconfig['full_posts'] ? content_encoded : item.description rescue ''
+          if @blogconfig['full_posts']
+            begin
+              content = item.content_encoded
+            rescue
+              content = item.description
+            end
+          else
+            content = item.description rescue ''
+          end
 
           imageurl = false
-          image_match = content_encoded.match(/src="(http:.*?\.(jpg|png)(\?.*?)?)"/i) rescue nil
+          image_match = content.match(/src="(http:.*?\.(jpg|png)(\?.*?)?)"/i) rescue nil
           imageurl = image_match[1] unless image_match.nil?
 
           content = content.markdownify if markdownify rescue ''
