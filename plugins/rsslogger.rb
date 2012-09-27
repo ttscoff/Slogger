@@ -24,7 +24,6 @@ class RSSLogger < Slogger
     feeds = []
     if @config.key?(self.class.name)
       @rssconfig = @config[self.class.name]
-      p @rssconfig['feeds']
       if !@rssconfig.key?('feeds') || @rssconfig['feeds'] == [] || @rssconfig['feeds'].nil?
         @log.warn("RSS feeds have not been configured or a feed is invalid, please edit your slogger_config file.")
         return
