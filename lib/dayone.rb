@@ -45,13 +45,9 @@ class DayOne < Slogger
     @dayonepath = Slogger.new.storage_path
     source = imageurl.gsub(/^https/,'http')
     match = source.match(/(\..{3,4})($|\?|%22)/)
-    unless match.nil?
-      ext = match[1]
-    else
-      @log.warn("Attempted to save #{imageurl} but extension could not be determined")
-      ext = '.jpg'
-    end
-    target = @dayonepath + '/photos/'+uuid+ext
+    ext = match.nil? ? match[1] : '.jpg'
+    @log.info("Original image has extension #{ext}. Coverting for Day One recognition.")
+    target = @dayonepath + "/photos/#{uuid}.jpg"
     begin
       Net::HTTP.get_response(URI.parse(imageurl)) do |http|
         data = http.body
@@ -72,6 +68,7 @@ class DayOne < Slogger
 
   def process_image(image)
     orig = File.expand_path(image)
+
     match = orig.match(/(\..{3,4})$/)
     return false if match.nil?
     ext = match[1]
@@ -83,18 +80,18 @@ class DayOne < Slogger
         target = orig.gsub(/\.jpeg$/,'.jpg')
         FileUtils.mv(orig,target)
         return target
-      when /\.(png|gif|tiff)$/
-        # if File.exists?('/usr/local/bin/convert')
-        #   target = orig.gsub(/#{ext}$/,'.jpg')
-        #   @log.info("Converting #{orig} to JPEG")
-        #   %x{/usr/local/bin/convert "#{orig}" "#{target}"}
-        #   File.delete(orig)
-        #   return target
-        # else
-        #   @log.warn("Image could not be converted to JPEG format and may not show up in Day One. Please install ImageMagick.")
-        #   return orig
-        # end
-        return orig
+      # when /\.(png|gif|tiff)$/
+      #   if File.exists?('/usr/local/bin/convert')
+      #     target = orig.gsub(/#{ext}$/,'.jpg')
+      #     @log.info("Converting #{orig} to JPEG")
+      #     %x{/usr/local/bin/convert "#{orig}" -background white -mosaic +matte "#{target}"}
+      #     File.delete(orig)
+      #     return target
+      #   else
+      #     @log.warn("Image could not be converted to JPEG format and may not show up in Day One. Please install ImageMagick (available through brew).")
+      #     return orig
+      #   end
+      #   return orig
       else
         return orig
       end

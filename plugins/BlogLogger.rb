@@ -28,7 +28,7 @@ config = {
   'markdownify_posts' => false,
   'star_posts' => false,
   'blog_tags' => '@social @blogging',
-  'full_posts' => true
+  'full_posts' => false
 }
 $slog.register_plugin({ 'class' => 'BlogLogger', 'config' => config })
 
@@ -92,7 +92,7 @@ class BlogLogger < Slogger
       rss.items.each { |item|
         item_date = Time.parse(item.date.to_s)
         if item_date > today
-
+          content = ''
           if @blogconfig['full_posts']
             begin
               content = item.content_encoded
@@ -104,7 +104,7 @@ class BlogLogger < Slogger
           end
 
           imageurl = false
-          image_match = content.match(/src="(http:.*?\.(jpg|png)(\?.*?)?)"/i) rescue nil
+          image_match = content.match(/src="(http:.*?\.(jpg|png))(\?.*?)?"/i) rescue nil
           imageurl = image_match[1] unless image_match.nil?
 
           content = content.markdownify if markdownify rescue ''
@@ -115,11 +115,8 @@ class BlogLogger < Slogger
           options['starred'] = starred
           options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
           sl = DayOne.new
-          if imageurl
-            sl.to_dayone(options) if sl.save_image(imageurl,options['uuid'])
-          else
-            sl.to_dayone(options)
-          end
+          sl.save_image(imageurl,options['uuid']) if imageurl
+          sl.to_dayone(options)
         else
           break
         end
