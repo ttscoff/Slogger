@@ -72,6 +72,7 @@ class DayOne < Slogger
 
   def process_image(image)
     orig = File.expand_path(image)
+
     match = orig.match(/(\..{3,4})$/)
     return false if match.nil?
     ext = match[1]
@@ -83,18 +84,18 @@ class DayOne < Slogger
         target = orig.gsub(/\.jpeg$/,'.jpg')
         FileUtils.mv(orig,target)
         return target
-      when /\.(png|gif|tiff)$/
-        # if File.exists?('/usr/local/bin/convert')
-        #   target = orig.gsub(/#{ext}$/,'.jpg')
-        #   @log.info("Converting #{orig} to JPEG")
-        #   %x{/usr/local/bin/convert "#{orig}" "#{target}"}
-        #   File.delete(orig)
-        #   return target
-        # else
-        #   @log.warn("Image could not be converted to JPEG format and may not show up in Day One. Please install ImageMagick.")
-        #   return orig
-        # end
-        return orig
+      # when /\.(png|gif|tiff)$/
+      #   if File.exists?('/usr/local/bin/convert')
+      #     target = orig.gsub(/#{ext}$/,'.jpg')
+      #     @log.info("Converting #{orig} to JPEG")
+      #     %x{/usr/local/bin/convert "#{orig}" -background white -mosaic +matte "#{target}"}
+      #     File.delete(orig)
+      #     return target
+      #   else
+      #     @log.warn("Image could not be converted to JPEG format and may not show up in Day One. Please install ImageMagick (available through brew).")
+      #     return orig
+      #   end
+      #   return orig
       else
         return orig
       end
