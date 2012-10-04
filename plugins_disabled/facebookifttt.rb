@@ -31,7 +31,7 @@ config = {
   'description' => ['Parses Facebook posts logged by IFTTT.com',
                     'facebook_ifttt_input_file is a string pointing to the location of the file created by IFTTT.',
                     'The recipe at https://ifttt.com/recipes/56242 determines that location.'],
-  'facebook_ifttt_input_file' => '', 
+  'facebook_ifttt_input_file' => '/Users/Marco/Dropbox/Apps/Day One/facebook/facebook.md.txt', 
   'facebook_ifttt_star' => false,
   'facebook_ifttt_tags' => '@social @blogging'
 }
@@ -77,43 +77,44 @@ class FacebookIFTTTLogger < Slogger
     content = f.read
     f.close
 
-    content.each do |line|
-			 if line =~ regPost
-			   	line = line.gsub(regPost, "")
-				  options['content'] = "#### FacebookIFTTT\n\n#{line}\n\n#{tags}"
-          ready = false
-			 elsif line =~ regDate
-			 	  line = line.strip
-				  line = line.gsub(regDate, "")
-				  line = line.gsub(" at ", ' ')
-				  line = line.gsub(',', '')
-			
-				  month, day, year, time = line.split
-				  hour,min = time.split(/:/)
-				  min = min.gsub(ampm, '')
+    if !content.empty?
+      content.each do |line|
+  			 if line =~ regPost
+  			   	line = line.gsub(regPost, "")
+  				  options['content'] = "#### FacebookIFTTT\n\n#{line}\n\n#{tags}"
+            ready = false
+  			 elsif line =~ regDate
+  		 	  line = line.strip
+  			  line = line.gsub(regDate, "")
+  			  line = line.gsub(" at ", ' ')
+  			  line = line.gsub(',', '')
 
-				  if line =~ pm
-				  	x = hour.to_i
-				  	x += 12
-				  	hour = x.to_s
-				  end
+  			  month, day, year, time = line.split
+  			  hour,min = time.split(/:/)
+  			  min = min.gsub(ampm, '')
 
-				  month = Date::MONTHNAMES.index(month)
-				  ltime = Time.local(year, month, day, hour, min, 0, 0)
-				  date = ltime.to_i
+  			  if line =~ pm
+  			  	x = hour.to_i
+  			  	x += 12
+  			  	hour = x.to_s
+  			  end
 
-				  next unless date > last_run.to_i
+  			  month = Date::MONTHNAMES.index(month)
+  			  ltime = Time.local(year, month, day, hour, min, 0, 0)
+  			  date = ltime.to_i
 
-				  options['datestamp'] = ltime.utc.iso8601
+  			  next unless date > last_run.to_i
+
+  			  options['datestamp'] = ltime.utc.iso8601
           ready = true
-			 end
-		  end    	
+  		  end    	
 
-      if ready
-        sl = DayOne.new
-        sl.to_dayone(options)
-        ready = false
+        if ready
+          sl = DayOne.new
+          sl.to_dayone(options)
+          ready = false
+        end
       end
-	   end
+    end
   end
 end
