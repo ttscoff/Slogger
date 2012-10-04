@@ -31,7 +31,7 @@ config = {
   'description' => ['Parses Facebook posts logged by IFTTT.com',
                     'facebook_ifttt_input_file is a string pointing to the location of the file created by IFTTT.',
                     'The recipe at https://ifttt.com/recipes/56242 determines that location.'],
-  'facebook_ifttt_input_file' => '/Users/Marco/Dropbox/Apps/Day One/facebook/facebook.md.txt', 
+  'facebook_ifttt_input_file' => '', 
   'facebook_ifttt_star' => false,
   'facebook_ifttt_tags' => '@social @blogging'
 }
