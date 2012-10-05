@@ -38,6 +38,10 @@ class String
     self.to_s.gsub(/(?=[^a-zA-Z0-9_.\/\-\n])/, '\\').gsub(/\n/, "'\n'").sub(/^$/, "''")
   end
 
+  def e_link
+    self.to_s.gsub(/([\[\]\(\)])/, '\\\\\1')
+  end
+
 end
 
 class Slogger
