@@ -57,7 +57,9 @@ class LastFMLogger < Slogger
       rss = RSS::Parser.parse(rss_content, false)
       rss.items.each { |item|
         break if Time.parse(item.pubDate.to_s) < today
-        content += "* [#{item.title}](#{item.link})\n"
+        title = String(item.title).e_link()
+        link = String(item.link).e_link()
+        content += "* [#{title}](#{link})\n"
       }
       if content != ''
         entrytext = "#{rss_feed['title']} for #{today.strftime('%m-%d-%Y')}\n\n" + content + "\n#{tags}"
