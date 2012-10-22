@@ -7,6 +7,7 @@ Author: [Alan Schussman](http://schussman.com)
 Configuration:
   appnet_usernames: [ ]
   appnet_tags: "@social @appnet"
+  appnet_save_replies: false
 Notes:
 
 =end

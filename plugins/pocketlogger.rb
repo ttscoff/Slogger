@@ -40,7 +40,7 @@ class PocketLogger < Slogger
     tags = "\n\n#{config['pocket_tags']}\n" unless config['pocket_tags'] == ''
     today = @timespan
 
-    @log.info("Getting Pocket posts for #{config['username']}")
+    @log.info("Getting Pocket posts for #{username}")
     output = ''
 
     rss_feed = "http://getpocket.com/users/#{username.strip}/feed/all"
