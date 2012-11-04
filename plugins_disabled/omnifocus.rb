@@ -43,22 +43,22 @@ class OmniFocusLogger < Slogger
             set strText to strText & strName
             if varContext is not missing value then set strText to strText & " @" & varContext
             if varProject is not missing value then set strText to strText & " (" & varProject & ")"
-            set strText to strText & return
+            set strText to strText & linefeed
           end repeat
         end tell
       end tell
       return strText
     APPLESCRIPT}
-    values.each_line do |value|
+    values.squeeze("\n").each_line do |value|
       # Create entries here
-      output += "* " + value + "\n"
+      output += "* " + value
     end
 
     # Create a journal entry
     unless output == ''
       options = {}
       options['content'] = "## OmniFocus - Completed Tasks\n\n#{output}#{tags}"
-      sl = DayOne.new      
+      sl = DayOne.new
       sl.to_dayone(options)
     end
   end
