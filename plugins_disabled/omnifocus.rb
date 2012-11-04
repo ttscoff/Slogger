@@ -49,9 +49,9 @@ class OmniFocusLogger < Slogger
       end tell
       return strText
     APPLESCRIPT}
-    values.each_line do |value|
+    values.squeeze("\n").each_line do |value|
       # Create entries here
-      output += "* " + value + "\n"
+      output += "* " + value
     end
 
     # Create a journal entry
