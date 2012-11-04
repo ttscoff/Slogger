@@ -43,7 +43,7 @@ class OmniFocusLogger < Slogger
             set strText to strText & strName
             if varContext is not missing value then set strText to strText & " @" & varContext
             if varProject is not missing value then set strText to strText & " (" & varProject & ")"
-            set strText to strText & return
+            set strText to strText & linefeed
           end repeat
         end tell
       end tell
@@ -58,7 +58,7 @@ class OmniFocusLogger < Slogger
     unless output == ''
       options = {}
       options['content'] = "## OmniFocus - Completed Tasks\n\n#{output}#{tags}"
-      sl = DayOne.new      
+      sl = DayOne.new
       sl.to_dayone(options)
     end
   end
