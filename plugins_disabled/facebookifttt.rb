@@ -73,7 +73,7 @@ class FacebookIFTTTLogger < Slogger
     options['starred'] = config['facebook_ifttt_star']
     options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
 
-    f = File.new(inputFile)
+    f = File.new(File.expand_path(inputFile))
     content = f.read
     f.close
 
