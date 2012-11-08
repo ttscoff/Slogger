@@ -64,7 +64,11 @@ class GetglueLogger < Slogger
     rss = RSS::Parser.parse(rss_content, false)
     rss.items.each { |item|
       break if Time.parse(item.pubDate.to_s) < @timespan
-      content += "* [#{item.pubDate.strftime('%H:%M %p')}](#{item.link}) - #{item.title}\n"
+      if item.description !=""
+        content += "* [#{item.pubDate.strftime('%H:%M %p')}](#{item.link}) - #{item.title} \"#{item.description}\"\n"
+      else
+        content += "* [#{item.pubDate.strftime('%H:%M %p')}](#{item.link}) - #{item.title}\n"
+      end
     }
     if content != ''
       entrytext = "## GetGlue Checkins for #{@timespan.strftime('%m-%d-%Y')}\n\n" + content + "\n#{@tags}"
