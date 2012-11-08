@@ -15,8 +15,10 @@ config = {
     'Logs updates and favorites for specified Twitter users',
     'twitter_users should be an array of Twitter usernames, e.g. [ ttscoff, markedapp ]',
     'save_images (true/false) determines weather TwitterLogger will look for image urls and include them in the entry',
+    'save_favorites (true/false) determines weather TwitterLogger will look for the favorites of the given usernames and include them in the entry',
     'droplr_domain: if you have a custom droplr domain, enter it here, otherwise leave it as d.pr '],
   'twitter_users' => [],
+  'save_favorites' => true,
   'save_images' => true,
   'droplr_domain' => 'd.pr',
   'twitter_tags' => '@social @twitter'
@@ -191,16 +193,20 @@ class TwitterLogger < Slogger
       end
       retries = 0
       success = false
-      until success
-        favs = self.get_tweets(user,'favorites')
-        if favs
-          success = true
-        else
-          break if $options[:max_retries] == retries
-          retries += 1
-          @log.error("Error parsing Favorites for #{user}, retrying (#{retries}/#{$options[:max_retries]})")
-          sleep 2
+      if @twitter_config['save_favorites']
+        until success
+          favs = self.get_tweets(user,'favorites')
+          if favs
+            success = true
+          else
+            break if $options[:max_retries] == retries
+            retries += 1
+            @log.error("Error parsing Favorites for #{user}, retrying (#{retries}/#{$options[:max_retries]})")
+            sleep 2
+          end
         end
+      else
+        favs = ''
       end
       unless tweets == ''
         tweets = "## Tweets\n\n### Posts by @#{user} on #{Time.now.strftime('%m-%d-%Y')}\n\n#{tweets}#{tags}"
