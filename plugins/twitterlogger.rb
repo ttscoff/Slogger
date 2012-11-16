@@ -16,10 +16,12 @@ config = {
     'twitter_users should be an array of Twitter usernames, e.g. [ ttscoff, markedapp ]',
     'save_images (true/false) determines weather TwitterLogger will look for image urls and include them in the entry',
     'save_favorites (true/false) determines weather TwitterLogger will look for the favorites of the given usernames and include them in the entry',
+    'save_images_from_favorites (true/false) determines weather TwitterLogger will download images for the favorites of the given usernames and include them in the entry',
     'droplr_domain: if you have a custom droplr domain, enter it here, otherwise leave it as d.pr '],
   'twitter_users' => [],
   'save_favorites' => true,
   'save_images' => true,
+  'save_images_from_favorites' => true,
   'droplr_domain' => 'd.pr',
   'twitter_tags' => '@social @twitter'
 }
@@ -135,7 +137,7 @@ class TwitterLogger < Slogger
           @log.warn("Failure gathering image urls")
           p e
         end
-        if tweet_images.empty?
+        if tweet_images.empty? or (type == 'favorites' and !@twitter_config['save_images_from_favorites'])
           tweets.push("* [[#{tweet_date.strftime('%I:%M %p')}](https://twitter.com/#{user}/status/#{tweet_id})] #{tweet_text}")
         else
           images.concat(tweet_images)
