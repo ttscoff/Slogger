@@ -170,7 +170,7 @@ class Slogger
         @config[_namespace][_namespace+"_last_run"] = Time.now.strftime('%c')
       end
       # ConfigTools.new.dump_config(@config)
-      if plugin['updates_config'] == true
+      if plugin['updates_config'] && plugin['updates_config'] == true
         # Pass a reference to config for mutation
         eval(plugin['class']).new.do_log(@config)
       else
