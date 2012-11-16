@@ -15,7 +15,7 @@ config = { # description and a primary key (username, url, etc.) required
                     'line 2, continue array as needed'],
   'service_username' => '', # update the name and make this a string or an array if you want to handle multiple accounts.
   'additional_config_option' => false
-  'tags' => '@social @blogging' # A good idea to provide this with an appropriate default setting
+  'tags' => ['social', 'blogging'] # A good idea to provide this with an appropriate default setting
 }
 # Update the class key to match the unique classname below
 $slog.register_plugin({ 'class' => 'ServiceLogger', 'config' => config })
@@ -44,8 +44,7 @@ class ServiceLogger < Slogger
     @log.info("Logging <Service> posts for #{username}")
 
     additional_config_option = config['additional_config_option'] || false
-    tags = config['tags'] || ''
-    tags = "\n\n#{@tags}\n" unless @tags == ''
+    tags = config['tags'] || false
 
     today = @timespan
 
@@ -54,10 +53,11 @@ class ServiceLogger < Slogger
     # create an options array to pass to 'to_dayone'
     # all options have default fallbacks, so you only need to create the options you want to specify
     options = {}
-    options['content'] = "## Post title\n\nContent#{tags}"
+    options['content'] = "## Post title\n\nContent"
     options['datestamp'] = Time.now.utc.iso8601
     options['starred'] = true
     options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
+    options['tags'] = tags
 
     # Create a journal entry
     # to_dayone accepts all of the above options as a hash

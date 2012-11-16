@@ -7,7 +7,7 @@ Author: [RichSomerfield](www.richsomerfield.com)
 config = {
   'omnifocus_description' => [
     'Grabs completed tasks from OmniFocus'],
-  'omnifocus_tags' => '@tasks',
+  'omnifocus_tags' => ['tasks'],
   'omnifocus_save_hashtags' => true
 }
 
@@ -16,16 +16,16 @@ $slog.register_plugin({ 'class' => 'OmniFocusLogger', 'config' => config })
 class OmniFocusLogger < Slogger
   def do_log
     if @config.key?(self.class.name)
+      config = @config[self.class.name]
       # We don't have any config, so don't need to worry about it not being there ;-)
     else
-      @log.warn("<Service> has not been configured or a feed is invalid, please edit your slogger_config file.")
+      @log.warn("Omnifocus has not been configured or a feed is invalid, please edit your slogger_config file.")
       return
     end
-    @log.info("Logging <Service> for completed tasks")
+    @log.info("Logging Omnifocus for completed tasks")
 
     additional_config_option = config['additional_config_option'] || false
-    tags = config['tags'] || ''
-    tags = "\n\n#{@tags}\n" unless @tags == ''
+    tags = config['omnifocus_tags'] || false
 
     today = @timespan
     output = ''
@@ -57,7 +57,8 @@ class OmniFocusLogger < Slogger
     # Create a journal entry
     unless output == ''
       options = {}
-      options['content'] = "## OmniFocus - Completed Tasks\n\n#{output}#{tags}"
+      options['content'] = "## OmniFocus - Completed Tasks\n\n#{output}"
+      options['tags'] = tags
       sl = DayOne.new
       sl.to_dayone(options)
     end

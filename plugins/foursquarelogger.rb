@@ -4,7 +4,7 @@ Description: Checks Foursquare feed once a day for that day's posts.
 Author: [Jeff Mueller](https://github.com/jeffmueller)
 Configuration:
   foursquare_feed: "https://feeds.foursquare.com/history/yourfoursquarehistory.rss"
-  foursquare_tags: "@social @checkins"
+  foursquare_tags: ["social", "checkins"]
 Notes:
   Find your feed at <https://foursquare.com/feeds/> (in RSS option)
 =end
@@ -13,7 +13,7 @@ default_config = {
   'description' => [
   'foursquare_feed must refer to the address of your personal feed.','Your feed should be available at <https://foursquare.com/feeds/>'],
   'foursquare_feed' => "",
-  'foursquare_tags' => "@social @checkins"
+  'foursquare_tags' => ["social", "checkins"]
 }
 $slog.register_plugin({ 'class' => 'FoursquareLogger', 'config' => default_config })
 
@@ -34,8 +34,7 @@ class FoursquareLogger < Slogger
 
     @log.info("Getting FourSquare checkins")
 
-    config['foursquare_tags'] ||= ''
-    @tags = "\n\n#{config['foursquare_tags']}\n" unless config['foursquare_tags'] == ''
+    tags = config['foursquare_tags'] || false
     @debug = config['debug'] || false
 
     entrytext = ''
@@ -64,8 +63,12 @@ class FoursquareLogger < Slogger
       content += "* [#{item.title}](#{item.link})\n"
     }
     if content != ''
-      entrytext = "## Foursquare Checkins for #{@timespan.strftime('%m-%d-%Y')}\n\n" + content + "\n#{@tags}"
+      entrytext = "## Foursquare Checkins for #{@timespan.strftime('%m-%d-%Y')}\n\n" + content
     end
-    DayOne.new.to_dayone({'content' => entrytext}) unless entrytext == ''
+    
+    options = {}
+    options['content'] = entrytext
+    options['tags'] = tags
+    DayOne.new.to_dayone(options) unless entrytext == ''
   end
 end

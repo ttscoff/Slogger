@@ -4,7 +4,7 @@ Description: Logs daily Github activity for the specified user
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
   github_user: githubuser
-  github_tags: "@social @coding"
+  github_tags: ["social", "coding"]
 Notes:
 
 =end
@@ -12,7 +12,7 @@ Notes:
 config = {
   'description' => ['Logs daily Github activity for the specified user','github_user should be your Github username'],
   'github_user' => '',
-  'github_tags' => '@social @coding',
+  'github_tags' => ['social', 'coding'],
 }
 $slog.register_plugin({ 'class' => 'GithubLogger', 'config' => config })
 
@@ -47,6 +47,8 @@ class GithubLogger < Slogger
       # p e
     end
 
+    tags = config['github_tags'] || false
+
     return false if res.nil?
     json = JSON.parse(res)
 
@@ -76,8 +78,13 @@ class GithubLogger < Slogger
     }
 
     return false if output.strip == ""
-    entry = "## Github activity for #{Time.now.strftime("%m-%d-%Y")}:\n\n#{output}\n#{config['github_tags']}"
-    DayOne.new.to_dayone({ 'content' => entry })
+    entry = "## Github activity for #{Time.now.strftime("%m-%d-%Y")}:\n\n#{output}}"
+
+    options = {}
+    options['content'] = entry
+    options['tags'] = tags
+
+    DayOne.new.to_dayone(options)
   end
 
 end

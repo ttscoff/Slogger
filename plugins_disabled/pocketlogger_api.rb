@@ -7,7 +7,7 @@ Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
   pocket_username: "your_username"
   pocket_passwd: "your_password"
-  pocket_tags: "@social @reading"
+  pocket_tags: ["social", "reading"]
   posts_to_get: "read" or "unread" or leave blank for all
 Notes:
 
@@ -21,7 +21,7 @@ config = {
     'posts_to_get allows you to choose read, unread or all items'],
   'pocket_username' => '',
   'pocket_passwd' => '',
-  'pocket_tags' => '@social @reading',
+  'pocket_tags' => ['social', 'reading'],
   'posts_to_get' => ''
 }
 $slog.register_plugin({ 'class' => 'PocketLogger', 'config' => config })
@@ -45,11 +45,10 @@ class PocketLogger < Slogger
     end
 
     sl = DayOne.new
-    config['pocket_tags'] ||= ''
+    tags = config['pocket_tags'] || false
     username = config['pocket_username']
     passwd= config['pocket_passwd']
     posts_to_get=config['posts_to_get']
-    tags = "\n\n#{config['pocket_tags']}\n" unless config['pocket_tags'] == ''
     today = @timespan
     yest=(Time.now-86400).to_i
     pkey="29ed8r79To6fuG8e9bA480GD77g5P586"
@@ -71,7 +70,8 @@ class PocketLogger < Slogger
     end
     unless output == ''
       options = {}
-      options['content'] = "Pocket reading\n\n#{output}#{tags}"
+      options['content'] = "Pocket reading\n\n#{output}"
+      options['tags'] = tags
       sl.to_dayone(options)
     end
   end

@@ -4,14 +4,14 @@ Description: Logs playlists and loved tracks for the day
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
   lastfm_user: lastfmusername
-  lastfm_tags: "@social @blogging"
+  lastfm_tags: ["social", "blogging"]
 Notes:
 
 =end
 config = {
   'lastfm_description' => ['Logs songs scrobbled for time period.','lastfm_user is your Last.fm username.'],
   'lastfm_user' => '',
-  'lastfm_tags' => '@social @music'
+  'lastfm_tags' => ["social", "blogging"]
 }
 $slog.register_plugin({ 'class' => 'LastFMLogger', 'config' => config })
 
@@ -31,8 +31,7 @@ class LastFMLogger < Slogger
       return
     end
 
-    config['lastfm_tags'] ||= ''
-    tags = "\n\n#{config['lastfm_tags']}\n" unless config['lastfm_tags'] == ''
+    tags = config['lastfm_tags'] || false
 
     feeds = [{'title'=>"## Listening To", 'feed' => "http://ws.audioscrobbler.com/2.0/user/#{config['lastfm_user']}/recenttracks.rss?limit=100"},{'title'=>"## Loved Tracks", 'feed' => "http://ws.audioscrobbler.com/2.0/user/#{config['lastfm_user']}/lovedtracks.rss?limit=100"}]
 
@@ -62,9 +61,14 @@ class LastFMLogger < Slogger
         content += "* [#{title}](#{link})\n"
       }
       if content != ''
-        entrytext = "#{rss_feed['title']} for #{today.strftime('%m-%d-%Y')}\n\n" + content + "\n#{tags}"
+        entrytext = "#{rss_feed['title']} for #{today.strftime('%m-%d-%Y')}\n\n" + content
       end
-      DayOne.new.to_dayone({'content' => entrytext}) unless entrytext == ''
+
+      options = {}
+      options['content'] = entrytext
+      options['tags'] = tags
+
+      DayOne.new.to_dayone(options) unless entrytext == ''
     end
   end
 end

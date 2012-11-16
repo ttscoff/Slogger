@@ -6,7 +6,7 @@ Configuration:
   goodreads_feed: "feedurl"
   goodreads_star_posts: true
   goodreads_save_image: true
-  goodreads_tags: "@social @reading"
+  goodreads_tags: "social", "reading"]
 Notes:
   - goodreads_save_image will save the book cover as the main image for the entry
   - goodreads_feed is a string containing the RSS feed for your read books
@@ -22,7 +22,7 @@ config = {
   'goodreads_feed' => '',
   'goodreads_save_image' => false,
   'goodreads_star_posts' => false,
-  'goodreads_tags' => '@social @reading'
+  'goodreads_tags' => ['social', 'reading']
 }
 $slog.register_plugin({ 'class' => 'GoodreadsLogger', 'config' => config })
 
@@ -75,8 +75,7 @@ class GoodreadsLogger < Slogger
       save_image = false
     end
 
-    tags = @grconfig['goodreads_tags'] || ''
-    tags = "\n\n#{tags}\n" unless tags == ''
+    tags = @grconfig['goodreads_tags'] || false
 
     begin
       rss_content = ""
@@ -103,10 +102,11 @@ class GoodreadsLogger < Slogger
           content = content != '' ? "\n\n#{content}" : ''
 
           options = {}
-          options['content'] = "Finished reading [#{item.elements['title'].text.gsub(/\n+/,' ').strip}](#{item.elements['link'].text.strip})#{content}#{tags}"
+          options['content'] = "Finished reading [#{item.elements['title'].text.gsub(/\n+/,' ').strip}](#{item.elements['link'].text.strip})#{content}"
           options['datestamp'] = Time.parse(item.elements['user_read_at'].text).utc.iso8601 rescue Time.parse(item.elements['pubDate'].text).utc.iso8601
           options['starred'] = starred
           options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
+          options['tags'] = tags
           sl = DayOne.new
           if imageurl
             sl.to_dayone(options) if sl.save_image(imageurl,options['uuid'])

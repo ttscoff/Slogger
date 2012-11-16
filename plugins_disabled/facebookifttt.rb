@@ -33,7 +33,7 @@ config = {
                     'The recipe at https://ifttt.com/recipes/56242 determines that location.'],
   'facebook_ifttt_input_file' => '', 
   'facebook_ifttt_star' => false,
-  'facebook_ifttt_tags' => '@social @blogging'
+  'facebook_ifttt_tags' => ['social', 'blogging']
 }
 
 $slog.register_plugin({ 'class' => 'FacebookIFTTTLogger', 'config' => config })
@@ -54,8 +54,7 @@ class FacebookIFTTTLogger < Slogger
       	return
     end
 
-    tags = config['facebook_ifttt_tags'] || ''
-    tags = "\n\n#{@tags}\n" unless @tags == ''
+    tags = config['facebook_ifttt_tags'] || false
 
     inputFile = config['facebook_ifttt_input_file']
 
@@ -72,6 +71,7 @@ class FacebookIFTTTLogger < Slogger
     options = {}
     options['starred'] = config['facebook_ifttt_star']
     options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
+    options['tags'] = tags
 
     f = File.new(File.expand_path(inputFile))
     content = f.read
@@ -81,7 +81,7 @@ class FacebookIFTTTLogger < Slogger
       content.each do |line|
   			 if line =~ regPost
   			   	line = line.gsub(regPost, "")
-  				  options['content'] = "#### FacebookIFTTT\n\n#{line}\n\n#{tags}"
+  				  options['content'] = "#### FacebookIFTTT\n\n#{line}"
             ready = false
   			 elsif line =~ regDate
   		 	  line = line.strip

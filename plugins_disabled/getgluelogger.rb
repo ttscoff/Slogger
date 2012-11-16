@@ -14,7 +14,7 @@ config = {
                     'You will need the RSS feed of your Activity stream.'],
   'getglue_username' => 'getglue',
   'getglue_feed' => "",
-  'tags' => '@social @entertainment'
+  'tags' => ['social', 'entertainment']
 }
 
 $slog.register_plugin({ 'class' => 'GetglueLogger', 'config' => config })
@@ -43,8 +43,7 @@ class GetglueLogger < Slogger
     @log.info("Logging GetGlue posts for #{username}")
     @feed = config['getglue_feed']
 
-    tags = config['tags'] || ''
-    tags = "\n\n#{@tags}\n" unless @tags == ''
+    tags = config['tags'] || false
 
     today = @timespan
 
@@ -71,16 +70,17 @@ class GetglueLogger < Slogger
       end
     }
     if content != ''
-      entrytext = "## GetGlue Checkins for #{@timespan.strftime('%m-%d-%Y')}\n\n" + content + "\n#{@tags}"
+      entrytext = "## GetGlue Checkins for #{@timespan.strftime('%m-%d-%Y')}\n\n" + content
     end
 
     # create an options array to pass to 'to_dayone'
     # all options have default fallbacks, so you only need to create the options you want to specify
     if content != ''
       options = {}
-      options['content'] = "## GetGlue Activity for #{@timespan.strftime('%m-%d-%Y')}\n\n#{content} #{tags}"
+      options['content'] = "## GetGlue Activity for #{@timespan.strftime('%m-%d-%Y')}\n\n#{content}"
       options['datestamp'] = @timespan.utc.iso8601
       options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
+      options['tags'] = tags
 
 
       # Create a journal entry

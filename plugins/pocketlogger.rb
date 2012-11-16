@@ -6,7 +6,7 @@ Notes:
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
   pocket_username: 'your_username'
-  pocket_tags: "@social @reading"
+  pocket_tags: ["social", "reading"]
 Notes:
 
 =end
@@ -15,7 +15,7 @@ config = {
     'Logs today\'s posts to Pocket.',
     'pocket_username is a string with your Pocket username'],
   'pocket_username' => '',
-  'pocket_tags' => '@social @reading'
+  'pocket_tags' => ['social', 'reading']
 }
 $slog.register_plugin({ 'class' => 'PocketLogger', 'config' => config })
 
@@ -35,9 +35,8 @@ class PocketLogger < Slogger
     end
 
     sl = DayOne.new
-    config['pocket_tags'] ||= ''
+    tags = config['pocket_tags'] || false
     username = config['pocket_username']
-    tags = "\n\n#{config['pocket_tags']}\n" unless config['pocket_tags'] == ''
     today = @timespan
 
     @log.info("Getting Pocket posts for #{username}")
@@ -67,7 +66,8 @@ class PocketLogger < Slogger
     end
     unless output == ''
       options = {}
-      options['content'] = "## Pocket reading\n\n#{output}#{tags}"
+      options['content'] = "## Pocket reading\n\n#{output}"
+      options['tags'] = tags
       sl.to_dayone(options)
     end
   end

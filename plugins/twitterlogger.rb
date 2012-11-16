@@ -6,7 +6,9 @@ Configuration:
   twitter_users: [ "handle1" , "handle2", ... ]
   save_images: true
   droplr_domain: d.pr
-  twitter_tags: "@social @blogging"
+  twitter_tags:
+    -social
+    -blogging
 Notes:
 
 =end
@@ -21,7 +23,7 @@ config = {
   'save_favorites' => true,
   'save_images' => true,
   'droplr_domain' => 'd.pr',
-  'twitter_tags' => '@social @twitter'
+  'twitter_tags' => ['social', 'twitter']
 }
 $slog.register_plugin({ 'class' => 'TwitterLogger', 'config' => config })
 
@@ -174,8 +176,7 @@ class TwitterLogger < Slogger
     @twitter_config['droplr_domain'] ||= 'd.pr'
 
     sl = DayOne.new
-    @twitter_config['twitter_tags'] ||= ''
-    tags = "\n\n#{@twitter_config['twitter_tags']}\n" unless @twitter_config['twitter_tags'] == ''
+    tags = @twitter_config['twitter_tags'] || false
 
     @twitter_config['twitter_users'].each do |user|
       retries = 0
@@ -209,12 +210,19 @@ class TwitterLogger < Slogger
         favs = ''
       end
       unless tweets == ''
-        tweets = "## Tweets\n\n### Posts by @#{user} on #{Time.now.strftime('%m-%d-%Y')}\n\n#{tweets}#{tags}"
-        sl.to_dayone({'content' => tweets})
+        tweets = "## Tweets\n\n### Posts by @#{user} on #{Time.now.strftime('%m-%d-%Y')}\n\n#{tweets}"
+        options = {}
+        options['content'] = tweets
+        options['tags'] = tags
+
+        sl.to_dayone(options)
       end
       unless favs == ''
-        favs = "## Favorite Tweets\n\n### Favorites from @#{user} for #{Time.now.strftime('%m-%d-%Y')}\n\n#{favs}#{tags}"
-        sl.to_dayone({'content' => favs})
+        favs = "## Favorite Tweets\n\n### Favorites from @#{user} for #{Time.now.strftime('%m-%d-%Y')}\n\n#{favs}"
+        options = {}
+        options['content'] = favs
+        options['tags'] = tags
+        sl.to_dayone(options)
       end
     end
   end
