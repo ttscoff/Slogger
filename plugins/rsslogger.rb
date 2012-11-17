@@ -4,18 +4,18 @@ Description: Logs any RSS feed as a digest and checks for new posts for the curr
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
   feeds: [ "feed url 1" , "feed url 2", ... ]
-  tags: "@social @rss"
+  tags: ["social", "rss"]
 Notes:
   - rss_feeds is an array of feeds separated by commas, a single feed is fine, but it should be inside of brackets `[]`
-  - rss_tags are tags you want to add to every entry, e.g. "@social @rss"
+  - rss_tags are tags you want to add to every entry, e.g. ["social", "rss"]
 =end
 
 config = {
   'description' => ['Logs any RSS feed as a digest and checks for new posts for the current day',
                     'feeds is an array of feeds separated by commas, a single feed is fine, but it should be inside of brackets `[]`',
-                    'tags are tags you want to add to every entry, e.g. "@social @rss"'],
+                    'tags are tags you want to add to every entry, e.g. ["social", "rss"]'],
   'feeds' => [],
-  'tags' => '@social @rss'
+  'tags' => ['social', 'rss']
 }
 $slog.register_plugin({ 'class' => 'RSSLogger', 'config' => config })
 
@@ -58,8 +58,7 @@ class RSSLogger < Slogger
 
   def parse_feed(rss_feed)
 
-    tags = @rssconfig['tags'] || ''
-    tags = "\n\n#{tags}\n" unless tags == ''
+    tags = @rssconfig['tags'] || false
 
     today = @timespan
     begin
@@ -97,7 +96,8 @@ class RSSLogger < Slogger
 
       if feed_items.length > 0
         options = {}
-        options['content'] = "## #{rss.channel.title.gsub(/\n+/,' ').strip}\n\n#{feed_items.reverse.join("\n")}#{tags}"
+        options['content'] = "## #{rss.channel.title.gsub(/\n+/,' ').strip}\n\n#{feed_items.reverse.join("\n")}"
+        options['tags'] = tags
         sl = DayOne.new
         sl.to_dayone(options)
       end

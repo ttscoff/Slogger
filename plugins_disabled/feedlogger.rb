@@ -6,13 +6,13 @@ Configuration:
   feeds: [ "feed url 1" , "feed url 2", ... ]
   markdownify_posts: true
   star_posts: true
-  tags: "@social @blogging"
+  tags: ["social", "blogging"]
 Notes:
   - if found, the first image in the post will be saved as the main image for the entry
   - atom_feeds is an array of feeds separated by commas, a single feed is fine, but it should be inside of brackets `[]`
   - markdownify_posts will convert links and emphasis in the post to Markdown for display in Day One
   - star_posts will create a starred post for new atom posts
-  - atom_tags are tags you want to add to every entry, e.g. "@social @blogging"
+  - atom_tags are tags you want to add to every entry, e.g. ["social", "blogging"]
 =end
 
 require 'feed-normalizer'
@@ -22,11 +22,11 @@ config = {
                     'feeds is an array of feeds separated by commas, a single feed is fine, but it should be inside of brackets `[]`',
                     'markdownify_posts will convert links and emphasis in the post to Markdown for display in Day One',
                     'star_posts will create a starred post for new posts',
-                    'tags are tags you want to add to every entry, e.g. "@social @blogging"'],
+                    'tags are tags you want to add to every entry, e.g. ["social", "blogging"]'],
   'feeds' => [],
   'markdownify_posts' => true,
   'star_posts' => false,
-  'tags' => '@social @blogging'
+  'tags' => ['social', 'blogging']
 }
 $slog.register_plugin({ 'class' => 'FeedLogger', 'config' => config })
 
@@ -76,8 +76,7 @@ class FeedLogger < Slogger
     unless (starred.is_a? TrueClass or starred.is_a? FalseClass)
       starred = true
     end
-    tags = config['tags'] || ''
-    tags = "\n\n#{@tags}\n" unless @tags == ''
+    tags = config['tags'] || false
 
     today = @timespan
     begin
@@ -111,10 +110,11 @@ class FeedLogger < Slogger
           end
 
           options = {}
-          options['content'] = "## [#{entry.title.gsub(/\n+/,' ').strip}](#{entry.url})\n\n#{content.strip}#{tags}"
+          options['content'] = "## [#{entry.title.gsub(/\n+/,' ').strip}](#{entry.url})\n\n#{content.strip}"
           options['datestamp'] = entry.date_published.utc.iso8601 rescue Time.now.utc.iso8601
           options['starred'] = starred
           options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
+          options['tags'] = tags
 
           sl = DayOne.new
           if imageurl

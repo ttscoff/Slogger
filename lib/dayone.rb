@@ -3,6 +3,7 @@ class DayOne < Slogger
     @dayonepath = storage_path
     markdown = @dayonepath =~ /Journal[._]dayone\/?$/ ? false : true
     content = options['content'] || ''
+    tags = options['tags'] || false
     unless markdown
       uuid = options['uuid'] || %x{uuidgen}.gsub(/-/,'').strip
       datestamp = options['datestamp'] || Time.now.utc.iso8601
@@ -105,6 +106,7 @@ class DayOne < Slogger
     options['uuid'] ||= %x{uuidgen}.gsub(/-/,'').strip
     options['starred'] ||= false
     options['datestamp'] ||= Time.now.utc.iso8601
+    options['tags'] ||= false
     photo_dir = File.join(File.expand_path(Slogger.new.storage_path), "photos")
     Dir.mkdir(photo_dir, 0700) unless File.directory?(photo_dir)
 

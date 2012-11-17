@@ -17,7 +17,7 @@ config = {
     'instapaper_feeds is an array of one or more RSS feeds',
   'Find the RSS feed for any folder at the bottom of a web interface page'],
   'instapaper_feeds' => [],
-  'instapaper_tags' => '@social @reading'
+  'instapaper_tags' => ['social', 'reading']
 }
 $slog.register_plugin({ 'class' => 'InstapaperLogger', 'config' => config })
 
@@ -37,8 +37,7 @@ class InstapaperLogger < Slogger
     end
 
     sl = DayOne.new
-    config['instapaper_tags'] ||= ''
-    tags = "\n\n#{config['instapaper_tags']}\n" unless config['instapaper_tags'] == ''
+    tags = config['instapaper_tags'] || false
     today = @timespan.to_i
 
     @log.info("Getting Instapaper posts for #{config['instapaper_feeds'].length} accounts")
@@ -71,7 +70,8 @@ class InstapaperLogger < Slogger
     end
     unless output.strip == ''
       options = {}
-      options['content'] = "## Instapaper reading\n\n#{output}#{tags}"
+      options['content'] = "## Instapaper reading\n\n#{output}"
+      options['tags'] = tags
       sl.to_dayone(options)
     end
   end

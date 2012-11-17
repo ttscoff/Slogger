@@ -200,6 +200,14 @@ class Slogger
   <string><%= entry %></string>
   <key>Starred</key>
   <<%= starred %>/>
+  <% if tags %>
+  <key>Tags</key>
+  <array>
+      <% tags.each do |tag| %>
+      <string><%= tag %></string>
+      <% end %>
+  </array>
+  <% end %>
   <key>UUID</key>
   <string><%= uuid %></string>
 </dict>
@@ -213,6 +221,7 @@ Starred: <%= starred %>
 
 <%= entry %>
 
+<%= tags.join(" ") %>
 MARKDOWNTEMPLATE
     end
   end

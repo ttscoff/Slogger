@@ -4,7 +4,7 @@ Description: Logs daily Gists for the specified user
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
   gist_user: githubuser
-  gist_tags: "@social @coding"
+  gist_tags: ["social", "coding"]
 Notes:
 
 =end
@@ -12,7 +12,7 @@ Notes:
 config = {
   'description' => ['Logs daily Gists for the specified user','gist_user should be your Github username'],
   'gist_user' => '',
-  'gist_tags' => '@social @coding',
+  'gist_tags' => ['social', 'coding'],
 }
 $slog.register_plugin({ 'class' => 'GistLogger', 'config' => config })
 
@@ -29,6 +29,9 @@ class GistLogger < Slogger
       @log.warn("Gist user has not been configured, please edit your slogger_config file.")
       return
     end
+
+    tags = config['gist_tags'] || false
+
     @log.info("Logging gists for #{config['gist_user']}")
     begin
       url = URI.parse "https://api.github.com/users/#{config['gist_user']}/gists"
@@ -66,8 +69,13 @@ class GistLogger < Slogger
     }
 
     return false if output.strip == ""
-    entry = "## Gists for #{Time.now.strftime("%m-%d-%Y")}:\n\n#{output}\n#{config['gist_tags']}"
-    DayOne.new.to_dayone({ 'content' => entry })
+    entry = "## Gists for #{Time.now.strftime("%m-%d-%Y")}:\n\n#{output}"
+
+    options = {}
+    options['content'] = entry
+    options['tags'] = tags
+
+    DayOne.new.to_dayone(options)
   end
 
 end

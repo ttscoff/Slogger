@@ -27,7 +27,7 @@ config = {
   'blog_feeds' => [],
   'markdownify_posts' => false,
   'star_posts' => false,
-  'blog_tags' => '@social @blogging',
+  'blog_tags' => ['social', 'blogging'],
   'full_posts' => false
 }
 $slog.register_plugin({ 'class' => 'BlogLogger', 'config' => config })
@@ -78,8 +78,7 @@ class BlogLogger < Slogger
     unless (starred.is_a? TrueClass or starred.is_a? FalseClass)
       starred = true
     end
-    tags = @blogconfig['blog_tags'] || ''
-    tags = "\n\n#{tags}\n" unless tags == ''
+    tags = @blogconfig['blog_tags'] || false
 
     today = @timespan
     begin
@@ -110,10 +109,11 @@ class BlogLogger < Slogger
           content = content.markdownify if markdownify rescue ''
 
           options = {}
-          options['content'] = "## [#{item.title.gsub(/\n+/,' ').strip}](#{item.link})\n\n#{content.strip}#{tags}"
+          options['content'] = "## [#{item.title.gsub(/\n+/,' ').strip}](#{item.link})\n\n#{content.strip}"
           options['datestamp'] = item.date.utc.iso8601 rescue item.dc_date.utc.iso8601
           options['starred'] = starred
           options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
+          options['tags'] = tags
           sl = DayOne.new
           sl.save_image(imageurl,options['uuid']) if imageurl
           sl.to_dayone(options)

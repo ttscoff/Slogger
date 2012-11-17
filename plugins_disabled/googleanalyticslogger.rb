@@ -60,7 +60,7 @@ config = { # description and a primary key (username, url, etc.) required
   'properties' => [],
   'show_sources' => true,
   'show_popular_pages' => true,
-  'tags' => '@social @sitestats'
+  'tags' => ['social', 'sitestats']
 }
 
 # ALERT: This registration assumes `slogger.rb` has been updated
@@ -295,15 +295,15 @@ class GoogleAnalyticsLogger < Slogger
       end
 
       # And create a Journal entry for each date body
-      tags = config['tags'] || ''      
+      tags = config['tags'] || false
       content.each do |key, body|
         logdate = "#{key[0..3]}-#{key[4..5]}-#{key[6..7]}"
-        body << "#{tags}" unless tags == ''
       
         # And Log to Day One
         options = {}
         options['content'] = body.join("\n\n")
         options['datestamp'] = Time.parse(logdate + " 23:59:00").utc.iso8601
+        options['tags'] = tags
 
         sl = DayOne.new
         sl.to_dayone(options)

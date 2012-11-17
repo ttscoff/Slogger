@@ -8,7 +8,7 @@ Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
   flickr_api_key: 'XXXXXXXXXXXXXXXXXXXXXXXXX'
   flickr_ids: [flickr_id1[, flickr_id2...]]
-  flickr_tags: "@social @photo"
+  flickr_tags: ["social", "photo"]
 Notes:
 
 =end
@@ -22,7 +22,7 @@ config = {
   'flickr_api_key' => '',
   'flickr_ids' => [],
   'flickr_datetype' => 'upload',
-  'flickr_tags' => '@social @photo'
+  'flickr_tags' => ['social', 'photo']
 }
 $slog.register_plugin({ 'class' => 'FlickrLogger', 'config' => config })
 
@@ -39,6 +39,7 @@ class FlickrLogger < Slogger
       options['content'] = image['content']
       options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
       options['datestamp'] = image['date']
+      options['tags'] = image['tags']
       sl = DayOne.new
       path = sl.save_image(image['url'],options['uuid'])
       sl.store_single_photo(path,options) unless path == false
@@ -60,8 +61,7 @@ class FlickrLogger < Slogger
     end
 
     sl = DayOne.new
-    config['flickr_tags'] ||= ''
-    tags = "\n\n#{config['flickr_tags']}\n" unless config['flickr_tags'] == ''
+    tags = config['flickr_tags'] || false
     today = @timespan.to_i
 
     @log.info("Getting Flickr images for #{config['flickr_ids'].join(', ')}")
@@ -89,7 +89,7 @@ class FlickrLogger < Slogger
               url = photo.attributes["url_m"]
               content = "## " + photo.attributes['title']
               content += "\n\n" + photo.attributes['content'] unless photo.attributes['content'].nil?
-              images << { 'content' => content, 'date' => image_date, 'url' => url }
+              images << { 'content' => content, 'date' => image_date, 'url' => url, 'tags' => tags }
             }
         }
       end

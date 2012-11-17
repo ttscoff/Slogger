@@ -6,7 +6,7 @@ Notes:
 Author: [Alan Schussman](http://schussman.com)
 Configuration:
   appnet_usernames: [ ]
-  appnet_tags: "@social @appnet"
+  appnet_tags: ["social", "appnet"]
   appnet_save_replies: false
 Notes:
 
@@ -16,7 +16,7 @@ config = {
     'Logs posts for today from App.net',
     'appnet_usernames is an array of App.net user names'],
   'appnet_usernames' => [ ],
-  'appnet_tags' => '@social @appnet',
+  'appnet_tags' => ['social', 'appnet'],
   'appnet_save_replies' => false
 }
 $slog.register_plugin({ 'class' => 'AppNetLogger', 'config' => config })
@@ -38,8 +38,7 @@ class AppNetLogger < Slogger
     end
 
     sl = DayOne.new
-    config['appnet_tags'] ||= ''
-    tags = "\n\n#{config['appnet_tags']}\n" unless config['appnet_tags'] == ''
+    tags = config['appnet_tags'] || false
     today = @timespan.to_i
 
     @log.info("Getting App.net posts for #{config['appnet_usernames'].length} feeds")
@@ -92,7 +91,8 @@ class AppNetLogger < Slogger
     end
     unless output == ''
       options = {}
-      options['content'] = "## App.net posts\n\n#{output}#{tags}"
+      options['content'] = "## App.net posts\n\n#{output}"
+      options['tags'] = tags
       sl.to_dayone(options)
     end
   end

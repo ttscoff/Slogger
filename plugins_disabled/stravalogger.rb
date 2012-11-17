@@ -4,17 +4,17 @@ Description: Creates separate entries for rides and runs you finished today
 Author: [Patrick Walsh](http://twitter.com/zmre)
 Configuration:
   strava_athleteid: "yourid"
-  strava_tags: "@social @sports"
+  strava_tags: ["social", "sports"]
 Notes:
   - strava_athleteid is a number you can find in the URL when viewing your profile
-  - strava_tags are tags you want to add to every entry, e.g. "@social @sports @cycling @training"
+  - strava_tags are tags you want to add to every entry, e.g. ["social", "sports", "cycling", "training"]
 =end
 require 'rexml/document';
 config = {
   'description' => ['strava_athleteid is a number you can find in the URL when viewing your profile',
-                    'strava_tags are tags you want to add to every entry, e.g. "@social @sports @cycling @training"'],
+                    'strava_tags are tags you want to add to every entry, e.g. ["social", "sports", "cycling", "training"]'],
   'strava_athleteid' => '',
-  'goodreads_tags' => '@social @sports'
+  'strava_tags' => ['social', 'sports']
 }
 $slog.register_plugin({ 'class' => 'StravaLogger', 'config' => config })
 
@@ -55,8 +55,7 @@ class StravaLogger < Slogger
   end
 
   def parse_feed(rss_feed)
-    tags = @grconfig['strava_tags'] || ''
-    tags = "\n\n#{tags}\n" unless tags == ''
+    tags = @grconfig['strava_tags'] || false
 
     begin
       res = Net::HTTP.get_response(URI.parse(rss_feed))
@@ -106,11 +105,12 @@ class StravaLogger < Slogger
           output += "* **Moving Time**: %02d:%02d:%02d\n" % [movingTimeHH, movingTimeMM, movingTimeSS] unless strava['movingTime'].nil?
           output += "* **Link**: http://app.strava.com/rides/#{rides['id']}\n\n"
           options = {}
-          options['content'] = "#{output}\n\n#{tags}"
+          options['content'] = "#{output}"
           options['datestamp'] = date.utc.iso8601
           options['starred'] = false
           # TODO: turn location into a Day One location
           options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
+          options['tags'] = tags
           sl = DayOne.new
           sl.to_dayone(options)
         else
