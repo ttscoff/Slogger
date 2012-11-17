@@ -6,7 +6,7 @@ Configuration:
   twitter_users: [ "handle1" , "handle2", ... ]
   save_images: true
   droplr_domain: d.pr
-  twitter_tags: "@social @blogging"
+  twitter_tags: "#social #blogging"
 Notes:
 
 =end
@@ -21,7 +21,7 @@ config = {
   'save_favorites' => true,
   'save_images' => true,
   'droplr_domain' => 'd.pr',
-  'twitter_tags' => '@social @twitter'
+  'twitter_tags' => '#social #twitter'
 }
 $slog.register_plugin({ 'class' => 'TwitterLogger', 'config' => config })
 

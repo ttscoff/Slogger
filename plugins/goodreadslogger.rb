@@ -6,23 +6,23 @@ Configuration:
   goodreads_feed: "feedurl"
   goodreads_star_posts: true
   goodreads_save_image: true
-  goodreads_tags: "@social @reading"
+  goodreads_tags: "#social #reading"
 Notes:
   - goodreads_save_image will save the book cover as the main image for the entry
   - goodreads_feed is a string containing the RSS feed for your read books
   - goodreads_star_posts will create a starred post for new books
-  - goodreads_tags are tags you want to add to every entry, e.g. "@social @reading"
+  - goodreads_tags are tags you want to add to every entry, e.g. "#social #reading"
 =end
 require 'rexml/document';
 config = {
   'description' => ['goodreads_save_image will save the book cover as the main image for the entry',
                     'goodreads_feed is a string containing the RSS feed for your read books',
                     'goodreads_star_posts will create a starred post for new books',
-                    'goodreads_tags are tags you want to add to every entry, e.g. "@social @reading"'],
+                    'goodreads_tags are tags you want to add to every entry, e.g. "#social #reading"'],
   'goodreads_feed' => '',
   'goodreads_save_image' => false,
   'goodreads_star_posts' => false,
-  'goodreads_tags' => '@social @reading'
+  'goodreads_tags' => '#social #reading'
 }
 $slog.register_plugin({ 'class' => 'GoodreadsLogger', 'config' => config })
 

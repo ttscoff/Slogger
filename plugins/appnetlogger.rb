@@ -6,7 +6,7 @@ Notes:
 Author: [Alan Schussman](http://schussman.com)
 Configuration:
   appnet_usernames: [ ]
-  appnet_tags: "@social @appnet"
+  appnet_tags: "#social #appnet"
   appnet_save_replies: false
 Notes:
 
@@ -16,7 +16,7 @@ config = {
     'Logs posts for today from App.net',
     'appnet_usernames is an array of App.net user names'],
   'appnet_usernames' => [ ],
-  'appnet_tags' => '@social @appnet',
+  'appnet_tags' => '#social #appnet',
   'appnet_save_replies' => false
 }
 $slog.register_plugin({ 'class' => 'AppNetLogger', 'config' => config })

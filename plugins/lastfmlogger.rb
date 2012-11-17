@@ -4,14 +4,14 @@ Description: Logs playlists and loved tracks for the day
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
   lastfm_user: lastfmusername
-  lastfm_tags: "@social @blogging"
+  lastfm_tags: "#social #blogging"
 Notes:
 
 =end
 config = {
   'lastfm_description' => ['Logs songs scrobbled for time period.','lastfm_user is your Last.fm username.'],
   'lastfm_user' => '',
-  'lastfm_tags' => '@social @music'
+  'lastfm_tags' => '#social #music'
 }
 $slog.register_plugin({ 'class' => 'LastFMLogger', 'config' => config })
 

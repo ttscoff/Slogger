@@ -7,7 +7,7 @@ Notes:
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
   pinboard_feeds: [ 'http://feeds.pinboard.in/rss/u:username/']
-  pinboard_tags: "@social @bookmarks"
+  pinboard_tags: "#social #bookmarks"
 Notes:
 
 =end
@@ -16,7 +16,7 @@ config = {
     'Logs bookmarks for today from Pinboard.in.',
     'pinboard_feeds is an array of one or more Pinboard RSS feeds'],
   'pinboard_feeds' => [],
-  'pinboard_tags' => '@social @bookmarks',
+  'pinboard_tags' => '#social #bookmarks',
   'pinboard_save_hashtags' => true
 }
 $slog.register_plugin({ 'class' => 'PinboardLogger', 'config' => config })

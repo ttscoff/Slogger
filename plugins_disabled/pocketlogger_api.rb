@@ -7,7 +7,7 @@ Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
   pocket_username: "your_username"
   pocket_passwd: "your_password"
-  pocket_tags: "@social @reading"
+  pocket_tags: "#social #reading"
   posts_to_get: "read" or "unread" or leave blank for all
 Notes:
 
@@ -21,7 +21,7 @@ config = {
     'posts_to_get allows you to choose read, unread or all items'],
   'pocket_username' => '',
   'pocket_passwd' => '',
-  'pocket_tags' => '@social @reading',
+  'pocket_tags' => '#social #reading',
   'posts_to_get' => ''
 }
 $slog.register_plugin({ 'class' => 'PocketLogger', 'config' => config })

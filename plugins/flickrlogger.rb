@@ -8,7 +8,7 @@ Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
   flickr_api_key: 'XXXXXXXXXXXXXXXXXXXXXXXXX'
   flickr_ids: [flickr_id1[, flickr_id2...]]
-  flickr_tags: "@social @photo"
+  flickr_tags: "#social #photo"
 Notes:
 
 =end
@@ -22,7 +22,7 @@ config = {
   'flickr_api_key' => '',
   'flickr_ids' => [],
   'flickr_datetype' => 'upload',
-  'flickr_tags' => '@social @photo'
+  'flickr_tags' => '#social #photo'
 }
 $slog.register_plugin({ 'class' => 'FlickrLogger', 'config' => config })
 

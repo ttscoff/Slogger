@@ -8,10 +8,10 @@ Notes:
   - Configure IFTTT to log Facebook status posts to a text file.
   - You can use the recipe at https://ifttt.com/recipes/56242
   - and personalize if for your Dropbox set up.
-  - 
+  -
   - Unless you change it, the recipe will write to the following
   - location:
-  - 
+  -
   - {Dropbox path}/AppData/ifttt/facebook/facebook.md.txt
   -
   - You probably don't want that, so change it in the recipe accordingly.
@@ -21,19 +21,19 @@ Notes:
   - /Users/username/Dropbox
   -
   - so the full path is:
-  - 
+  -
   - /Users/username/Dropbox/AppData/ifttt/facebook/facebook.md.txt
   -
   - You should set facebook_ifttt_input_file to this value, substituting username appropriately.
 =end
 
-config = { 
+config = {
   'description' => ['Parses Facebook posts logged by IFTTT.com',
                     'facebook_ifttt_input_file is a string pointing to the location of the file created by IFTTT.',
                     'The recipe at https://ifttt.com/recipes/56242 determines that location.'],
-  'facebook_ifttt_input_file' => '', 
+  'facebook_ifttt_input_file' => '',
   'facebook_ifttt_star' => false,
-  'facebook_ifttt_tags' => '@social @blogging'
+  'facebook_ifttt_tags' => '#social #blogging'
 }
 
 $slog.register_plugin({ 'class' => 'FacebookIFTTTLogger', 'config' => config })
@@ -67,7 +67,7 @@ class FacebookIFTTTLogger < Slogger
     pm      = /PM\Z/
 
     last_run = @timespan
-    
+
     ready = false
     options = {}
     options['starred'] = config['facebook_ifttt_star']
@@ -107,7 +107,7 @@ class FacebookIFTTTLogger < Slogger
 
   			  options['datestamp'] = ltime.utc.iso8601
           ready = true
-  		  end    	
+  		  end
 
         if ready
           sl = DayOne.new

@@ -14,7 +14,7 @@ config = {
                     'You will need the RSS feed of your Activity stream.'],
   'getglue_username' => 'getglue',
   'getglue_feed' => "",
-  'tags' => '@social @entertainment'
+  'tags' => '#social #entertainment'
 }
 
 $slog.register_plugin({ 'class' => 'GetglueLogger', 'config' => config })
