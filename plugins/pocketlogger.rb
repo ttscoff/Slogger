@@ -6,7 +6,7 @@ Notes:
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
   pocket_username: 'your_username'
-  pocket_tags: "@social @reading"
+  pocket_tags: "#social #reading"
 Notes:
 
 =end
@@ -15,7 +15,7 @@ config = {
     'Logs today\'s posts to Pocket.',
     'pocket_username is a string with your Pocket username'],
   'pocket_username' => '',
-  'pocket_tags' => '@social @reading'
+  'pocket_tags' => '#social #reading'
 }
 $slog.register_plugin({ 'class' => 'PocketLogger', 'config' => config })
 

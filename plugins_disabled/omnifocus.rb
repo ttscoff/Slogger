@@ -7,7 +7,7 @@ Author: [RichSomerfield](www.richsomerfield.com)
 config = {
   'omnifocus_description' => [
     'Grabs completed tasks from OmniFocus'],
-  'omnifocus_tags' => '@tasks',
+  'omnifocus_tags' => '#tasks',
   'omnifocus_save_hashtags' => true
 }
 

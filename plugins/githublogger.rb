@@ -4,7 +4,7 @@ Description: Logs daily Github activity for the specified user
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
   github_user: githubuser
-  github_tags: "@social @coding"
+  github_tags: "#social #coding"
 Notes:
 
 =end
@@ -12,7 +12,7 @@ Notes:
 config = {
   'description' => ['Logs daily Github activity for the specified user','github_user should be your Github username'],
   'github_user' => '',
-  'github_tags' => '@social @coding',
+  'github_tags' => '#social #coding',
 }
 $slog.register_plugin({ 'class' => 'GithubLogger', 'config' => config })
 

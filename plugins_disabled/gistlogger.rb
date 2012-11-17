@@ -4,7 +4,7 @@ Description: Logs daily Gists for the specified user
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
   gist_user: githubuser
-  gist_tags: "@social @coding"
+  gist_tags: "#social #coding"
 Notes:
 
 =end
@@ -12,7 +12,7 @@ Notes:
 config = {
   'description' => ['Logs daily Gists for the specified user','gist_user should be your Github username'],
   'gist_user' => '',
-  'gist_tags' => '@social @coding',
+  'gist_tags' => '#social #coding',
 }
 $slog.register_plugin({ 'class' => 'GistLogger', 'config' => config })
 
