@@ -1,7 +1,7 @@
 #!/usr/bin/env ruby
 MAJOR_VERSION = 2.0
 MINOR_VERSION = 14
-BUILD_NUMBER = 7
+BUILD_NUMBER = 8
 
 init_env = ENV['SLOGGER_NO_INITIALIZE'].to_s
 ENV['SLOGGER_NO_INITIALIZE'] = "false"
