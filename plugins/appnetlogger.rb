@@ -71,17 +71,17 @@ class AppNetLogger < Slogger
         rss = RSS::Parser.parse(rss_content, true)
         feed_output = ''
         rss.items.each { |item|
-          item_date = Time.parse(item.date.to_s)
+          item_date = Time.parse(item.date.to_s) + Time.now.gmt_offset
           if item_date > @timespan
             content = ''
             item.title = item.title.gsub(/^#{user}: /,'').strip   # remove user's own name from front of post
             item.title = item.title.gsub(/\n/,"\n    ")           # fix for multi-line posts displayed in markdown
             if item.title =~ /^@/
               if config['appnet_save_replies'] == true
-                feed_output += "* [#{item.pubDate.strftime('%I:%M %p')}](#{item.link}) #{linkify(item.title)}#{content}\n"
+                feed_output += "* [#{item_date.strftime('%I:%M %p')}](#{item.link}) #{linkify(item.title)}#{content}\n"
               end
             else
-              feed_output += "* [#{item.pubDate.strftime('%I:%M %p')}](#{item.link}) #{linkify(item.title)}#{content}\n"
+              feed_output += "* [#{item_date.strftime('%I:%M %p')}](#{item.link}) #{linkify(item.title)}#{content}\n"
             end
           else
             break

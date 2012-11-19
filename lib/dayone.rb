@@ -3,7 +3,7 @@ class DayOne < Slogger
     @dayonepath = storage_path
     markdown = @dayonepath =~ /Journal[._]dayone\/?$/ ? false : true
     content = options['content'] || ''
-    tags = content.scan(/#([^#\s]+)/m).map { |tag| tag[0] }.delete_if {|tag| tag =~ /^\d+$/ }
+    tags = content.scan(/#([A-Za-z0-9]+)/m).map { |tag| tag[0] }.delete_if {|tag| tag =~ /^\d+$/ }
     unless markdown
       uuid = options['uuid'] || %x{uuidgen}.gsub(/-/,'').strip
       datestamp = options['datestamp'] || Time.now.utc.iso8601

@@ -90,7 +90,7 @@ class BlogLogger < Slogger
 
       rss = RSS::Parser.parse(rss_content, false)
       rss.items.each { |item|
-        item_date = Time.parse(item.date.to_s)
+        item_date = Time.parse(item.date.to_s) + Time.now.gmt_offset
         if item_date > today
           content = ''
           if @blogconfig['full_posts']
