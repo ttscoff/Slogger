@@ -45,6 +45,14 @@ Slogger indexes various public social services and creates Day One (<http://dayo
         -  App.net
             -  App.net posts for the current day    
         -  OmniFocus complete tasks for the day
+- There are additional plugins in the default "plugins_disabled" folder. They can be enabled by copying them to your "plugins" folder.
+    - These are typically disabled by default because they require advanced setup or have limited use for most users. Read the headers in each plugin file for additional details.
+    - Some of the additional plugins available:
+        - GetGlue
+        - Google Analytics (advanced setup)
+        - Gist
+        - SoundCloud
+        - Strava
 - Slogger can be called with a single argument that is a path to a local image or text file, and an entry will be created containing its contents.
     - You can use this with a folder action or launchd task to add files from a folder connected to something like <http://IFTTT.com>. Any images added to the watched folder will be turned into journal entries.
         -  Note that Slogger does not delete the original file, so your script needs to move files out of the folder manually to avoid double-processing.
