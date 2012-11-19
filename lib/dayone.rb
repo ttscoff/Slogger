@@ -3,6 +3,7 @@ class DayOne < Slogger
     @dayonepath = storage_path
     markdown = @dayonepath =~ /Journal[._]dayone\/?$/ ? false : true
     content = options['content'] || ''
+    tags = content.scan(/#([^#\s]+)/m).map { |tag| tag[0] }.delete_if {|tag| tag =~ /^\d+$/ }
     unless markdown
       uuid = options['uuid'] || %x{uuidgen}.gsub(/-/,'').strip
       datestamp = options['datestamp'] || Time.now.utc.iso8601
@@ -46,7 +47,6 @@ class DayOne < Slogger
     source = imageurl.gsub(/^https/,'http')
     match = source.match(/(\..{3,4})($|\?|%22)/)
     ext = match.nil? ? match[1] : '.jpg'
-    @log.info("Original image has extension #{ext}. Coverting for Day One recognition.")
     target = @dayonepath + "/photos/#{uuid}.jpg"
     begin
       Net::HTTP.get_response(URI.parse(imageurl)) do |http|
@@ -73,14 +73,11 @@ class DayOne < Slogger
     return false if match.nil?
     ext = match[1]
     @log.info("Resizing image #{File.basename(orig)}")
-    height = Integer(%x{sips --getProperty pixelHeight "#{orig}" 2>&1}.split(":")[1])
-    width = Integer(%x{sips --getProperty pixelWidth "#{orig}" 2>&1}.split(":")[1])
-    if width > 1600 || height > 1600
-      res = %x{sips -Z 1600 "#{orig}" 2>&1}
-    end
+    res = %x{sips -Z 1600 "#{orig}" 2>&1}
     unless ext =~ /\.jpg$/
       case ext
       when '.jpeg'
+        @log.info("81")
         target = orig.gsub(/\.jpeg$/,'.jpg')
         FileUtils.mv(orig,target)
         return target

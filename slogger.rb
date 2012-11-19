@@ -200,16 +200,22 @@ class Slogger
   <string><%= entry %></string>
   <key>Starred</key>
   <<%= starred %>/>
+  <% if tags %><key>Tags</key>
+  <array>
+  <% tags.each do |tag| %>  <string><%= tag %></string>
+  <% end %></array><% end %>
   <key>UUID</key>
   <string><%= uuid %></string>
 </dict>
 </plist>
 XMLTEMPLATE
     else
+      br = "  "
       ERB.new <<-MARKDOWNTEMPLATE
-Title: Journal entry for <%= datestamp %>
-Date: <%= datestamp %>
-Starred: <%= starred %>
+Title: Journal entry for <%= datestamp %><%= br %>
+Date: <%= datestamp %><%= br %>
+Starred: <%= starred %><%= br %>
+<% if tags %>Tags: <% tags.join(", ") %><%= br %><% end %>
 
 <%= entry %>
 
