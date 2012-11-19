@@ -46,6 +46,7 @@ class TwitterLogger < Slogger
   def download_images(images)
 
     images.each do |image|
+      next if image['content'].nil? || image['url'].nil?
       options = {}
       options['content'] = image['content']
       options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
@@ -147,7 +148,7 @@ class TwitterLogger < Slogger
         begin
           self.download_images(images)
         rescue Exception => e
-          @log.warn("Failure downloading images")
+          @log.warn("Failure downloading images: #{e}")
           # p e
         end
       end

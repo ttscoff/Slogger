@@ -25,6 +25,10 @@ require 'rexml/document'
 require 'rss/dublincore'
 
 class AppNetLogger < Slogger
+  def linkify(input)
+    input.gsub(/@(\S+)/,"[\\0](https://alpha.app.net/\\1)").gsub(/(http|https):\/\/[\w\-_]+(\.[\w\-_]+)+([\w\-\.,@?^=%&amp;:\/~\+#]*[\w\-\@^=%&amp;\/~\+#])?/,"<\\0>")
+  end
+
   def do_log
     if config.key?(self.class.name)
       config = @config[self.class.name]
@@ -74,10 +78,10 @@ class AppNetLogger < Slogger
             item.title = item.title.gsub(/\n/,"\n    ")           # fix for multi-line posts displayed in markdown
             if item.title =~ /^@/
               if config['appnet_save_replies'] == true
-                feed_output += "* [#{item.pubDate.strftime('%I:%M %p')}](#{item.link}) #{item.title}#{content}\n"
+                feed_output += "* [#{item.pubDate.strftime('%I:%M %p')}](#{item.link}) #{linkify(item.title)}#{content}\n"
               end
             else
-              feed_output += "* [#{item.pubDate.strftime('%I:%M %p')}](#{item.link}) #{item.title}#{content}\n"
+              feed_output += "* [#{item.pubDate.strftime('%I:%M %p')}](#{item.link}) #{linkify(item.title)}#{content}\n"
             end
           else
             break

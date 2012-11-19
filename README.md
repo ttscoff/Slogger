@@ -45,17 +45,18 @@ Slogger indexes various public social services and creates Day One (<http://dayo
         -  App.net
             -  App.net posts for the current day    
         -  OmniFocus complete tasks for the day
-- There are additional plugins in the default "plugins_disabled" folder. They can be enabled by copying them to your "plugins" folder.
-    - These are typically disabled by default because they require advanced setup or have limited use for most users. Read the headers in each plugin file for additional details.
-    - Some of the additional plugins available:
-        - GetGlue
-        - Google Analytics (advanced setup)
-        - Gist
-        - SoundCloud
-        - Strava
+    - There are additional plugins in the default "plugins_disabled" folder. They can be enabled by copying them to your "plugins" folder.
+        - These are typically disabled by default because they require advanced setup or have limited use for most users. Read the headers in each plugin file for additional details.
+        - Some of the additional plugins available:
+            - GetGlue
+            - Google Analytics (advanced setup)
+            - Gist
+            - SoundCloud
+            - Strava
 - Slogger can be called with a single argument that is a path to a local image or text file, and an entry will be created containing its contents.
     - You can use this with a folder action or launchd task to add files from a folder connected to something like <http://IFTTT.com>. Any images added to the watched folder will be turned into journal entries.
         -  Note that Slogger does not delete the original file, so your script needs to move files out of the folder manually to avoid double-processing.
+- **NEW:** #tags in posts are saved as native tags. Default tags specified in the config are saved, as well as any hashtags present in the post. Github #XX issue references are ignored.
 
 ## Configure ##
 
@@ -77,7 +78,7 @@ Slogger indexes various public social services and creates Day One (<http://dayo
 1. From within the Slogger folder, run `./slogger` to run the data
    capture for the plugins you have in you `/plugins/` directory. 
 2. You may run `./slogger` manually to test, or if you do not wish to automate the process.
-3. If you wish to automate slogger use Lingon (launchd) or other scheduling app.
+3. If you wish to automate slogger, use Lingon (launchd) or other scheduling app.
 4. You can install a launchd task that will automatically run at 11:50pm every night by running `install.rb`. It's the same as Lingon would create, but all automatic and everything.
     - To uninstall the launchd task, run the command `rm ~/Library/LaunchAgents/com.brettterpstra.slogger.plist` and then log out and back in.
 
