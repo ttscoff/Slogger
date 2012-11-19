@@ -79,7 +79,7 @@ Slogger indexes various public social services and creates Day One (<http://dayo
 2. You may run `./slogger` manually to test, or if you do not wish to automate the process.
 3. If you wish to automate slogger use Lingon (launchd) or other scheduling app.
 4. You can install a launchd task that will automatically run at 11:50pm every night by running `install.rb`. It's the same as Lingon would create, but all automatic and everything.
-    - To uninstall the launchd task, run the command `rm ~/Library/LaunchAgents/com.brettterpstra.slogger` and then log out and back in.
+    - To uninstall the launchd task, run the command `rm ~/Library/LaunchAgents/com.brettterpstra.slogger.plist` and then log out and back in.
 
 ## Command line options ##
 
