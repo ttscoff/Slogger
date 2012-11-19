@@ -15,7 +15,7 @@ config = { # description and a primary key (username, url, etc.) required
                     'line 2, continue array as needed'],
   'service_username' => '', # update the name and make this a string or an array if you want to handle multiple accounts.
   'additional_config_option' => false
-  'tags' => '@social @blogging' # A good idea to provide this with an appropriate default setting
+  'tags' => '#social #blogging' # A good idea to provide this with an appropriate default setting
 }
 # Update the class key to match the unique classname below
 $slog.register_plugin({ 'class' => 'ServiceLogger', 'config' => config })
