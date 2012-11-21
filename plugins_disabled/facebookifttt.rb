@@ -69,6 +69,9 @@ class FacebookIFTTTLogger < Slogger
     last_run = @timespan
 
     ready = false
+    inpost = false
+    posttext = ""
+
     options = {}
     options['starred'] = config['facebook_ifttt_star']
     options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
@@ -79,40 +82,44 @@ class FacebookIFTTTLogger < Slogger
 
     if !content.empty?
       content.each do |line|
-  			 if line =~ regPost
-  			   	line = line.gsub(regPost, "")
-  				  options['content'] = "#### FacebookIFTTT\n\n#{line}\n\n#{tags}"
-            ready = false
-  			 elsif line =~ regDate
-  		 	  line = line.strip
-  			  line = line.gsub(regDate, "")
-  			  line = line.gsub(" at ", ' ')
-  			  line = line.gsub(',', '')
+         if line =~ regDate
+          inpost = false
+          line = line.strip
+          line = line.gsub(regDate, "")
+          line = line.gsub(" at ", ' ')
+          line = line.gsub(',', '')
 
-  			  month, day, year, time = line.split
-  			  hour,min = time.split(/:/)
-  			  min = min.gsub(ampm, '')
+          month, day, year, time = line.split
+          hour,min = time.split(/:/)
+          min = min.gsub(ampm, '')
 
-  			  if line =~ pm
-  			  	x = hour.to_i
-  			  	x += 12
-  			  	hour = x.to_s
-  			  end
+          if line =~ pm
+            x = hour.to_i
+            x += 12
+            hour = x.to_s
+          end
 
-  			  month = Date::MONTHNAMES.index(month)
-  			  ltime = Time.local(year, month, day, hour, min, 0, 0)
-  			  date = ltime.to_i
+          month = Date::MONTHNAMES.index(month)
+          ltime = Time.local(year, month, day, hour, min, 0, 0)
+          date = ltime.to_i
 
-  			  next unless date > last_run.to_i
+          next unless date > last_run.to_i
 
-  			  options['datestamp'] = ltime.utc.iso8601
+          options['datestamp'] = ltime.utc.iso8601
           ready = true
+  			 elsif line =~ regPost or inpost == true
+            inpost = true
+  			   	line = line.gsub(regPost, "")
+            posttext += line
+            ready = false
   		  end
 
         if ready
           sl = DayOne.new
+          options['content'] = "#### FacebookIFTTT\n\n#{posttext}\n\n#{tags}"
           sl.to_dayone(options)
           ready = false
+          posttext = ""
         end
       end
     end
