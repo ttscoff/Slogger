@@ -55,12 +55,42 @@ class LastFMLogger < Slogger
       end
       content = ''
       rss = RSS::Parser.parse(rss_content, false)
+      
+      # define a hash to store song count and a hash to link song title to the last.fm URL
+	  songs_count = {}
+	  title_to_link = {}
+
       rss.items.each { |item|
         break if Time.parse(item.pubDate.to_s) < today
         title = String(item.title).e_link()
         link = String(item.link).e_link()
-        content += "* [#{title}](#{link})\n"
+
+		# keep track of URL for each song title
+        title_to_link[title] = link
+
+        # store play counts in hash
+		if songs_count[title].nil?
+			songs_count[title] = 1
+		else
+			songs_count[title] += 1
+		end
       }
+      
+      # loop over each song and make final output as appropriate
+	  # (depending on whether there was 1 play or more)	      
+      songs_count.each { |k, v| 
+
+        # a fudge because I couldn't seem to access this hash value directly in
+        # the if statement
+      	link = title_to_link[k]
+
+		if v == 1
+        	content += "* [#{k}](#{link})\n"
+		else
+        	content += "* [#{k}](#{link}) (#{v} plays)\n"
+		end
+      	}
+
       if content != ''
         entrytext = "#{rss_feed['title']} for #{today.strftime('%m-%d-%Y')}\n\n" + content + "\n#{tags}"
       end
