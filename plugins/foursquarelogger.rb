@@ -64,7 +64,7 @@ class FoursquareLogger < Slogger
       content += "* [#{item.title}](#{item.link})\n"
     }
     if content != ''
-      entrytext = "## Foursquare Checkins for #{@timespan.strftime('%m-%d-%Y')}\n\n" + content + "\n#{@tags}"
+      entrytext = "## Foursquare Checkins for #{Time.now.strftime('%m-%d-%Y')}\n\n" + content + "\n#{@tags}"
     end
     DayOne.new.to_dayone({'content' => entrytext}) unless entrytext == ''
   end
