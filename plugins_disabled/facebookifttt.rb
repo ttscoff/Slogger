@@ -118,7 +118,6 @@ class FacebookIFTTTLogger < Slogger
 
         if ready
           sl = DayOne.new
-          options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
           options['content'] = "#### FacebookIFTTT\n\n#{posttext}\n\n#{tags}"
           sl.to_dayone(options)
           ready = false
