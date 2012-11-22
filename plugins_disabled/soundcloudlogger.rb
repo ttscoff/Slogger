@@ -91,11 +91,13 @@ class SoundCloudLogger < Slogger
           break
         end
       }
-      options = {}
-      options['content'] = "## SoundCloud uploads\n\n#{content}#{tags}"
-      options['starred'] = starred
-      sl = DayOne.new
-      sl.to_dayone(options)
+      unless content = ''
+        options = {}
+        options['content'] = "## SoundCloud uploads\n\n#{content}#{tags}"
+        options['starred'] = starred
+        sl = DayOne.new
+        sl.to_dayone(options)
+      end
     rescue Exception => e
       p e
       return false
