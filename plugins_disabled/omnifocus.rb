@@ -29,9 +29,8 @@ class OmniFocusLogger < Slogger
     tags = config['tags'] || ''
     tags = "\n\n#{@tags}\n" unless @tags == ''
 
-    today = @timespan
+    timespan = @timespan.strftime('%d %b %Y')
     output = ''
-
     # Run an embedded applescript to get today's completed tasks
 
     if filters.empty? then
@@ -41,7 +40,7 @@ class OmniFocusLogger < Slogger
     for filter in filters
       values = %x{osascript <<'APPLESCRIPT'
         set filter to "#{filter}"
-        set dteToday to date (short date string of (current date))
+        set dteToday to date ("#{timespan}")
         tell application id "com.omnigroup.OmniFocus"
           tell default document
             if filter is equal to "NONE" then
