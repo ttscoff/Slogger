@@ -6,7 +6,8 @@ Author: [RichSomerfield](www.richsomerfield.com)
 
 config = {
   'omnifocus_description' => [
-    'Grabs completed tasks from OmniFocus'],
+    'Grabs completed tasks from OmniFocus',
+    'omnifocus_folder_filter is an optional array of folders that should be included. If empty, all tasks will be imported.'],
   'omnifocus_tags' => '#tasks',
   'omnifocus_save_hashtags' => true,
   'omnifocus_folder_filter' => [],
@@ -71,7 +72,6 @@ class OmniFocusLogger < Slogger
           output += "* " + value
         end
         output += "\n"
-        puts filter
       end
     end
 
