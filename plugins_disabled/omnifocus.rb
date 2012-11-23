@@ -1,13 +1,22 @@
 =begin
 Plugin: OmniFocus
 Description: Grabs completed tasks from OmniFocus
+Notes: omnifocus_folder_filter is an optional array of folders that should be
+  included. If empty, all tasks will be imported. Only the immediate ancestor
+  folder will be considered, so if you have a stucture like:
+    - Work
+      - Client 1
+      - Client 2
+  You'll have to add "Client 1" and "Client 2" - "Work" will not return anything
+  in the Client folders, only projects and tasks directly inside the Work
+  folder.
 Author: [RichSomerfield](www.richsomerfield.com)
 =end
 
 config = {
   'omnifocus_description' => [
     'Grabs completed tasks from OmniFocus',
-    'omnifocus_folder_filter is an optional array of folders that should be included. If empty, all tasks will be imported.'],
+    'omnifocus_folder_filter is an optional array of folders that should be included. If left empty, all tasks will be imported.'],
   'omnifocus_tags' => '#tasks',
   'omnifocus_save_hashtags' => true,
   'omnifocus_folder_filter' => [],
