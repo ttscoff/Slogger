@@ -91,7 +91,7 @@ class SoundCloudLogger < Slogger
           break
         end
       }
-      unless content = ''
+      unless content == ''
         options = {}
         options['content'] = "## SoundCloud uploads\n\n#{content}#{tags}"
         options['starred'] = starred
