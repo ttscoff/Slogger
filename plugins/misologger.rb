@@ -1,10 +1,10 @@
 =begin
 Plugin: Miso Logger
-Description: Brief description (one line)
+Description: Add the films and tv shows that you watch
 Author: [Alejandro Martinez](http://alejandromp.com)
 Configuration:
-  option_1_name: [ "example_value1" , "example_value2", ... ]
-  option_2_name: example_value
+  miso_feed: "http://gomiso.com/feeds/user/ID/checkins.rss"
+  pre_title: "Watched"
 Notes:
   - multi-line notes with additional description and information (optional)
 =end
