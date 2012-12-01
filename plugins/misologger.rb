@@ -6,13 +6,14 @@ Configuration:
   miso_feed: "http://gomiso.com/feeds/user/ID/checkins.rss"
   pre_title: "Watched"
 Notes:
-  - multi-line notes with additional description and information (optional)
+  - The miso_feed parameter is like -> http://gomiso.com/feeds/user/ID/checkins.rss
+  - You need the change the ID with your user id. You can find your user id going to http://gomiso.com/resources/widget and watching in the code snippet.
 =end
 
 config = { # description and a primary key (username, url, etc.) required
   'description' => ['MisoLogger downloads your feed from Miso and add the Films and TVShows that you watch to DayOne',
                     'The miso_feed parameter is like -> http://gomiso.com/feeds/user/ID/checkins.rss',
-                    'You need the change the ID with your user id. You can find your user id going to http://gomiso.com/resources/widget and watching in the code snippet.'],
+                    'You need to change the ID with your user id. You can find your user id going to http://gomiso.com/resources/widget and watching in the code snippet.'],
   'miso_feed' => "",
   'pre_title' => "Watched",
   'additional_config_option' => false,
