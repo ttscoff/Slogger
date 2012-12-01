@@ -46,12 +46,11 @@ class YahooFinanceLogger < Slogger
     tags = "\n\n#{@tags}\n" unless @tags == ''
     show_details = (config['show_details'] == true)
 
-
     # This logger gets real-time data from Yahoo, so whatever time you run it, that's the data
     # I prefer to run my Slogger late at night, so this gets me the day's close
     if Time.now.saturday? || Time.now.sunday?
       @log.warn("Its a weekend, nothing to do.")
-      # return
+      return
     end
     
     symbols = tickers.join("+")
