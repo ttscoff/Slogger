@@ -57,6 +57,9 @@ class GithubLogger < Slogger
       if date > @timespan
         case action['type']
           when "PushEvent"
+            if !action["repository"]
+              action['repository'] = {"name" => "unknown repository"}
+            end
             output += "* Pushed to branch *#{action['payload']['ref'].gsub(/refs\/heads\//,'')}* of [#{action['repository']['name']}](#{action['url']})\n"
             action['payload']['shas'].each do |sha|
               output += "    * #{sha[2].gsub(/\n+/," ")}\n" unless sha.length < 3
