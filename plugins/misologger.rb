@@ -71,31 +71,35 @@ class MisoLogger < Slogger
       @log.error("ERROR fetching Miso feed" + e.to_s)
       # p e
     end
-    @log.info(@timespan)
     
     watched = config['pre_title'] || ''
 
     ## Parse feed
     rss = RSS::Parser.parse(rss_content, false)
+    content = ''
     rss.items.each { |item|
       break if Time.parse(item.pubDate.to_s) < @timespan
+      content += "\n" + "## " + watched + " " + item.title + "\nat *" + item.pubDate.to_s + "*\n" + item.description
+    }
 
-      @log.info("Adding " + item.title + " " + item.description)
-    
+    if content != '' 
       # create an options array to pass to 'to_dayone'
       # all options have default fallbacks, so you only need to create the options you want to specify
       options = {}
-      options['content'] = "## " + watched + " " + item.title + "\n\n" + item.description + "#{tags}"
-      options['datestamp'] = item.pubDate.to_s #Time.now.utc.iso8601
+      options['content'] = content + "\n" + "#{tags}"
+      #options['content'] = "## Post title\n\nContent#{tags}"
+      options['datestamp'] = Time.now.utc.iso8601
       #options['starred'] = true
-      #options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
-  
+      options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
+
+      #@log.info("Adding " + options['content'])
+
       # Create a journal entry
       # to_dayone accepts all of the above options as a hash
       # generates an entry base on the datestamp key or defaults to "now"
       sl = DayOne.new
       sl.to_dayone(options)
-    }
+    end
 
     # To create an image entry, use `sl.to_dayone(options) if sl.save_image(imageurl,options['uuid'])`
     # save_image takes an image path and a uuid that must be identical the one passed to to_dayone
