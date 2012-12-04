@@ -48,7 +48,8 @@ class YahooFinanceLogger < Slogger
 
     # This logger gets real-time data from Yahoo, so whatever time you run it, that's the data
     # I prefer to run my Slogger late at night, so this gets me the day's close
-    if Time.now.saturday? || Time.now.sunday?
+    weekday_now = Time.now.strftime('%a')
+    if weekday_now == 'Sat' || weekday_now == 'Sun'
       @log.warn("Its a weekend, nothing to do.")
       return
     end
