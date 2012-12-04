@@ -55,10 +55,9 @@ class YahooFinanceLogger < Slogger
     end
     
     symbols = tickers.join("+")
-    uri = URI('http://download.finance.yahoo.com/d/quotes.csv')
-    params = { :s => symbols, :f => 'nl1c1oghjkpvrj1' }
-    uri.query = URI.encode_www_form(params)
-
+    symbols = tickers.join("+")
+    uri = URI(URI.escape("http://download.finance.yahoo.com/d/quotes.csv?s=#{symbols}&f=nl1c1oghjkpvrj1"))
+    
     res = Net::HTTP.get_response(uri)
     unless res.is_a?(Net::HTTPSuccess)
       @log.warn("Unable to get data from Yahoo Finance.")
