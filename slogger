@@ -1,7 +1,16 @@
 #!/usr/bin/env ruby
+#    __  _
+#   / _\| | ___   __ _  __ _  ___ _ __
+#   \ \ | |/ _ \ / _` |/ _` |/ _ \ '__|
+#   _\ \| | (_) | (_| | (_| |  __/ |
+#   \__/|_|\___/ \__, |\__, |\___|_|
+#                |___/ |___/
+#        Copyright 2012, Brett Terpstra
+#              http://brettterpstra.com
+#                  --------------------
 MAJOR_VERSION = 2.0
 MINOR_VERSION = 15
-BUILD_NUMBER = 1
+BUILD_NUMBER = 3
 
 init_env = ENV['SLOGGER_NO_INITIALIZE'].to_s
 ENV['SLOGGER_NO_INITIALIZE'] = "false"

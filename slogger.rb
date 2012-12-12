@@ -1,5 +1,13 @@
 #!/usr/bin/env ruby
-
+#    __  _
+#   / _\| | ___   __ _  __ _  ___ _ __
+#   \ \ | |/ _ \ / _` |/ _` |/ _ \ '__|
+#   _\ \| | (_) | (_| | (_| |  __/ |
+#   \__/|_|\___/ \__, |\__, |\___|_|
+#                |___/ |___/
+#        Copyright 2012, Brett Terpstra
+#              http://brettterpstra.com
+#                  --------------------
 require 'open-uri'
 require 'net/http'
 require 'net/https'
@@ -42,6 +50,22 @@ class String
     self.to_s.gsub(/([\[\]\(\)])/, '\\\\\1')
   end
 
+end
+
+class SloggerUtils
+  def get_stdin(message)
+    print message + " "
+    STDIN.gets.chomp
+  end
+
+  def ask(message, valid_options = nil)
+    if valid_options
+      answer = get_stdin("#{message} #{valid_options.to_s.gsub(/"/, '').gsub(/, /,'/')} ") while !valid_options.include?(answer)
+    else
+      answer = get_stdin(message)
+    end
+    answer
+  end
 end
 
 class Slogger
@@ -169,13 +193,12 @@ class Slogger
         end
         @config[_namespace][_namespace+"_last_run"] = Time.now.strftime('%c')
       end
-      # ConfigTools.new.dump_config(@config)
-      if plugin['updates_config'] && plugin['updates_config'] == true
-        # Pass a reference to config for mutation
-        eval(plugin['class']).new.do_log(@config)
-      else
-        # Usual thing (so that we don't break other plugins)
-        eval(plugin['class']).new.do_log
+      # credit to Hilton Lipschitz (@hiltmon)
+      updated_config = eval(plugin['class']).new.do_log
+      if updated_config && updated_config.class.to_s == 'Hash'
+          updated_config.each { |k,v|
+            @config[_namespace][k] = v
+          }
       end
     end
     ConfigTools.new({'config_file' => $options[:config_file]}).dump_config(@config)
