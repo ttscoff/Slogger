@@ -133,8 +133,6 @@
 <li> OmniFocus complete tasks for the day</li>
 </ul>
 </li>
-</ul>
-</li>
 <li>There are additional plugins in the default "plugins_disabled" folder. They can be enabled by copying them to your "plugins" folder.
 
 <ul>
@@ -151,6 +149,8 @@
 </li>
 </ul>
 </li>
+</ul>
+</li>
 <li>Slogger can be called with a single argument that is a path to a local image or text file, and an entry will be created containing its contents.
 
 <ul>
@@ -162,6 +162,8 @@
 </li>
 </ul>
 </li>
+<li>
+<strong>NEW:</strong> #tags in posts are saved as native tags. Default tags specified in the config are saved, as well as any hashtags present in the post. Github #XX issue references are ignored.</li>
 </ul><h2>Configure</h2>
 
 <ol>
@@ -191,11 +193,11 @@
 <li>From within the Slogger folder, run <code>./slogger</code> to run the data
 capture for the plugins you have in you <code>/plugins/</code> directory. </li>
 <li>You may run <code>./slogger</code> manually to test, or if you do not wish to automate the process.</li>
-<li>If you wish to automate slogger use Lingon (launchd) or other scheduling app.</li>
+<li>If you wish to automate slogger, use Lingon (launchd) or other scheduling app.</li>
 <li>You can install a launchd task that will automatically run at 11:50pm every night by running <code>install.rb</code>. It's the same as Lingon would create, but all automatic and everything.
 
 <ul>
-<li>To uninstall the launchd task, run the command <code>rm ~/Library/LaunchAgents/com.brettterpstra.slogger</code> and then log out and back in.</li>
+<li>To uninstall the launchd task, run the command <code>rm ~/Library/LaunchAgents/com.brettterpstra.slogger.plist</code> and then log out and back in.</li>
 </ul>
 </li>
 </ol><h2>Command line options</h2>
@@ -246,6 +248,35 @@ Usage: slogger [-dq] [-r X] [/path/to/image.jpg]
 <li>
 <code>:retries</code> is the number of retries to attempt on any given operation. Create loops in network calls and parsing routines to allow for retry on failure, and use <code>$options[:retries]</code> to determine how many times to iterate.</li>
 </ul><p><code>@timespan</code> is available to all plugins and contains a date object based on the timespan setting. This defaults to 24 hours prior to the run.</p>
+
+<h2>License</h2>
+
+<pre><code> __  _
+/ _\| | ___   __ _  __ _  ___ _ __
+\ \ | |/ _ \ / _` |/ _` |/ _ \ '__|
+_\ \| | (_) | (_| | (_| |  __/ |
+\__/|_|\___/ \__, |\__, |\___|_|
+             |___/ |___/
+     Copyright 2012, Brett Terpstra
+           http://brettterpstra.com
+               --------------------
+</code></pre>
+
+<p>[The BSD License]</p>
+
+<p>Copyright (c) 2012 Brett Terpstra</p>
+
+<p>All rights reserved.</p>
+
+<blockquote>
+<p>Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</p>
+
+<p>Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.</p>
+
+<p>Neither the name of the author nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.</p>
+
+<p><strong>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</strong></p>
+</blockquote>
       </section>
       <footer>
         <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
