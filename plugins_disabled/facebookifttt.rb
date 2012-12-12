@@ -74,7 +74,6 @@ class FacebookIFTTTLogger < Slogger
 
     options = {}
     options['starred'] = config['facebook_ifttt_star']
-    options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
 
     f = File.new(File.expand_path(inputFile))
     content = f.read
@@ -103,7 +102,10 @@ class FacebookIFTTTLogger < Slogger
           ltime = Time.local(year, month, day, hour, min, 0, 0)
           date = ltime.to_i
 
-          next unless date > last_run.to_i
+          if not date > last_run.to_i
+            posttext = ""
+            next
+          end
 
           options['datestamp'] = ltime.utc.iso8601
           ready = true
