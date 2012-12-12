@@ -1,5 +1,13 @@
 #!/usr/bin/env ruby
-
+#    __  _
+#   / _\| | ___   __ _  __ _  ___ _ __
+#   \ \ | |/ _ \ / _` |/ _` |/ _ \ '__|
+#   _\ \| | (_) | (_| | (_| |  __/ |
+#   \__/|_|\___/ \__, |\__, |\___|_|
+#                |___/ |___/
+#        Copyright 2012, Brett Terpstra
+#              http://brettterpstra.com
+#                  --------------------
 require 'open-uri'
 require 'net/http'
 require 'net/https'
