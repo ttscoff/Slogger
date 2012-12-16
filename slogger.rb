@@ -42,6 +42,12 @@ class String
     contents
   end
 
+  # convert (multi)Markdown to HTML
+  def to_html
+    md = SLOGGER_HOME + '/lib/multimarkdown'
+    return %x{echo #{self.e_sh}|"#{md}"}
+  end
+
   # shell escape for passing content to external commands
   # e.g. %x{echo content.e_sh|sort}
   def e_sh
