@@ -42,12 +42,24 @@ class String
     contents
   end
 
+  # shell escape for passing content to external commands
+  # e.g. %x{echo content.e_sh|sort}
   def e_sh
     self.to_s.gsub(/(?=[^a-zA-Z0-9_.\/\-\n])/, '\\').gsub(/\n/, "'\n'").sub(/^$/, "''")
   end
 
   def e_link
     self.to_s.gsub(/([\[\]\(\)])/, '\\\\\1')
+  end
+
+  # escape text for use in a quoted AppleScript string
+  #
+  # string = %q{"This is a quoted string and it's awfully nice!"}
+  # res = %x{osascript <<'APPLESCRIPT'
+  #   return "hello, #{string.e_as}"
+  # APPLESCRIPT}
+  def e_as(str)
+    str.to_s.gsub(/(?=["\\])/, '\\')
   end
 
 end
