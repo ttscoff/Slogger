@@ -6,5 +6,5 @@
 slogger_config
 plugins_develop
 runlog.txt
-
 /slogger.log
+*test.*
