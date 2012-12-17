@@ -5,6 +5,7 @@ Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
   twitter_users: [ "handle1" , "handle2", ... ]
   save_images: true
+  exclude_replies: true
   droplr_domain: d.pr
   twitter_tags: "#social #blogging"
 Notes:
@@ -17,11 +18,13 @@ config = {
     'save_images (true/false) determines whether TwitterLogger will look for image urls and include them in the entry',
     'save_favorites (true/false) determines whether TwitterLogger will look for the favorites of the given usernames and include them in the entry',
     'save_images_from_favorites (true/false) determines whether TwitterLogger will download images for the favorites of the given usernames and include them in the entry',
+    'exclude_replies (true/false) determines, whether TwitterLogger will prevent replies from being logged',
     'droplr_domain: if you have a custom droplr domain, enter it here, otherwise leave it as d.pr '],
   'twitter_users' => [],
   'save_favorites' => true,
   'save_images' => true,
   'save_images_from_favorites' => true,
+  'exclude_replies' => true,
   'droplr_domain' => 'd.pr',
   'twitter_tags' => '#social #twitter'
 }
@@ -66,7 +69,7 @@ class TwitterLogger < Slogger
     if type == 'favorites'
       url = URI.parse("http://api.twitter.com/1/favorites.xml?count=200&screen_name=#{user}&include_entities=true&count=200")
     else
-      url = URI.parse("http://api.twitter.com/1/statuses/user_timeline.xml?screen_name=#{user}&count=200&exclude_replies=true&include_entities=true")
+      url = URI.parse("http://api.twitter.com/1/statuses/user_timeline.xml?screen_name=#{user}&count=200&exclude_replies=#{@twitter_config['exclude_replies']}&include_entities=true")
     end
     tweets = []
     images = []
