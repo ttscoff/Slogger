@@ -50,8 +50,6 @@ class MisoLogger < Slogger
     tags = "\n\n#{tags}\n" unless @tags == ''
     today = @timespan
 
-    # Perform necessary functions to retrieve posts
-
     ## Download Miso feed
     rss_content = ''
     begin
@@ -69,7 +67,6 @@ class MisoLogger < Slogger
 
     rescue Exception => e
       @log.error("ERROR fetching Miso feed" + e.to_s)
-      # p e
     end
     
     watched = config['pre_title'] || ''
@@ -84,27 +81,15 @@ class MisoLogger < Slogger
 
     if content != '' 
       # create an options array to pass to 'to_dayone'
-      # all options have default fallbacks, so you only need to create the options you want to specify
       options = {}
       options['content'] = content + "\n" + "#{tags}"
-      #options['content'] = "## Post title\n\nContent#{tags}"
       options['datestamp'] = Time.now.utc.iso8601
-      #options['starred'] = true
       options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
 
-      #@log.info("Adding " + options['content'])
-
       # Create a journal entry
-      # to_dayone accepts all of the above options as a hash
-      # generates an entry base on the datestamp key or defaults to "now"
       sl = DayOne.new
       sl.to_dayone(options)
     end
-
-    # To create an image entry, use `sl.to_dayone(options) if sl.save_image(imageurl,options['uuid'])`
-    # save_image takes an image path and a uuid that must be identical the one passed to to_dayone
-    # save_image returns false if there's an error
-
   end
 
   def helper_function(args)
