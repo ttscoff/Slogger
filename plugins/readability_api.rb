@@ -84,7 +84,7 @@ class ReadabilityLogger < Slogger
         res = access_token.get(burl)
         entries=JSON.parse(res.body)
         entries["bookmarks"].each do |item|
-          output+="[#{item["article"]["title"]}](https://www.readability.com/articles/#{item["article"]["id"]})\n#{item["article"]["excerpt"]}\n\n"
+          output+="[#{item["article"]["title"]}](https://www.readability.com/articles/#{item["article"]["id"]})\n>#{item["article"]["excerpt"]}\n\n"
         end
       rescue Exception => e
         @log.error("Error getting reading list for #{username}: #{e}")
