@@ -28,7 +28,7 @@ $slog.register_plugin({ 'class' => 'FitbitLogger', 'config' => config })
 
 require 'rubygems'
 require 'fitgem'
-require 'pp'
+require 'time'
 
 class FitbitLogger < Slogger
     def do_log
@@ -45,7 +45,8 @@ class FitbitLogger < Slogger
             return
         end
         
-        @log.info("Logging today's Fitbit activities")
+        # ============================================================
+        # Init fitgem client
         
         oauth_token = config['fitbit_oauth_token']
         oauth_secret = config['fitbit_oauth_secret']
@@ -53,8 +54,11 @@ class FitbitLogger < Slogger
         fitbit_consumer_secret = config['fitbit_consumer_secret']
         
         client = Fitgem::Client.new(:consumer_key => fitbit_consumer_key, :consumer_secret => fitbit_consumer_secret, :unit_system => config['fitbit_unit_system'])
-        
         developMode = $options[:develop]
+        
+        
+        # ============================================================
+        # request oauth token if needed
         
         if  oauth_token != '' && oauth_secret != ''
             access_token = client.reconnect(oauth_token, oauth_secret)
@@ -78,36 +82,45 @@ class FitbitLogger < Slogger
         end
         
         # ============================================================
-        # Add Fitgem API calls on the client object below this line
-        
-        activities = client.activities_on_date(@timespan)
-        summary = activities['summary']
-        steps = summary['steps']
-        floors = summary['floors']
-        distance = summary['distances'][0]['distance']
-        distanceUnit = client.label_for_measurement(:distance, false)
-        activityPoints = summary['activeScore']
-        
-        if developMode
-            @log.info("Steps: #{steps}")
-            @log.info("Distance: #{distance} #{distanceUnit}")
-            @log.info("Floors: #{floors}")
-            @log.info("ActivityPoints: #{activityPoints}")
+        # iterate over the days and create entries
+        $i = 0
+        days = $options[:timespan]
+        until $i >= days  do
+            currentDate = Time.now - ((60 * 60 * 24) * $i)
+            timestring = currentDate.strftime('%F')
+            
+            @log.info("Logging Fitbit summary for #{timestring}")
+            
+            activities = client.activities_on_date(timestring)
+            summary = activities['summary']
+            steps = summary['steps']
+            floors = summary['floors']
+            distance = summary['distances'][0]['distance']
+            distanceUnit = client.label_for_measurement(:distance, false)
+            activityPoints = summary['activeScore']
+            
+            if developMode
+                @log.info("Steps: #{steps}")
+                @log.info("Distance: #{distance} #{distanceUnit}")
+                @log.info("Floors: #{floors}")
+                @log.info("ActivityPoints: #{activityPoints}")
+            end
+            
+            tags = config['fitbit_tags'] || ''
+            tags = "\n\n#{tags}\n" unless tags == ''
+            
+            
+            output = "**Steps:** #{steps}\n**Floors:** #{floors}\n**Distance:** #{distance} #{distanceUnit}\n**Activity Points:** #{activityPoints}\n"
+            
+            # Create a journal entry
+            options = {}
+            options['content'] = "## Fitbit - Summary for #{timestring}\n\n#{output}#{tags}"
+            options['datestamp'] = currentDate.utc.iso8601
+            
+            sl = DayOne.new
+            sl.to_dayone(options)
+            $i += 1
         end
-        
-        tags = config['fitbit_tags'] || ''
-        tags = "\n\n#{tags}\n" unless tags == ''
-        
-        
-        output = "**Steps:** #{steps}\n**Floors:** #{floors}\n**Distance:** #{distance} #{distanceUnit}\n**Activity Points:** #{activityPoints}\n"
-        timespan = @timespan.strftime('%F')
-        
-        # Create a journal entry
-        options = {}
-        options['content'] = "## Fitbit - Summary for #{timespan}\n\n#{output}#{tags}"
-        sl = DayOne.new
-        sl.to_dayone(options)
-        
         return config
     end
 end
