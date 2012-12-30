@@ -43,7 +43,7 @@ class RdioLogger < Slogger
     return nil unless userKey
     
     activities = try { next get_activities(userKey) }
-    return nil unless activities
+    return nil unless activities && activities.count > 0
 
     albums = get_albums(activities)
     content = generate_content(albums)
