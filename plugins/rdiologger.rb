@@ -9,7 +9,7 @@ Notes:
 =end
 
 config = {
-  'description' => ['Logs summary of activity on Rdio for the specified user', 'rdio_username should be the Rdio username. include_album_image determines wether the album image is included in the journal entry'],
+  'description' => ['Logs tracks/albums added to your rdio collection.', 'rdio_username should be the Rdio username. include_album_image determines wether the album image is included in the journal entry'],
   'rdio_username' => '',
   'include_album_image' => true,
   'tags' => '#social #music'
