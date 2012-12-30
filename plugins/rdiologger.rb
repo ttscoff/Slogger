@@ -147,7 +147,7 @@ private
   end
 
   def table_header_md
-    Array.new(RDIO_LOGGER_TABLE_WIDTH, ":-------").join(" | ")
+    Array.new(RDIO_LOGGER_TABLE_WIDTH, ":-------:").join(" | ")
   end
 
   def generate_entry_with_image(album)
