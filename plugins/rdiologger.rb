@@ -19,6 +19,7 @@ $slog.register_plugin({ 'class' => 'RdioLogger', 'config' => config })
 
 require 'rdio_api'
 class RdioLogger < Slogger
+  RDIO_LOGGER_TABLE_WIDTH = 3
   # every plugin must contain a do_log function which creates a new entry using the DayOne class (example below)
   # @config is available with all of the keys defined in "config" above
   # @timespan and @dayonepath are also available
@@ -106,19 +107,72 @@ private
   end
 
   def get_albums(activities)
-    activities.inject([]) { |acc, activity| acc.concat(activity['albums']) }
+    activities.reduce([]) { |result, activity| result.concat(activity['albums']) }
   end
   
   def generate_content(albums)
-    albums.inject("") { |acc, album| acc + generate_md(album) }
+    if logger_config['include_album_image']
+      generate_table_content(albums)
+    else
+      generate_text_content(albums)
+    end
   end
 
-  def generate_md(album)
+  def generate_table_content(albums)
+    result = ""
+    albums.each_with_index do |album, i|
+      result += generate_entry_with_image(album) + table_separator(i)    
+    end
+    result
+  end
+
+  def table_separator(index)
+    if end_of_row?(index)
+        seperator = "\n"
+        if end_of_first_row?(index)
+          seperator += table_header_md + "\n"
+        end
+      else
+        seperator = " | "
+      end
+      seperator
+  end
+
+  def end_of_row?(index)
+    (index + 1) % RDIO_LOGGER_TABLE_WIDTH == 0
+  end
+
+  def end_of_first_row?(index)
+    (index + 1) == RDIO_LOGGER_TABLE_WIDTH
+  end
+
+  def table_header_md
+    Array.new(RDIO_LOGGER_TABLE_WIDTH, ":-------").join(" | ")
+  end
+
+  def generate_entry_with_image(album)
     link_text = "#{album['artist']} - #{album['name']}"
     link_text.gsub!(/[()]/, "-") #replace parentheses with - otherwise it conflict with the md
-    image_md = "![alt text](#{album['icon']} '#{link_text}')"
 
-    prefix = logger_config['include_album_image'] ? image_md : "* "
-    "#{prefix}[#{link_text}](#{album['shortUrl']})\n"
+    if link_text.length > 50 #limit the length of the text in the table otherwise the layout is not balanced
+      link_text = link_text[0..50] + "..."
+    end
+    
+    url = album['shortUrl']
+    "![alt text](#{album['icon']})#{md_link(link_text, url)}"
+  end
+
+  def generate_text_content(albums)
+    albums.reduce("") { |result, album| result + generate_entry_with_text(album) }
+  end
+
+  def generate_entry_with_text(album)
+    link_text = "#{album['artist']} - #{album['name']}"
+    url = album['shortUrl']
+    md_link(link_text,url)
+  end
+
+  def md_link(text, url)
+    "[#{text}](#{url})"
   end
 end
