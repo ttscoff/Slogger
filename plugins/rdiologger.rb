@@ -103,7 +103,7 @@ private
   end
   
   def is_activity_valid?(activity)
-    activity['update_type'] == 0 #&& activity['date'] > @timespan
+    activity['update_type'] == 0 && Time.parse(activity['date']) > @timespan
   end
 
   def get_albums(activities)
