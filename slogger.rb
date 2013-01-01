@@ -251,12 +251,11 @@ class Slogger
 </plist>
 XMLTEMPLATE
     else
-      br = "  "
       ERB.new <<-MARKDOWNTEMPLATE
-Title: Journal entry for <%= datestamp %><%= br %>
-Date: <%= datestamp %><%= br %>
-Starred: <%= starred %><%= br %>
-<% if tags %>Tags: <% tags.join(", ") %><%= br %><% end %>
+Title: Journal entry for <%= datestamp %>
+Date: <%= datestamp %>
+Starred: <%= starred %>
+<% if tags %>Tags: <% tags.join(", ") %>  <% end %>
 
 <%= entry %>
 
