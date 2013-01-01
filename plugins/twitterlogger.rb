@@ -45,10 +45,13 @@ class TwitterLogger < Slogger
 
   def download_images(images)
 
+    @twitter_config['twitter_tags'] ||= ''
+    tags = "\n\n#{@twitter_config['twitter_tags']}\n" unless @twitter_config['twitter_tags'] == ''
+
     images.each do |image|
       next if image['content'].nil? || image['url'].nil?
       options = {}
-      options['content'] = image['content']
+      options['content'] = "#{image['content']}#{tags}"
       options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
       sl = DayOne.new
       path = sl.save_image(image['url'],options['uuid'])
