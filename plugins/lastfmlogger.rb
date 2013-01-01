@@ -11,6 +11,7 @@ Notes:
 config = {
   'lastfm_description' => ['Logs songs scrobbled for time period.','lastfm_user is your Last.fm username.'],
   'lastfm_user' => '',
+  'lastfm_feeds' => ['recent', 'loved'],
   'lastfm_tags' => '#social #music'
 }
 $slog.register_plugin({ 'class' => 'LastFMLogger', 'config' => config })
@@ -34,8 +35,11 @@ class LastFMLogger < Slogger
     config['lastfm_tags'] ||= ''
     tags = "\n\n#{config['lastfm_tags']}\n" unless config['lastfm_tags'] == ''
 
-    feeds = [{'title'=>"## Listening To", 'feed' => "http://ws.audioscrobbler.com/2.0/user/#{config['lastfm_user']}/recenttracks.rss?limit=100"},{'title'=>"## Loved Tracks", 'feed' => "http://ws.audioscrobbler.com/2.0/user/#{config['lastfm_user']}/lovedtracks.rss?limit=100"}]
+    config['lastfm_feeds'] ||= ['recent', 'loved']
 
+    feeds = []
+    feeds << {'title'=>"## Listening To", 'feed' => "http://ws.audioscrobbler.com/2.0/user/#{config['lastfm_user']}/recenttracks.rss?limit=100"} if config['lastfm_feeds'].include?('recent')
+    feeds << {'title'=>"## Loved Tracks", 'feed' => "http://ws.audioscrobbler.com/2.0/user/#{config['lastfm_user']}/lovedtracks.rss?limit=100"} if config['lastfm_feeds'].include?('loved')
 
     today = @timespan
 
