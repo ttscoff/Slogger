@@ -14,7 +14,7 @@ config = {
   'description' => ['strava_athleteid is a number you can find in the URL when viewing your profile',
                     'strava_tags are tags you want to add to every entry, e.g. "#social #sports #cycling #training"'],
   'strava_athleteid' => '',
-  'goodreads_tags' => '#social #sports'
+  'strava_tags' => '#social #sports'
 }
 $slog.register_plugin({ 'class' => 'StravaLogger', 'config' => config })
 
