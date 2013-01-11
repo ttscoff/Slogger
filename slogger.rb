@@ -25,7 +25,7 @@ ENV['SLOGGER_HOME'] = SLOGGER_HOME
 require SLOGGER_HOME + '/lib/sociallogger'
 require SLOGGER_HOME + '/lib/configtools'
 require SLOGGER_HOME + '/lib/json'
-require SLOGGER_HOME + '/lib/feed-normalizer/feed-normalizer'
+
 class String
   def markdownify
     contents = ''
