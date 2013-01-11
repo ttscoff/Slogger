@@ -88,21 +88,19 @@ class BlogLogger < Slogger
         rss_content = f.read
       end
 
-      # rss = RSS::Parser.parse(rss_content, false)
-      # rss.items.each { |item|
-      feed = FeedNormalizer::FeedNormalizer.parse(rss_content)
-      feed.entries.each { |item|
-        item_date = item.date_published
-        item_date = item.last_updated if item_date.nil?
-        next if item_date.nil?
-        post_date = Time.parse(item_date.to_s) + Time.now.gmt_offset
-        if post_date > today
-          p post_date
+      rss = RSS::Parser.parse(rss_content, false)
+      rss.items.each { |item|
+        item_date = Time.parse(item.date.to_s) + Time.now.gmt_offset
+        if item_date > today
           content = ''
           if @blogconfig['full_posts']
-            content = item.content
+            begin
+              content = item.content_encoded
+            rescue
+              content = item.description
+            end
           else
-            content = item.description rescue 'Empty content'
+            content = item.description rescue ''
           end
 
           imageurl = false
@@ -112,8 +110,8 @@ class BlogLogger < Slogger
           content = content.markdownify if markdownify rescue ''
 
           options = {}
-          options['content'] = "## [#{item.title.gsub(/\n+/,' ').strip}](#{item.urls[0]})\n\n#{content.strip}#{tags}" rescue 'Content empty'
-          options['datestamp'] = post_date.utc.iso8601
+          options['content'] = "## [#{item.title.gsub(/\n+/,' ').strip}](#{item.link})\n\n#{content.strip}#{tags}"
+          options['datestamp'] = item.date.utc.iso8601 rescue item.dc_date.utc.iso8601
           options['starred'] = starred
           options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
           sl = DayOne.new

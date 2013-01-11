@@ -83,16 +83,13 @@ class RSSLogger < Slogger
           rss_content = f.read
         end
       end
-      rss = FeedNormalizer::FeedNormalizer.parse(rss_content)
+
+      rss = RSS::Parser.parse(rss_content, false)
       feed_items = []
-      feed_title = rss.title.nil? ? '' : rss.title
       rss.items.each { |item|
-        item_date = item.date_published
-        item_date = item.last_updated if item_date.nil?
-        next if item_date.nil?
-        post_date = Time.parse(item_date.to_s) + Time.now.gmt_offset
-        if post_date > today
-          feed_items.push("* [#{item.title.gsub(/\n+/,' ').strip}](#{item.urls[0]})")
+        item_date = Time.parse(item.date.to_s) + Time.now.gmt_offset
+        if item_date > today
+          feed_items.push("* [#{item.title.gsub(/\n+/,' ').strip}](#{item.link})")
         else
           break
         end
@@ -100,7 +97,7 @@ class RSSLogger < Slogger
 
       if feed_items.length > 0
         options = {}
-        options['content'] = "## #{feed_title.gsub(/\n+/,' ').strip}\n\n#{feed_items.reverse.join("\n")}#{tags}"
+        options['content'] = "## #{rss.channel.title.gsub(/\n+/,' ').strip}\n\n#{feed_items.reverse.join("\n")}#{tags}"
         sl = DayOne.new
         sl.to_dayone(options)
       end
