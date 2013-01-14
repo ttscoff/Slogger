@@ -103,7 +103,15 @@ class FitbitLogger < Slogger
             measurements = client.body_measurements_on_date(timestring)
             weight = measurements['body']['weight']		
             bmi = measurements['body']['bmi']
-            weightUnit = client.label_for_measurement(:weight, false)	               
+            weightUnit = client.label_for_measurement(:weight, false)	  
+	
+		if config['fitbit_log_water']
+			water = client.water_on_date(timestring)
+			waterSummary = water['summary']
+			loggedWater = waterSummary['water']
+			waterUnit = client.label_for_measurement(:liquids, false)		
+		end            
+		     
             if developMode
                 @log.info("Steps: #{steps}")
                 @log.info("Distance: #{distance} #{distanceUnit}")
@@ -111,13 +119,17 @@ class FitbitLogger < Slogger
                 @log.info("ActivityPoints: #{activityPoints}")
 				@log.info("Weight: #{weight} #{weightUnit}")
 				@log.info("BMI: #{bmi}")     
-				@log.info("Water:#{water} #{waterUnit}")        
+				@log.info("Water Intake: #{loggedWater} #{waterUnit}")        
             end
             
             tags = config['fitbit_tags'] || ''
             tags = "\n\n#{tags}\n" unless tags == ''
             
             output = "**Steps:** #{steps}\n**Floors:** #{floors}\n**Distance:** #{distance} #{distanceUnit}\n**Activity Points:** #{activityPoints}\n**Weight:** #{weight} #{weightUnit}\n**BMI:** #{bmi}\n"
+            
+            if config['fitbit_log_water']
+            	output = output + "**Water Intake:** #{loggedWater} #{waterUnit}\n"
+            end
             
             # Create a journal entry
             options = {}
