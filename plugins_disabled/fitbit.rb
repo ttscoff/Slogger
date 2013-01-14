@@ -22,6 +22,7 @@ config = {
     'fitbit_oauth_secret' => '',
     'fitbit_unit_system' => 'US',
     'fitbit_tags' => '#activities',
+    'fitbit_log_water' => true
 }
 
 $slog.register_plugin({ 'class' => 'FitbitLogger', 'config' => config })
@@ -101,32 +102,30 @@ class FitbitLogger < Slogger
             
             measurements = client.body_measurements_on_date(timestring)
             weight = measurements['body']['weight']		
-            weightUnit = client.label_for_measurement(:weight, false)	  
-                 
+            bmi = measurements['body']['bmi']
+            weightUnit = client.label_for_measurement(:weight, false)	               
             if developMode
                 @log.info("Steps: #{steps}")
                 @log.info("Distance: #{distance} #{distanceUnit}")
                 @log.info("Floors: #{floors}")
                 @log.info("ActivityPoints: #{activityPoints}")
-				@log.info("Weight: #{weight} #{weightUnit}")             
+				@log.info("Weight: #{weight} #{weightUnit}")
+				@log.info("BMI: #{bmi}")     
+				@log.info("Water:#{water} #{waterUnit}")        
             end
             
             tags = config['fitbit_tags'] || ''
             tags = "\n\n#{tags}\n" unless tags == ''
             
-            
-            output = "**Steps:** #{steps}\n**Floors:** #{floors}\n**Distance:** #{distance} #{distanceUnit}\n**Activity Points:** #{activityPoints}\n**Weight:** #{weight}\n"
+            output = "**Steps:** #{steps}\n**Floors:** #{floors}\n**Distance:** #{distance} #{distanceUnit}\n**Activity Points:** #{activityPoints}\n**Weight:** #{weight} #{weightUnit}\n**BMI:** #{bmi}\n"
             
             # Create a journal entry
             options = {}
             options['content'] = "## Fitbit - Summary for #{timestring}\n\n#{output}#{tags}"
             options['datestamp'] = currentDate.utc.iso8601
-            
             sl = DayOne.new
             sl.to_dayone(options)
             $i += 1
-
-
         end
         return config
     end
