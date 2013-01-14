@@ -99,18 +99,23 @@ class FitbitLogger < Slogger
             distanceUnit = client.label_for_measurement(:distance, false)
             activityPoints = summary['activeScore']
             
+            measurements = client.body_measurements_on_date(timestring)
+            weight = measurements['body']['weight']		
+            weightUnit = client.label_for_measurement(:weight, false)	  
+                 
             if developMode
                 @log.info("Steps: #{steps}")
                 @log.info("Distance: #{distance} #{distanceUnit}")
                 @log.info("Floors: #{floors}")
                 @log.info("ActivityPoints: #{activityPoints}")
+				@log.info("Weight: #{weight} #{weightUnit}")             
             end
             
             tags = config['fitbit_tags'] || ''
             tags = "\n\n#{tags}\n" unless tags == ''
             
             
-            output = "**Steps:** #{steps}\n**Floors:** #{floors}\n**Distance:** #{distance} #{distanceUnit}\n**Activity Points:** #{activityPoints}\n"
+            output = "**Steps:** #{steps}\n**Floors:** #{floors}\n**Distance:** #{distance} #{distanceUnit}\n**Activity Points:** #{activityPoints}\n**Weight:** #{weight}\n"
             
             # Create a journal entry
             options = {}
@@ -120,6 +125,8 @@ class FitbitLogger < Slogger
             sl = DayOne.new
             sl.to_dayone(options)
             $i += 1
+
+
         end
         return config
     end
