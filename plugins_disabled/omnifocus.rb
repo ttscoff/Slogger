@@ -19,6 +19,7 @@ config = {
     'omnifocus_folder_filter is an optional array of folders that should be included. If left empty, all tasks will be imported.'],
   'omnifocus_tags' => '#tasks',
   'omnifocus_save_hashtags' => true,
+  'omnifocus_completed_tasks' => true,
   'omnifocus_folder_filter' => [],
 }
 
@@ -36,6 +37,7 @@ class OmniFocusLogger < Slogger
     @log.info("Logging OmniFocus for completed tasks")
 
     additional_config_option = config['additional_config_option'] || false
+    omnifocus_completed_tasks = config['omnifocus_completed_tasks'] || false
     tags = config['tags'] || ''
     tags = "\n\n#{@tags}\n" unless @tags == ''
 
@@ -86,18 +88,25 @@ class OmniFocusLogger < Slogger
         unless filter == "NONE"
           output += "\n### Tasks in #{filter}\n"
         end
+        tasks_completed = 0
         values.squeeze("\n").each_line do |value|
           # Create entries here
-          output += "* " + value
+          tasks_completed += 1
+          #ensures that only valid characters are saved to output
+          output += "* " + value.chars.select{|i| i.valid_encoding?}.join
         end
         output += "\n"
       end
+    end
+    #If omnifocus_completed_tasks is true then set text for insertion
+    if omnifocus_completed_tasks then
+      text_completed = "#{tasks_completed} tasks completed today! \n\n"
     end
 
     # Create a journal entry
     unless output == ''
       options = {}
-      options['content'] = "## OmniFocus - Completed Tasks\n\n#{output}#{tags}"
+      options['content'] = "## OmniFocus - Completed Tasks\n\n#{text_completed}#{output}#{tags}"
       sl = DayOne.new
       sl.to_dayone(options)
     end
