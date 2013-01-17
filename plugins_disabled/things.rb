@@ -3,7 +3,7 @@ Plugin: Things
 Description: Grabs completed tasks from Things
 Notes: Thanks goes to RichSomerfield for the OmniFocus plugin, I used it as inspiration.
        things_project_filter is an optional string of a project name that should not be imported (e.g. my grocery list). If left empty, all tasks will be imported.
-Author: [Brian Stearns](twitter.com/brs)
+Author: [Brian Stearns](twitter.com/brs), Patrice Brend'amour
 =end
 
 config = {
@@ -32,7 +32,7 @@ class ThingsLogger < Slogger
     tags = config['tags'] || ''
     tags = "\n\n#{@tags}\n" unless @tags == ''
 
-    timespan = @timespan.strftime('%m/%d/%y')
+    timespan = @timespan.strftime('%d/%m/%Y')
     output = ''
     # Run an embedded applescript to get today's completed tasks
 
@@ -44,7 +44,7 @@ class ThingsLogger < Slogger
       values = %x{osascript <<'APPLESCRIPT'
         set filter to "#{filter}"
 
-        set dteToday to ("#{timespan}")
+        set dteToday to setDate("#{timespan}")
         
         set completedItems to ""
         tell application id "com.culturedcode.Things"
@@ -72,6 +72,17 @@ class ThingsLogger < Slogger
         	end repeat
         end tell
         return completedItems
+          
+        on setDate(theDateStr)
+          set {TID, text item delimiters} to {text item delimiters, "/"}
+          set {dd, mm, yy, text item delimiters} to every text item in theDateStr & TID
+          set t to current date
+          set day of t to (dd as integer)
+          set month of t to (mm as integer)
+          set year of t to (yy as integer)
+          return t
+        end setDate
+
       APPLESCRIPT}
 
       unless values.strip.empty?
