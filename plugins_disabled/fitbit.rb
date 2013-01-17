@@ -22,7 +22,8 @@ config = {
     'fitbit_oauth_secret' => '',
     'fitbit_unit_system' => 'US',
     'fitbit_tags' => '#activities',
-    'fitbit_log_water' => true
+    'fitbit_log_water' => true,
+    'fitbit_log_body_measurements' => true,
 }
 
 $slog.register_plugin({ 'class' => 'FitbitLogger', 'config' => config })
@@ -100,17 +101,18 @@ class FitbitLogger < Slogger
             distanceUnit = client.label_for_measurement(:distance, false)
             activityPoints = summary['activeScore']
             
-            measurements = client.body_measurements_on_date(timestring)
-            weight = measurements['body']['weight']		
-            bmi = measurements['body']['bmi']
-            weightUnit = client.label_for_measurement(:weight, false)	  
-	
-		if config['fitbit_log_water']
-			water = client.water_on_date(timestring)
-			waterSummary = water['summary']
-			loggedWater = waterSummary['water']
-			waterUnit = client.label_for_measurement(:liquids, false)		
-		end            
+            if config['fitbit_log_body_measurements']
+                measurements = client.body_measurements_on_date(timestring)
+                weight = measurements['body']['weight']
+                bmi = measurements['body']['bmi']
+                weightUnit = client.label_for_measurement(:weight, false)
+            end
+            if config['fitbit_log_water']
+                water = client.water_on_date(timestring)
+                waterSummary = water['summary']
+                loggedWater = waterSummary['water']
+                waterUnit = client.label_for_measurement(:liquids, false)		
+            end            
 		     
             if developMode
                 @log.info("Steps: #{steps}")
@@ -125,10 +127,13 @@ class FitbitLogger < Slogger
             tags = config['fitbit_tags'] || ''
             tags = "\n\n#{tags}\n" unless tags == ''
             
-            output = "**Steps:** #{steps}\n**Floors:** #{floors}\n**Distance:** #{distance} #{distanceUnit}\n**Activity Points:** #{activityPoints}\n**Weight:** #{weight} #{weightUnit}\n**BMI:** #{bmi}\n"
+            output = "**Steps:** #{steps}\n**Floors:** #{floors}\n**Distance:** #{distance} #{distanceUnit}\n**Activity Points:** #{activityPoints}\n"
             
+            if config['fitbit_log_body_measurements']
+                output += "**Weight:** #{weight} #{weightUnit}\n**BMI:** #{bmi}\n"
+            end
             if config['fitbit_log_water']
-            	output = output + "**Water Intake:** #{loggedWater} #{waterUnit}\n"
+            	output += "**Water Intake:** #{loggedWater} #{waterUnit}\n"
             end
             
             # Create a journal entry
