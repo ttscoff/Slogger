@@ -78,9 +78,9 @@ class OmniFocusLogger < Slogger
          set {TID, text item delimiters} to {text item delimiters, "/"}
          set {dd, mm, yy, text item delimiters} to every text item in theDateStr & TID
          set t to current date
-         set day of t to (dd as integer)
-         set month of t to (mm as integer)
          set year of t to (yy as integer)
+         set month of t to (mm as integer)
+         set day of t to (dd as integer)
          return t
       end setDate
       APPLESCRIPT}
@@ -93,7 +93,14 @@ class OmniFocusLogger < Slogger
           # Create entries here
           tasks_completed += 1
           #ensures that only valid characters are saved to output
-          output += "* " + value.chars.select{|i| i.valid_encoding?}.join
+        
+          #this only works in newer ruby versions but not in the default 1.8.7
+          begin
+              value = value.chars.select{|i| i.valid_encoding?}.join
+          rescue
+          end
+          
+          output += "* " + value
         end
         output += "\n"
       end
