@@ -22,8 +22,9 @@ config = {
     'fitbit_oauth_secret' => '',
     'fitbit_unit_system' => 'US',
     'fitbit_tags' => '#activities',
-    'fitbit_log_water' => true
-}
+    'fitbit_log_water' => true,
+    'fitbit_log_sleep' => true
+    }
 
 $slog.register_plugin({ 'class' => 'FitbitLogger', 'config' => config })
 
@@ -109,7 +110,15 @@ class FitbitLogger < Slogger
 			water = client.water_on_date(timestring)
 			waterSummary = water['summary']
 			loggedWater = waterSummary['water']
+			# round output to 2 decimals
+			loggedWater = (loggedWater*100).round / 100.0
 			waterUnit = client.label_for_measurement(:liquids, false)		
+		end            
+
+		if config['fitbit_log_sleep']
+			sleep = client.sleep_on_date(timestring)
+			sleepSummary = sleep['summary']
+			loggedSleep = sleepSummary['totalMinutesAsleep']
 		end            
 		     
             if developMode
@@ -119,7 +128,9 @@ class FitbitLogger < Slogger
                 @log.info("ActivityPoints: #{activityPoints}")
 				@log.info("Weight: #{weight} #{weightUnit}")
 				@log.info("BMI: #{bmi}")     
-				@log.info("Water Intake: #{loggedWater} #{waterUnit}")        
+				@log.info("Water Intake: #{loggedWater} #{waterUnit}")
+				# In minutes; journal output is converted to hh:mm
+				@log.info("Slept: #{loggedSleep}")        
             end
             
             tags = config['fitbit_tags'] || ''
@@ -128,9 +139,15 @@ class FitbitLogger < Slogger
             output = "**Steps:** #{steps}\n**Floors:** #{floors}\n**Distance:** #{distance} #{distanceUnit}\n**Activity Points:** #{activityPoints}\n**Weight:** #{weight} #{weightUnit}\n**BMI:** #{bmi}\n"
             
             if config['fitbit_log_water']
-            	output = output + "**Water Intake:** #{loggedWater} #{waterUnit}\n"
+            output += "**Water Intake:** #{loggedWater} #{waterUnit}\n"
             end
             
+            if config['fitbit_log_sleep']
+            	hh, mm = loggedSleep.divmod(60)
+				dd, hh = hh.divmod(24) 
+				loggedSleep = "%d hours, %d minutes" % [hh, mm]
+            	output += "**Slept:** #{loggedSleep}\n"
+            end            
             # Create a journal entry
             options = {}
             options['content'] = "## Fitbit - Summary for #{timestring}\n\n#{output}#{tags}"
