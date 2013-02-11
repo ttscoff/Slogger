@@ -1,5 +1,5 @@
-require 'structures'
-require 'html-cleaner'
+require ENV['SLOGGER_HOME'] + '/lib/feed-normalizer/structures'
+require ENV['SLOGGER_HOME'] + '/lib/feed-normalizer/html-cleaner'
 
 module FeedNormalizer
 
