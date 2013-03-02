@@ -1,3 +1,5 @@
+require 'fileutils'
+
 class DayOne < Slogger
   def to_dayone(options = {})
     @dayonepath = storage_path
@@ -56,7 +58,10 @@ class DayOne < Slogger
           @log.warn("Download failed")
           return false
         else
-          open( File.expand_path(target), "wb" ) { |file| file.write(data) }
+          path = File.expand_path(target)
+          dir = File.dirname(path)
+          FileUtils::mkdir_p(dir)
+          open( path, "wb" ) { |file| file.write(data) }
         end
       end
       return target
