@@ -106,7 +106,7 @@ class StravaLogger < Slogger
               strava['averageSpeed'] *= 3.611940299 #km
               strava['maximumSpeed'] *= 0.001000553 #km
           end
-          output += "# Strava Ride - %.2f %s - %dh %dm %ds - %.1f %s - #{strava['name']}\n\n" % [strava['distance'], unit[1], movingTimeHH, movingTimeMM, movingTimeSS, strava['averageSpeed'], unit[2]] unless strava['name'].nil?
+          output += "# Strava Ride - %.2f %s - %dh %dm %ds - %.1f %s - %s\n\n" % [strava['distance'], unit[1], movingTimeHH, movingTimeMM, movingTimeSS, strava['averageSpeed'], unit[2], strava['name']] unless strava['name'].nil?
           output += "* **Description**: #{strava['description']}\n" unless strava['description'].nil?
           output += "* **Distance**: %.2f %s\n" % [strava['distance'], unit[1]] unless strava['distance'].nil?
           output += "* **Elevation Gain**: %d %s\n" % [strava['elevationGain'], unit[0]] unless strava['elevationGain'].nil?
