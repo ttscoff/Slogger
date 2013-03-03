@@ -5,16 +5,20 @@ Author: [Patrick Walsh](http://twitter.com/zmre)
 Configuration:
   strava_athleteid: "yourid"
   strava_tags: "#social #sports"
+  strava_unit "metric" || "imperial"
 Notes:
   - strava_athleteid is a number you can find in the URL when viewing your profile
   - strava_tags are tags you want to add to every entry, e.g. "#social #sports #cycling #training"
+  - strava_units determine what units to display data in: "metric" or "imperial"
 =end
 require 'rexml/document';
 config = {
   'description' => ['strava_athleteid is a number you can find in the URL when viewing your profile',
-                    'strava_tags are tags you want to add to every entry, e.g. "#social #sports #cycling #training"'],
+                    'strava_tags are tags you want to add to every entry, e.g. "#social #sports #cycling #training"',
+                    'strava_units determine what units to display data in: "metric" or "imperial"'],
   'strava_athleteid' => '',
-  'strava_tags' => '#social #sports'
+  'strava_tags' => '#social #sports',
+  'strava_unit' => 'metric'
 }
 $slog.register_plugin({ 'class' => 'StravaLogger', 'config' => config })
 
@@ -90,17 +94,25 @@ class StravaLogger < Slogger
           elapsedTime = Integer(strava['elapsedTime'])
           elapsedTimeMM, elapsedTimeSS = elapsedTime.divmod(60)
           elapsedTimeHH, elapsedTimeMM = elapsedTimeMM.divmod(60)
-          strava['distance'] *= 0.000621371
-          strava['averageSpeed'] *= 2.23694
-          strava['maximumSpeed'] *= 0.000621371
-          strava['elevationGain'] *= 3.28084
-          output += "# Strava Ride - %.2f mi - %dh %dm %ds - %.1f mph - #{strava['name']}\n\n" % [strava['distance'], movingTimeHH, movingTimeMM, movingTimeSS, strava['averageSpeed']] unless strava['name'].nil?
+          if @grconfig['strava_unit'] == 'imperial'
+              unit = ['ft', 'mi', 'mph']
+              strava['distance'] *= 0.000621371 #mi
+              strava['averageSpeed'] *= 2.23694 #mi
+              strava['maximumSpeed'] *= 0.000621371 #mi
+              strava['elevationGain'] *= 3.28084 #ft
+          elsif @grconfig['strava_unit'] == 'metric'
+              unit = ['m', 'km', 'kph']
+              strava['distance'] *= 0.001001535 #km
+              strava['averageSpeed'] *= 3.611940299 #km
+              strava['maximumSpeed'] *= 0.001000553 #km
+          end
+          output += "# Strava Ride - %.2f %s - %dh %dm %ds - %.1f %s - %s\n\n" % [strava['distance'], unit[1], movingTimeHH, movingTimeMM, movingTimeSS, strava['averageSpeed'], unit[2], strava['name']] unless strava['name'].nil?
           output += "* **Description**: #{strava['description']}\n" unless strava['description'].nil?
-          output += "* **Distance**: %.2f mi\n" % strava['distance'] unless strava['distance'].nil?
-          output += "* **Elevation Gain**: %d ft\n" % strava['elevationGain'] unless strava['elevationGain'].nil?
-          output += "* **Bike**: #{strava['bike']}\n" unless strava['bike'].nil?
-          output += "* **Average Speed**: %.1f mph\n" % strava['averageSpeed'] unless strava['averageSpeed'].nil?
-          output += "* **Max Speed**: %.1f mph\n" % strava['maximumSpeed'] unless strava['maximumSpeed'].nil?
+          output += "* **Distance**: %.2f %s\n" % [strava['distance'], unit[1]] unless strava['distance'].nil?
+          output += "* **Elevation Gain**: %d %s\n" % [strava['elevationGain'], unit[0]] unless strava['elevationGain'].nil?
+          output += "* **Bike**: #{strava['bike']['name']}\n" unless strava['bike'].nil?
+          output += "* **Average Speed**: %.1f %s\n" % [strava['averageSpeed'], unit[2]] unless strava['averageSpeed'].nil?
+          output += "* **Max Speed**: %.1f %s\n" % [strava['maximumSpeed'], unit[2]] unless strava['maximumSpeed'].nil?
           output += "* **Location**: #{strava['location']}\n" unless strava['location'].nil?
           output += "* **Elapsed Time**: %02d:%02d:%02d\n" % [elapsedTimeHH, elapsedTimeMM, elapsedTimeSS] unless strava['elapsedTime'].nil?
           output += "* **Moving Time**: %02d:%02d:%02d\n" % [movingTimeHH, movingTimeMM, movingTimeSS] unless strava['movingTime'].nil?
