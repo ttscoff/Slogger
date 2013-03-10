@@ -122,13 +122,16 @@ class BlogLogger < Slogger
           content = content.markdownify if markdownify rescue ''
 
           options = {}
-          if item.title.respond_to? :content
+
+          if item.class == RSS::Atom::Feed::Entry
             title = item.title.content.gsub(/\n+/,' ')
+            link = item.link.href
           else
             title = item.title.gsub(/\n+/,' ')
+            link = item.link
           end
 
-          options['content'] = "## [#{title.strip}](#{item.link})\n\n#{content.strip}#{tags}"
+          options['content'] = "## [#{title.strip}](#{link.strip})\n\n#{content.strip}#{tags}"
           if !item.date.nil?
             options['datestamp'] = item.date.utc.iso8601
           elsif !item.dc_date.nil?
