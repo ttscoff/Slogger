@@ -118,9 +118,9 @@ class BlogLogger < Slogger
 
           # can't find a way to truncate partial html without nokogiri or other gems...
           # content = content.truncate_html(10) unless @blogconfig['full_posts']
+          content.gsub!(/<iframe src="http:\/\/player\.vimeo\.com.*?href="(http:\/\/vimeo.com\/(\d+))">(.*?)<\/p>/,"\\1\n\n<p>\\3</p>")
           content = content.markdownify if markdownify rescue ''
-          puts content
-          Process.exit
+
           options = {}
           if item.title.respond_to? :content
             title = item.title.content.gsub(/\n+/,' ')
