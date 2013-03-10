@@ -90,28 +90,55 @@ class BlogLogger < Slogger
 
       rss = RSS::Parser.parse(rss_content, false)
       rss.items.each { |item|
-        item_date = Time.parse(item.date.to_s) + Time.now.gmt_offset
+        begin
+          item_date = Time.parse(item.date.to_s) + Time.now.gmt_offset
+        rescue
+          item_date = Time.parse(item.updated.to_s) + Time.now.gmt_offset
+        end
         if item_date > today
-          content = ''
-          if @blogconfig['full_posts']
+          content = nil
+
+          if item.class == RSS::Atom::Feed::Entry
             begin
-              content = item.content_encoded
-            rescue
-              content = item.description
+              content = item.content.content unless item.content.nil?
+              content = item.summary.content if content.nil?
+              @log.error("No content field recognized in feed") if content.nil?
+            rescue Exception => e
+              p e
+              return false
             end
           else
-            content = item.description rescue ''
+            content = item.description
+            @log.error("No content field recognized in feed") if content.nil?
           end
 
           imageurl = false
           image_match = content.match(/src="(http:.*?\.(jpg|png))(\?.*?)?"/i) rescue nil
           imageurl = image_match[1] unless image_match.nil?
 
+          # can't find a way to truncate partial html without nokogiri or other gems...
+          # content = content.truncate_html(10) unless @blogconfig['full_posts']
           content = content.markdownify if markdownify rescue ''
-
+          puts content
+          Process.exit
           options = {}
-          options['content'] = "## [#{item.title.gsub(/\n+/,' ').strip}](#{item.link})\n\n#{content.strip}#{tags}"
-          options['datestamp'] = item.date.utc.iso8601 rescue item.dc_date.utc.iso8601
+          if item.title.respond_to? :content
+            title = item.title.content.gsub(/\n+/,' ')
+          else
+            title = item.title.gsub(/\n+/,' ')
+          end
+
+          options['content'] = "## [#{title.strip}](#{item.link})\n\n#{content.strip}#{tags}"
+          if !item.date.nil?
+            options['datestamp'] = item.date.utc.iso8601
+          elsif !item.dc_date.nil?
+            options['datestamp'] = item.dc_date.utc.iso8601
+          elsif !item.updated.nil?
+            options['datestamp'] = item.updated.content.utc.iso8601
+          else
+            @log.warn("Unable to find proper datestamp")
+            options['datestamp'] = Time.now.utc.iso8601
+          end
           options['starred'] = starred
           options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
           sl = DayOne.new
