@@ -7,14 +7,12 @@ Configuration:
   markdownify_posts: true
   star_posts: true
   blog_tags: "#social #blogging"
-  full_posts: true
 Notes:
   - if found, the first image in the post will be saved as the main image for the entry
   - blog_feeds is an array of feeds separated by commas, a single feed is fine, but it should be inside of brackets `[]`
   - markdownify_posts will convert links and emphasis in the post to Markdown for display in Day One
   - star_posts will star entries created for new posts
   - blog_tags are tags you want to add to every entry, e.g. "#social #blogging"
-  - full_posts will try to save the entire text of the post if it's available in the feed
 =end
 
 config = {
@@ -23,12 +21,10 @@ config = {
                     'markdownify_posts will convert links and emphasis in the post to Markdown for display in Day One',
                     'star_posts will create a starred post for new RSS posts',
                     'blog_tags are tags you want to add to every entry, e.g. "#social #rss"',
-                    'full_posts will try to save the entire text of the post if available in the feed'],
   'blog_feeds' => [],
-  'markdownify_posts' => false,
+  'markdownify_posts' => true,
   'star_posts' => false,
-  'blog_tags' => '#social #blogging',
-  'full_posts' => false
+  'blog_tags' => '#social #blogging'
 }
 $slog.register_plugin({ 'class' => 'BlogLogger', 'config' => config })
 
@@ -121,7 +117,7 @@ class BlogLogger < Slogger
           content.gsub!(/<iframe.*?src="http:\/\/player\.vimeo\.com\/video\/(\d+)".*?\/iframe>(?:<br\/>)+/,"\nhttp://vimeo.com/\\1\n\n")
           content.gsub!(/<iframe.*?src="http:\/\/www\.youtube\.com\/embed\/(.+?)(\?.*?)?".*?\/iframe>/,"\nhttp://www.youtube.com/watch?v=\\1\n\n")
 
-          content = content.markdownify if markdownify rescue ''
+          content = content.markdownify if markdownify rescue content
 
           options = {}
 
