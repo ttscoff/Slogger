@@ -120,6 +120,7 @@ class BlogLogger < Slogger
           # content = content.truncate_html(10) unless @blogconfig['full_posts']
           content.gsub!(/<iframe.*?src="http:\/\/player\.vimeo\.com\/video\/(\d+)".*?\/iframe>(?:<br\/>)+/,"\nhttp://vimeo.com/\\1\n\n")
           content.gsub!(/<iframe.*?src="http:\/\/www\.youtube\.com\/embed\/(.+?)(\?.*?)?".*?\/iframe>/,"\nhttp://www.youtube.com/watch?v=\\1\n\n")
+
           content = content.markdownify if markdownify rescue ''
 
           options = {}
