@@ -87,9 +87,14 @@ class BlogLogger < Slogger
       rss = RSS::Parser.parse(rss_content, false)
       rss.items.each { |item|
         begin
-          item_date = Time.parse(item.date.to_s) + Time.now.gmt_offset
+          if item.class == RSS::Atom::Feed::Entry
+            item_date = Time.parse(item.updated.to_s) + Time.now.gmt_offset
+          else
+            item_date = Time.parse(item.date.to_s) + Time.now.gmt_offset
+          end
         rescue
-          item_date = Time.parse(item.updated.to_s) + Time.now.gmt_offset
+          @log.error("No date information found for posts in #{rss_feed}")
+          return false
         end
         if item_date > today
           content = nil
@@ -98,14 +103,14 @@ class BlogLogger < Slogger
             begin
               content = item.content.content unless item.content.nil?
               content = item.summary.content if content.nil?
-              @log.error("No content field recognized in feed") if content.nil?
+              @log.error("No content field recognized in #{rss_feed}") if content.nil?
             rescue Exception => e
               p e
               return false
             end
           else
             content = item.description
-            @log.error("No content field recognized in feed") if content.nil?
+            @log.error("No content field recognized in #{rss_feed}") if content.nil?
           end
 
           imageurl = false
