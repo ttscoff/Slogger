@@ -20,7 +20,7 @@ config = {
                     'blog_feeds is an array of feeds separated by commas, a single feed is fine, but it should be inside of brackets `[]`',
                     'markdownify_posts will convert links and emphasis in the post to Markdown for display in Day One',
                     'star_posts will create a starred post for new RSS posts',
-                    'blog_tags are tags you want to add to every entry, e.g. "#social #rss"',
+                    'blog_tags are tags you want to add to every entry, e.g. "#social #rss"'],
   'blog_feeds' => [],
   'markdownify_posts' => true,
   'star_posts' => false,
@@ -87,9 +87,10 @@ class BlogLogger < Slogger
       rss = RSS::Parser.parse(rss_content, false)
       rss.items.each { |item|
         begin
-          item_date = Time.parse(item.date.to_s) + Time.now.gmt_offset
+          item_date = Time.parse((item.date || item.updated).to_s) + Time.now.gmt_offset
         rescue
-          item_date = Time.parse(item.updated.to_s) + Time.now.gmt_offset
+          @log.warn("Unable to find proper datestamp")
+          item_date = Time.now
         end
         if item_date > today
           content = nil
