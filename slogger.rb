@@ -18,6 +18,7 @@ require 'erb'
 require 'logger'
 require 'optparse'
 require 'fileutils'
+require 'rexml/parsers/pullparser'
 
 SLOGGER_HOME = File.dirname(File.expand_path(__FILE__))
 ENV['SLOGGER_HOME'] = SLOGGER_HOME
@@ -42,6 +43,14 @@ class String
     contents
   end
 
+  # convert (multi)Markdown to HTML
+  def to_html
+    md = SLOGGER_HOME + '/lib/multimarkdown'
+    return %x{echo #{self.e_sh}|"#{md}"}
+  end
+
+  # shell escape for passing content to external commands
+  # e.g. %x{echo content.e_sh|sort}
   def e_sh
     self.to_s.gsub(/(?=[^a-zA-Z0-9_.\/\-\n])/, '\\').gsub(/\n/, "'\n'").sub(/^$/, "''")
   end
@@ -50,6 +59,51 @@ class String
     self.to_s.gsub(/([\[\]\(\)])/, '\\\\\1')
   end
 
+  # escape text for use in a quoted AppleScript string
+  #
+  # string = %q{"This is a quoted string and it's awfully nice!"}
+  # res = %x{osascript <<'APPLESCRIPT'
+  #   return "hello, #{string.e_as}"
+  # APPLESCRIPT}
+  def e_as(str)
+    str.to_s.gsub(/(?=["\\])/, '\\')
+  end
+
+  def truncate_html(len = 30)
+    p = REXML::Parsers::PullParser.new(self)
+    tags = []
+    new_len = len
+    results = ''
+    while p.has_next? && new_len > 0
+      p_e = p.pull
+      case p_e.event_type
+      when :start_element
+        tags.push p_e[0]
+        results << "<#{tags.last} #{attrs_to_s(p_e[1])}>"
+      when :end_element
+        results << "</#{tags.pop}>"
+      when :text
+        results << p_e[0].first(new_len)
+        new_len -= p_e[0].length
+      else
+        results << "<!-- #{p_e.inspect} -->"
+      end
+    end
+    tags.reverse.each do |tag|
+      results << "</#{tag}>"
+    end
+    results
+  end
+
+  private
+
+  def attrs_to_s(attrs)
+    if attrs.empty?
+      ''
+    else
+      attrs.to_a.map { |attr| %{#{attr[0]}="#{attr[1]}"} }.join(' ')
+    end
+  end
 end
 
 class SloggerUtils
@@ -233,12 +287,11 @@ class Slogger
 </plist>
 XMLTEMPLATE
     else
-      br = "  "
       ERB.new <<-MARKDOWNTEMPLATE
-Title: Journal entry for <%= datestamp %><%= br %>
-Date: <%= datestamp %><%= br %>
-Starred: <%= starred %><%= br %>
-<% if tags %>Tags: <% tags.join(", ") %><%= br %><% end %>
+Title: Journal entry for <%= datestamp %>
+Date: <%= datestamp %>
+Starred: <%= starred %>
+<% if tags %>Tags: <% tags.join(", ") %>  <% end %>
 
 <%= entry %>
 

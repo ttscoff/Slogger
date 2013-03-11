@@ -7,14 +7,12 @@ Configuration:
   markdownify_posts: true
   star_posts: true
   blog_tags: "#social #blogging"
-  full_posts: true
 Notes:
   - if found, the first image in the post will be saved as the main image for the entry
   - blog_feeds is an array of feeds separated by commas, a single feed is fine, but it should be inside of brackets `[]`
   - markdownify_posts will convert links and emphasis in the post to Markdown for display in Day One
   - star_posts will star entries created for new posts
   - blog_tags are tags you want to add to every entry, e.g. "#social #blogging"
-  - full_posts will try to save the entire text of the post if it's available in the feed
 =end
 
 config = {
@@ -22,13 +20,11 @@ config = {
                     'blog_feeds is an array of feeds separated by commas, a single feed is fine, but it should be inside of brackets `[]`',
                     'markdownify_posts will convert links and emphasis in the post to Markdown for display in Day One',
                     'star_posts will create a starred post for new RSS posts',
-                    'blog_tags are tags you want to add to every entry, e.g. "#social #rss"',
-                    'full_posts will try to save the entire text of the post if available in the feed'],
+                    'blog_tags are tags you want to add to every entry, e.g. "#social #rss"'],
   'blog_feeds' => [],
-  'markdownify_posts' => false,
+  'markdownify_posts' => true,
   'star_posts' => false,
-  'blog_tags' => '#social #blogging',
-  'full_posts' => false
+  'blog_tags' => '#social #blogging'
 }
 $slog.register_plugin({ 'class' => 'BlogLogger', 'config' => config })
 
@@ -90,28 +86,65 @@ class BlogLogger < Slogger
 
       rss = RSS::Parser.parse(rss_content, false)
       rss.items.each { |item|
-        item_date = Time.parse(item.date.to_s) + Time.now.gmt_offset
+        begin
+          if item.class == RSS::Atom::Feed::Entry
+            item_date = Time.parse(item.updated.to_s) + Time.now.gmt_offset
+          else
+            item_date = Time.parse(item.date.to_s) + Time.now.gmt_offset
+          end
+        rescue
+          @log.error("No date information found for posts in #{rss_feed}")
+          return false
+        end
         if item_date > today
-          content = ''
-          if @blogconfig['full_posts']
+          content = nil
+
+          if item.class == RSS::Atom::Feed::Entry
             begin
-              content = item.content_encoded
-            rescue
-              content = item.description
+              content = item.content.content unless item.content.nil?
+              content = item.summary.content if content.nil?
+              @log.error("No content field recognized in #{rss_feed}") if content.nil?
+            rescue Exception => e
+              p e
+              return false
             end
           else
-            content = item.description rescue ''
+            content = item.description
+            @log.error("No content field recognized in #{rss_feed}") if content.nil?
           end
 
           imageurl = false
           image_match = content.match(/src="(http:.*?\.(jpg|png))(\?.*?)?"/i) rescue nil
           imageurl = image_match[1] unless image_match.nil?
 
-          content = content.markdownify if markdownify rescue ''
+          # can't find a way to truncate partial html without nokogiri or other gems...
+          # content = content.truncate_html(10) unless @blogconfig['full_posts']
+          content.gsub!(/<iframe.*?src="http:\/\/player\.vimeo\.com\/video\/(\d+)".*?\/iframe>(?:<br\/>)+/,"\nhttp://vimeo.com/\\1\n\n")
+          content.gsub!(/<iframe.*?src="http:\/\/www\.youtube\.com\/embed\/(.+?)(\?.*?)?".*?\/iframe>/,"\nhttp://www.youtube.com/watch?v=\\1\n\n")
+
+          content = content.markdownify if markdownify rescue content
 
           options = {}
-          options['content'] = "## [#{item.title.gsub(/\n+/,' ').strip}](#{item.link})\n\n#{content.strip}#{tags}"
-          options['datestamp'] = item.date.utc.iso8601 rescue item.dc_date.utc.iso8601
+
+          if item.class == RSS::Atom::Feed::Entry
+            title = item.title.content.gsub(/\n+/,' ')
+            link = item.link.href
+          else
+            title = item.title.gsub(/\n+/,' ')
+            link = item.link
+          end
+
+          options['content'] = "## [#{title.strip}](#{link.strip})\n\n#{content.strip}#{tags}"
+          if !item.date.nil?
+            options['datestamp'] = item.date.utc.iso8601
+          elsif !item.dc_date.nil?
+            options['datestamp'] = item.dc_date.utc.iso8601
+          elsif !item.updated.nil?
+            options['datestamp'] = item.updated.content.utc.iso8601
+          else
+            @log.warn("Unable to find proper datestamp")
+            options['datestamp'] = Time.now.utc.iso8601
+          end
           options['starred'] = starred
           options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
           sl = DayOne.new
