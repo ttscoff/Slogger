@@ -87,9 +87,10 @@ class BlogLogger < Slogger
       rss = RSS::Parser.parse(rss_content, false)
       rss.items.each { |item|
         begin
-          item_date = Time.parse(item.date.to_s) + Time.now.gmt_offset
+          item_date = Time.parse((item.date || item.updated).to_s) + Time.now.gmt_offset
         rescue
-          item_date = Time.parse(item.updated.to_s) + Time.now.gmt_offset
+          @log.warn("Unable to find proper datestamp")
+          item_date = Time.now
         end
         if item_date > today
           content = nil
