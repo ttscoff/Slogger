@@ -49,29 +49,30 @@ class PocketLogger < Slogger
       when "read" then "### Items read today:"
       when "unread" then "### Items saved today:"
       end
-      output += "#{title}\n\n"
+
       begin
         rss_content = ""
         open(rss_feed) do |f|
           rss_content = f.read
         end
-
+        tempoutput = ""
         rss = RSS::Parser.parse(rss_content, false)
 
         rss.items.each { |item|
           item_date = Time.parse(item.pubDate.to_s)
           if item_date > @timespan
-            output += "* [#{item.title}](#{item.link})\n\n"
+            tempoutput += "* [#{item.title}](#{item.link})\n"
           else
             break
           end
         }
+        output += "#{title}\n\n#{tempoutput}\n\n" unless tempoutput == ""
+
       rescue Exception => e
         puts "Error getting posts for #{username}"
         p e
         return ''
       end
-      output += "\n\n"
     }
     unless output == ''
       options = {}
