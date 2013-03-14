@@ -122,6 +122,9 @@ class BlogLogger < Slogger
           content.gsub!(/<iframe.*?src="http:\/\/player\.vimeo\.com\/video\/(\d+)".*?\/iframe>(?:<br\/>)+/,"\nhttp://vimeo.com/\\1\n\n")
           content.gsub!(/<iframe.*?src="http:\/\/www\.youtube\.com\/embed\/(.+?)(\?.*?)?".*?\/iframe>/,"\nhttp://www.youtube.com/watch?v=\\1\n\n")
 
+          # handle "&nbsp_place_holder;" thing
+          content.gsub!(/&nbsp_place_holder;/," ")
+
           content = content.markdownify if markdownify rescue content
 
           options = {}
