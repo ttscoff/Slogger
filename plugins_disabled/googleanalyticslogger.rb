@@ -33,9 +33,6 @@ Notes:
   - Since Google Analytics is date (not time) based, we cannot follow the usual Slogger process of including all the data that fits between the given timestamps (since the last run). Instead, if the given start time is yesterday or before, it requests the data by date, compacts the data to a daily record then appends each daily to a daily content body. Once the bodies are all created, it creates a DayOne entry for each date (for each site).
   - If the last run date is today, this logger intentionally does nothing.
 
-  MUTABLE CONFIG:
-  - Because these tokens change, this class needs access to the original config data structure (called mutable_config) to save these tokens for reuse. This means that the `slogger.rb` file needs to change to pass this data in or this script will not work. I have coded the changes to the mutable config separately to using the traditional config so that they stand out when refactoring later.
-
   BACK FILL:
   - Feel free to use the Slogger -t DAYS parameter to back-fill your journal, but do this only once, this Logger does not check to see if an entry already appears for a date.
 =end
@@ -72,7 +69,7 @@ require 'google/api_client'
 class GoogleAnalyticsLogger < Slogger
 
   # ALERT: Has a parameter, you did remember to update `slogger.rb` right?
-  def do_log(mutable_config)
+  def do_log
 
     # Check Setup
     if @config.key?(self.class.name)
@@ -135,9 +132,9 @@ class GoogleAnalyticsLogger < Slogger
 
       config['access_token'] = new_tokens['access_token']
       config['refresh_token'] = new_tokens['refresh_token']
-
-      mutable_config['GoogleAnalyticsLogger']['access_token'] = new_tokens['access_token']
-      mutable_config['GoogleAnalyticsLogger']['refresh_token'] = new_tokens['refresh_token']
+      # 
+      # mutable_config['GoogleAnalyticsLogger']['access_token'] = new_tokens['access_token']
+      # mutable_config['GoogleAnalyticsLogger']['refresh_token'] = new_tokens['refresh_token']
     end
 
     client.authorization.access_token = config['access_token']
@@ -149,7 +146,7 @@ class GoogleAnalyticsLogger < Slogger
       @log.info("Refreshing access Token...")
       new_tokens = client.authorization.fetch_access_token!
       config['access_token'] = new_tokens['access_token']
-      mutable_config[self.class.name]['access_token'] = new_tokens['access_token']
+      # mutable_config[self.class.name]['access_token'] = new_tokens['access_token']
     end
 
     # If we get here, its likely we have defeated the OAuth2 boss level
@@ -165,7 +162,7 @@ class GoogleAnalyticsLogger < Slogger
     profiles = {}
     if result.data['error'] != nil
       @log.warn("Google Analytics profile error: #{result.data.inspect}")
-      return
+      return config
     end
 
     # If we get here, we've saved the princess and this Logger is working fine
@@ -309,5 +306,6 @@ class GoogleAnalyticsLogger < Slogger
         sl.to_dayone(options)
       end
     end
+    return config
   end
 end
