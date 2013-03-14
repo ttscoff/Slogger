@@ -94,8 +94,8 @@ class BlogLogger < Slogger
             item_date = Time.parse(item.date.to_s) + Time.now.gmt_offset
           end
         rescue
-          @log.error("No date information found for posts in #{rss_feed}")
-          return false
+          @log.warn("No date information found for posts in #{rss_feed}")
+          item_date = Time.now
         end
         if item_date > today
           content = nil
