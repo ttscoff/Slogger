@@ -1,5 +1,6 @@
 =begin
 Plugin: FourSquare Logger
+Version: 1.0
 Description: Checks Foursquare feed once a day for that day's posts.
 Author: [Jeff Mueller](https://github.com/jeffmueller)
 Configuration:

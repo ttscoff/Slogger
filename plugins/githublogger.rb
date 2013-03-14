@@ -1,5 +1,6 @@
 =begin
 Plugin: Github Logger
+Version: 1.1
 Description: Logs daily Github activity for the specified user
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:

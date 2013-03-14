@@ -1,5 +1,6 @@
 =begin
 Plugin: App.net Logger
+Version: 1.0
 Description: Logs today's posts to App.net.
 Notes:
   appnet_usernames is an array of App.net user names

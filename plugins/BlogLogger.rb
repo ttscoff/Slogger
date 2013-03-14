@@ -1,5 +1,6 @@
 =begin
 Plugin: Blog Logger
+Version: 2.1
 Description: Logs individual blog posts for the current timespan using RSS feeds
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
