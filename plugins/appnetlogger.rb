@@ -55,7 +55,7 @@ class AppNetLogger < Slogger
     config['appnet_usernames'].each do |user|
       begin
         rss_feed = "https://alpha-api.app.net/feed/rss/users/@"+ user + "/posts"
-
+                                        
         url = URI.parse rss_feed
 
         http = Net::HTTP.new url.host, url.port
@@ -74,7 +74,7 @@ class AppNetLogger < Slogger
           item_date = Time.parse(item.date.to_s) + Time.now.gmt_offset
           if item_date > @timespan
             content = ''
-            item.title = item.title.gsub(/^#{user}: /,'').strip   # remove user's own name from front of post
+            item.title = item.title.gsub(/^@#{user}: /,'').strip   # remove user's own name from front of post
             item.title = item.title.gsub(/\n/,"\n    ")           # fix for multi-line posts displayed in markdown
             if item.title =~ /^@/
               if config['appnet_save_replies'] == true
