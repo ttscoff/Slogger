@@ -18,7 +18,9 @@ class ConfigTools
   def default_config
     config = {
       'storage' => 'icloud',
-      'image_filename_is_title' => true
+      'image_filename_is_title' => true,
+      'date_format' => '%F',
+      'time_format' => '%R'
     }
     config
   end
