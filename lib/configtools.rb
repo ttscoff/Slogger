@@ -3,7 +3,7 @@ require 'yaml'
 class ConfigTools
   attr_accessor :config_file
   def initialize(options)
-    YAML::ENGINE.yamler = 'syck' if defined?(YAML::ENGINE)
+    YAML::ENGINE.yamler = 'syck' if defined?(YAML::ENGINE) && RUBY_VERSION < "2.0.0"
     @config_file = options['config_file']
   end
 
