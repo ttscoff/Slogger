@@ -63,12 +63,13 @@ Slogger indexes various public social services and creates Day One (<http://dayo
 
 1. From within the Slogger folder, run `./slogger` to create the initial configuration file. If this doesn't work, you may need to make the file executable: `chmod a+x slogger` from within the Slogger folder.
 2. Edit the file `slogger_config` that shows up
-    - The only options will be 'storage:' and 'image_filename_is_title:'
+    - The only options will be 'storage:', 'image_filename_is_title:', 'date_format:' and 'time_format:'
     - storage: should be one of
         -  'icloud'
         -  a path to a Dropbox-synced Journal (e.g. '/Users/username/Dropbox/Apps/Day One/Journal.dayone')
         -  a path to a folder for storing markdown files and related images (if the path doesn't end in "Journal.dayone", markdown storage is triggered automatically)
     - image_filename_is_title: should be set to true or false. If true, it will use the base filename (without extension) as the title of images imported individually.
+    - date_format and time_format should be set to your favorite style (strftime)
 3. Move any additional plugins you want to use from `/plugins_disabled/` into `/plugins/`.
 4. Run `./slogger` again to update the configuration file with enabled plugin options.
 5. Edit `slogger_config` again and fill in the necessary parameters for listed configuration settings.
@@ -124,6 +125,8 @@ When developing plugins you can create a directory called 'plugins_develop' in t
 - `:retries` is the number of retries to attempt on any given operation. Create loops in network calls and parsing routines to allow for retry on failure, and use `$options[:retries]` to determine how many times to iterate.
 
 `@timespan` is available to all plugins and contains a date object based on the timespan setting. This defaults to 24 hours prior to the run.
+
+`@date_format`, `@time_format` and `@datetime_format` (this is just the conjunction of the first two) are available to all plugins and should be used wherever you output a date or time to DayOne files, e.g. `Time.now.strftime(@date_format)`.
 
 ## License
 
