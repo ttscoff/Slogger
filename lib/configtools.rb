@@ -3,7 +3,7 @@ require 'yaml'
 class ConfigTools
   attr_accessor :config_file
   def initialize(options)
-    YAML::ENGINE.yamler = 'syck' if defined?(YAML::ENGINE)
+    YAML::ENGINE.yamler = 'syck' if defined?(YAML::ENGINE) && RUBY_VERSION < "2.0.0"
     @config_file = options['config_file']
   end
 
@@ -18,7 +18,9 @@ class ConfigTools
   def default_config
     config = {
       'storage' => 'icloud',
-      'image_filename_is_title' => true
+      'image_filename_is_title' => true,
+      'date_format' => '%F',
+      'time_format' => '%R'
     }
     config
   end

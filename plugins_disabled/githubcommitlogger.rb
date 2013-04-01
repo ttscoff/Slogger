@@ -70,14 +70,14 @@ class GithubCommitLogger < Slogger
             action['payload']['commits'].each do |commit|
               output += "    * #{commit['message'].gsub(/\n+/," ")}\n" 
             end
-          end
+        end
       else
         break
       end
     }
 
     return false if output.strip == ""
-    entry = "Github activity for #{Time.now.strftime("%m-%d-%Y")}:\n\n#{output}\n#{config['github_tags']}"
+    entry = "Github activity for #{Time.now.strftime(@date_format)}:\n\n#{output}\n#{config['github_tags']}"
     DayOne.new.to_dayone({ 'content' => entry })
   end
 

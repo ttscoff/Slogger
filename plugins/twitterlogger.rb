@@ -154,7 +154,7 @@ class TwitterLogger < Slogger
           p e
         end
         if tweet_images.empty? or !@twitter_config["save_images_from_#{type}"]
-          tweets.push("* [[#{tweet_date.strftime('%I:%M %p')}](https://twitter.com/#{user}/status/#{tweet_id})] #{tweet_text}")
+          tweets.push("* [[#{tweet_date.strftime(@time_format)}](https://twitter.com/#{user}/status/#{tweet_id})] #{tweet_text}")
         else
           images.concat(tweet_images)
         end
@@ -212,15 +212,15 @@ class TwitterLogger < Slogger
       end
 
       unless tweets == ''
-        tweets = "## Tweets\n\n### Posts by @#{user} on #{Time.now.strftime('%m-%d-%Y')}\n\n#{tweets}#{tags}"
+        tweets = "## Tweets\n\n### Posts by @#{user} on #{Time.now.strftime(@date_format)}\n\n#{tweets}#{tags}"
         sl.to_dayone({'content' => tweets})
       end
       unless favs == ''
-        favs = "## Favorite Tweets\n\n### Favorites from @#{user} for #{Time.now.strftime('%m-%d-%Y')}\n\n#{favs}#{tags}"
+        favs = "## Favorite Tweets\n\n### Favorites from @#{user} for #{Time.now.strftime(@date_format)}\n\n#{favs}#{tags}"
         sl.to_dayone({'content' => favs})
       end
       unless  retweets == ''
-        retweets = "## Retweets\n\n### Retweets from @#{user} for #{Time.now.strftime('%m-%d-%Y')}\n\n#{retweets}#{tags}"
+        retweets = "## Retweets\n\n### Retweets from @#{user} for #{Time.now.strftime(@date_format)}\n\n#{retweets}#{tags}"
         sl.to_dayone({'content' => retweets})
       end
     end
