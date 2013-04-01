@@ -1,5 +1,6 @@
 =begin
 Plugin: GetGlue Logger
+Version: 1.0
 Description: Brief description (one line)
 Author: [Dom Barnes](http://dombarnes.com)
 Configuration:

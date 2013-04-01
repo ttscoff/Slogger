@@ -1,5 +1,6 @@
 =begin
 Plugin: Twitter Logger
+Version: 2.0
 Description: Logs updates and favorites for specified Twitter users
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:

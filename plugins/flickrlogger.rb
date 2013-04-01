@@ -1,5 +1,6 @@
 =begin
 Plugin: Flickr Logger
+Version: 1.0
 Description: Logs today's photos from Flickr.
 Notes:
   Get your Flickr ID at <http://idgettr.com/>

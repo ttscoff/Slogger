@@ -1,5 +1,6 @@
 =begin
 Plugin: Instapaper Logger
+Version: 1.0
 Description: Logs today's additions to Instapaper.
 Notes:
   instapaper_feeds is an array of Instapaper RSS feeds

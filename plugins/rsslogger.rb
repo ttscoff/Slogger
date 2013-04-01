@@ -1,5 +1,6 @@
 =begin
 Plugin: RSS Logger
+Version: 1.0
 Description: Logs any RSS feed as a digest and checks for new posts for the current day
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:

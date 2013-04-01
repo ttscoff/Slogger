@@ -1,5 +1,6 @@
 =begin
 Plugin: Blog Logger
+Version: 2.1
 Description: Logs individual blog posts for the current timespan using RSS feeds
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
@@ -93,8 +94,8 @@ class BlogLogger < Slogger
             item_date = Time.parse(item.date.to_s) + Time.now.gmt_offset
           end
         rescue
-          @log.error("No date information found for posts in #{rss_feed}")
-          return false
+          @log.warn("No date information found for posts in #{rss_feed}")
+          item_date = Time.now
         end
         if item_date > today
           content = nil
@@ -123,6 +124,9 @@ class BlogLogger < Slogger
           content.gsub!(/<iframe.*?src="http:\/\/www\.youtube\.com\/embed\/(.+?)(\?.*?)?".*?\/iframe>/,"\nhttp://www.youtube.com/watch?v=\\1\n\n")
 
           content = content.markdownify if markdownify rescue content
+
+          # handle "&nbsp_place_holder;" thing
+          content.gsub!(/&nbsp_place_holder;/," ")
 
           options = {}
 

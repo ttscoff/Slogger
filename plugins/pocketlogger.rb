@@ -1,5 +1,6 @@
 =begin
 Plugin: Pocket Logger
+Version: 2.0
 Description: Logs today's additions to Pocket.
 Notes:
   pocket_username is a string with your Pocket username
