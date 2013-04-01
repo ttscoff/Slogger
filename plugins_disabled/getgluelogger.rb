@@ -65,20 +65,20 @@ class GetglueLogger < Slogger
     rss.items.each { |item|
       break if Time.parse(item.pubDate.to_s) < @timespan
       if item.description !=""
-        content += "* [#{item.pubDate.strftime('%H:%M %p')}](#{item.link}) - #{item.title} \"#{item.description}\"\n"
+        content += "* [#{item.pubDate.strftime(@time_format)}](#{item.link}) - #{item.title} \"#{item.description}\"\n"
       else
-        content += "* [#{item.pubDate.strftime('%H:%M %p')}](#{item.link}) - #{item.title}\n"
+        content += "* [#{item.pubDate.strftime(@time_format)}](#{item.link}) - #{item.title}\n"
       end
     }
     if content != ''
-      entrytext = "## GetGlue Checkins for #{@timespan.strftime('%m-%d-%Y')}\n\n" + content + "\n#{@tags}"
+      entrytext = "## GetGlue Checkins for #{@timespan.strftime(@date_format)}\n\n" + content + "\n#{@tags}"
     end
 
     # create an options array to pass to 'to_dayone'
     # all options have default fallbacks, so you only need to create the options you want to specify
     if content != ''
       options = {}
-      options['content'] = "## GetGlue Activity for #{@timespan.strftime('%m-%d-%Y')}\n\n#{content} #{tags}"
+      options['content'] = "## GetGlue Activity for #{@timespan.strftime(@date_format)}\n\n#{content} #{tags}"
       options['datestamp'] = @timespan.utc.iso8601
       options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
 
