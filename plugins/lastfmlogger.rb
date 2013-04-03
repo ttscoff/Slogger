@@ -1,5 +1,6 @@
 =begin
 Plugin: Last.fm Logger
+Version: 1.2
 Description: Logs playlists and loved tracks for the day
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
@@ -59,7 +60,7 @@ class LastFMLogger < Slogger
       end
       content = ''
       rss = RSS::Parser.parse(rss_content, false)
-      
+
       # define a hash to store song count and a hash to link song title to the last.fm URL
 	  songs_count = {}
 	  title_to_link = {}
@@ -79,10 +80,10 @@ class LastFMLogger < Slogger
 			songs_count[title] += 1
 		end
       }
-      
+
       # loop over each song and make final output as appropriate
-	  # (depending on whether there was 1 play or more)	      
-      songs_count.each { |k, v| 
+	  # (depending on whether there was 1 play or more)
+      songs_count.each { |k, v|
 
         # a fudge because I couldn't seem to access this hash value directly in
         # the if statement
@@ -96,7 +97,7 @@ class LastFMLogger < Slogger
       	}
 
       if content != ''
-        entrytext = "#{rss_feed['title']} for #{today.strftime('%m-%d-%Y')}\n\n" + content + "\n#{tags}"
+        entrytext = "#{rss_feed['title']} for #{today.strftime(@date_format)}\n\n" + content + "\n#{tags}"
       end
       DayOne.new.to_dayone({'content' => entrytext}) unless entrytext == ''
     end

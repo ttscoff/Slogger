@@ -1,5 +1,6 @@
 =begin
 Plugin: Pinboard Logger
+Version: 1.0
 Description: Logs today's bookmarks from Pinboard.in.
 Notes:
   pinboard_feeds is an array of Pinboard RSS feeds

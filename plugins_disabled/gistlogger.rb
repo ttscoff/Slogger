@@ -66,7 +66,7 @@ class GistLogger < Slogger
     }
 
     return false if output.strip == ""
-    entry = "## Gists for #{Time.now.strftime("%m-%d-%Y")}:\n\n#{output}\n#{config['gist_tags']}"
+    entry = "## Gists for #{Time.now.strftime(@date_format)}:\n\n#{output}\n#{config['gist_tags']}"
     DayOne.new.to_dayone({ 'content' => entry })
   end
 

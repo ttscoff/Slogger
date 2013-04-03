@@ -1,5 +1,6 @@
 =begin
 Plugin: Twitter Logger
+Version: 2.0
 Description: Logs updates and favorites for specified Twitter users
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
@@ -78,7 +79,8 @@ class TwitterLogger < Slogger
         url = URI.parse("http://api.twitter.com/1/statuses/user_timeline.xml?screen_name=#{user}&count=200&exclude_replies=#{@twitter_config['exclude_replies']}&include_entities=true")
 
       when 'retweets'
-        url = URI.parse("http://api.twitter.com/1/statuses/retweeted_by_user.xml?screen_name=#{user}&count=200&include_entities=true")        
+        url = URI.parse("http://api.twitter.com/1/statuses/retweeted_by_user.xml?screen_name=#{user}&count=200&include_entities=true")
+
     end
 
     tweets = []
@@ -154,8 +156,8 @@ class TwitterLogger < Slogger
           @log.warn("Failure gathering image urls")
           p e
         end
-        if tweet_images.empty? or (type == 'favorites' and !@twitter_config['save_images_from_favorites'])
-          tweets.push("* [[#{tweet_date.strftime('%I:%M %p')}](https://twitter.com/#{user}/status/#{tweet_id})] #{tweet_text}")
+        if tweet_images.empty? or !@twitter_config["save_images_from_#{type}"]
+          tweets.push("* [[#{tweet_date.strftime(@time_format)}](https://twitter.com/#{user}/status/#{tweet_id})] #{tweet_text}")
         else
           images.concat(tweet_images)
         end
@@ -199,7 +201,7 @@ class TwitterLogger < Slogger
     @twitter_config['twitter_users'].each do |user|
 
       tweets = try { self.get_tweets(user, 'timeline') }
-      
+
       if @twitter_config['save_favorites']
         favs = try { self.get_tweets(user, 'favorites')}
       else
@@ -213,15 +215,15 @@ class TwitterLogger < Slogger
       end
 
       unless tweets == ''
-        tweets = "Tweets\n\n### Posts by @#{user} on #{Time.now.strftime('%m-%d-%Y')}\n\n#{tweets}#{tags}"
+        tweets = "## Tweets\n\n### Posts by @#{user} on #{Time.now.strftime(@date_format)}\n\n#{tweets}#{tags}"
         sl.to_dayone({'content' => tweets})
       end
       unless favs == ''
-        favs = "Favorite Tweets\n\n### Favorites from @#{user} for #{Time.now.strftime('%m-%d-%Y')}\n\n#{favs}#{tags}"
+        favs = "## Favorite Tweets\n\n### Favorites from @#{user} for #{Time.now.strftime(@date_format)}\n\n#{favs}#{tags}"
         sl.to_dayone({'content' => favs})
       end
       unless  retweets == ''
-        retweets = "Retweets\n\n### Retweets from @#{user} for #{Time.now.strftime('%m-%d-%Y')}\n\n#{retweets}#{tags}"
+        retweets = "## Retweets\n\n### Retweets from @#{user} for #{Time.now.strftime(@date_format)}\n\n#{retweets}#{tags}"
         sl.to_dayone({'content' => retweets})
       end
     end
@@ -241,7 +243,7 @@ class TwitterLogger < Slogger
         sleep 2
       end
     end
-    result  
+    result
   end
 
 end

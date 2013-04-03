@@ -1,5 +1,6 @@
 =begin
 Plugin: Github Logger
+Version: 1.1
 Description: Logs daily Github activity for the specified user
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
@@ -72,14 +73,14 @@ class GithubLogger < Slogger
               output += "* Started watching [#{action['repository']['owner']}/#{action['repository']['name']}](#{action['repository']['url']})\n"
               output += "    * #{action['repository']['description'].gsub(/\n/," ")}\n" unless action['repository']['description'].nil?
             end
-          end
+        end
       else
         break
       end
     }
 
     return false if output.strip == ""
-    entry = "## Github activity for #{Time.now.strftime("%m-%d-%Y")}:\n\n#{output}\n#{config['github_tags']}"
+    entry = "## Github activity for #{Time.now.strftime(@date_format)}:\n\n#{output}\n#{config['github_tags']}"
     DayOne.new.to_dayone({ 'content' => entry })
   end
 
