@@ -166,6 +166,9 @@ class Slogger
     @config['image_filename_is_title'] ||= false
     @dayonepath = self.storage_path
     @template = self.template
+    @date_format = @config['date_format'] || '%F'
+    @time_format = @config['time_format'] || '%R'
+    @datetime_format = "#{@date_format} #{@time_format}"
   end
 
   def undo_slogger(count = 1)

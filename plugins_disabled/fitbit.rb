@@ -138,7 +138,7 @@ class FitbitLogger < Slogger
             
             # Create a journal entry
             options = {}
-            options['content'] = "## Fitbit - Summary for #{timestring}\n\n#{output}#{tags}"
+            options['content'] = "## Fitbit - Summary for #{currentDate.strftime(@date_format)}\n\n#{output}#{tags}"
             options['datestamp'] = currentDate.utc.iso8601
             sl = DayOne.new
             sl.to_dayone(options)

@@ -27,9 +27,19 @@ else
 end
 
 if File.exists?(dir+"/slogger")
+	flags = ""
+	puts "By default, Slogger runs once a day at 11:50PM."
+	puts "If your computer is not always on, you can have"
+	puts "Slogger fetch data back to the time of the last"
+	puts "successful run."
+	puts
+	puts "Is your Mac routinely offline at 11:50PM?"
+	print "(Y/n)"
+	ans = gets.chomp
+	flags += " -s" if ans.downcase == "y"
 
-print "Setting up launchd... "
-xml=<<LAUNCHCTLPLIST
+	print "Setting up launchd... "
+	xml=<<LAUNCHCTLPLIST
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -39,7 +49,7 @@ xml=<<LAUNCHCTLPLIST
 	<key>ProgramArguments</key>
 	<array>
 		<string>/usr/bin/ruby</string>
-		<string>#{dir}/slogger</string>
+		<string>#{dir}/slogger#{flags}</string>
 	</array>
 	<key>StartCalendarInterval</key>
 	<dict>
@@ -52,21 +62,22 @@ xml=<<LAUNCHCTLPLIST
 </plist>
 LAUNCHCTLPLIST
 
-target_dir = File.expand_path("~/Library/LaunchAgents")
-target_file = File.expand_path(target_dir+"/com.brettterpstra.slogger.plist")
+	target_dir = File.expand_path("~/Library/LaunchAgents")
+	target_file = File.expand_path(target_dir+"/com.brettterpstra.slogger.plist")
 
-Dir.mkdir(target_dir) unless File.exists?(target_dir)
+	Dir.mkdir(target_dir) unless File.exists?(target_dir)
 
-open(target_file,'w') { |f|
-	f.puts xml
-} unless File.exists?(target_file)
+	open(target_file,'w') { |f|
+		f.puts xml
+	} unless File.exists?(target_file)
 
-%x{launchctl load "#{target_file}"}
-puts "done!"
-puts
-puts "----------------------"
-puts "Installation complete."
+	%x{launchctl load "#{target_file}"}
+	puts "done!"
+	puts
+	puts "----------------------"
+	puts "Installation complete."
 
 else
-	puts "Slogger doesn't appear to exist in the directory specified. Please check your file location and try again."
+	puts "Slogger doesn't appear to exist in the directory specified."
+	puts "Please check your file location and try again."
 end

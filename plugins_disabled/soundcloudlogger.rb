@@ -1,5 +1,6 @@
 =begin
 Plugin: SoundCloud Logger
+Version: 1.0
 Description: Logs SoundCloud uploads as a digest
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:

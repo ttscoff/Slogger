@@ -8,3 +8,6 @@ plugins_develop
 runlog.txt
 /slogger.log
 *test.*
+projectnotes.md
+bintest
+.fuse*
