@@ -58,48 +58,62 @@ class GaugesLogger < Slogger
     end
     @log.info("Logging Gaug.es stats")
 
+    date = @timespan
+
     json = gauges_api_call(key,"gauges")
     return false unless json
-    output = ""
     gauges = []
-    json['gauges'].each {|g|
-      gauge = {}
-      gauge['title'] = g['title']
-      gauge['today'] = {'views' => g['today']['views'], 'visits' => g['today']['people']}
 
-      urls = g['urls']
-      pages = gauges_api_call(key,urls['content'])
-      referrers = gauges_api_call(key,urls['referrers'])
-      gauge['top_pages'] = pages['content']
-      gauge['top_referrers'] = referrers['referrers']
+    while date.strftime("%Y%m%d") <= Time.now.strftime("%Y%m%d")
+      json['gauges'].each {|g|
+        gauge = {}
+        gauge['title'] = g['title']
+        gauge['date'] = date
+        urls = g['urls']
 
-      gauges.push(gauge)
-    }
+        traffic = gauges_api_call(key,urls['traffic']+"?date=#{date.strftime("%Y-%m-%d")}")
 
-    output = ""
+        traffic['traffic'].each { |t|
+          if t['date'] == date.strftime("%Y-%m-%d")
+            gauge['today'] = {'views' => t['views'], 'visits' => t['people']}
+          end
+        }
+
+        pages = gauges_api_call(key,urls['content']+"?date=#{date.strftime("%Y-%m-%d")}")
+        referrers = gauges_api_call(key,urls['referrers']+"?date=#{date.strftime("%Y-%m-%d")}")
+        gauge['top_pages'] = pages['content'][0..5]
+        gauge['top_referrers'] = referrers['referrers'][0..5]
+
+        gauges.push(gauge)
+      }
+      date = date + (60 * 60 * 24)
+    end
 
     gauges.each {|gauge|
-      output += "## #{gauge['title']}\n\n"
+      output = ""
+      # p date.strftime(@date_format)
+      # p gauge['title']
+      # p gauge['today']
       output += "* Visits: **#{gauge['today']['visits']}**\n"
       output += "* Views: **#{gauge['today']['views']}**"
 
       output += "\n\n### Top content:\n\n"
 
-      gauge['top_pages'][0..5].each {|page|
-        output += "* [#{page['title']}](#{page['url']})\n"
+      gauge['top_pages'].each {|page|
+        output += "* [#{page['title']}](#{page['url']}) (#{page['views']})\n"
       }
 
       output += "\n\n### Top referrers:\n\n"
 
-      gauge['top_referrers'][0..5].each {|ref|
-        output += "* <#{ref['url']}>\n"
+      gauge['top_referrers'].each {|ref|
+        output += "* <#{ref['url']}> (#{ref['views']})\n"
       }
       output += "\n\n"
-    }
 
-    return false if output.strip == ""
-    entry = "# Gaug.es report for #{Time.now.strftime(@date_format)}\n\n#{output}\n#{config['gauges_tags']}"
-    DayOne.new.to_dayone({ 'content' => entry })
+      return false if output.strip == ""
+      entry = "# Gaug.es report for #{gauge['title']} on #{gauge['date'].strftime(@date_format)}\n\n#{output}\n#{config['gauges_tags']}"
+      DayOne.new.to_dayone({ 'content' => entry, 'datestamp' => gauge['date'].utc.iso8601 })
+    }
   end
 
 end
