@@ -80,7 +80,7 @@ class FacebookIFTTTLogger < Slogger
     f.close
 
     if !content.empty?
-      content.each do |line|
+      content.each_line do |line|
          if line =~ regDate
           inpost = false
           line = line.strip
