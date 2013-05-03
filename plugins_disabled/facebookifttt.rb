@@ -80,7 +80,8 @@ class FacebookIFTTTLogger < Slogger
     f.close
 
     if !content.empty?
-      content.each_line do |line|
+      each_selector = RUBY_VERSION < "1.9.2" ? :each : :each_line
+      content.send(each_selector) do | line|
          if line =~ regDate
           inpost = false
           line = line.strip
