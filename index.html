@@ -164,14 +164,17 @@
 </li>
 <li>
 <strong>NEW:</strong> #tags in posts are saved as native tags. Default tags specified in the config are saved, as well as any hashtags present in the post. Github #XX issue references are ignored.</li>
-</ul><h2>Configure</h2>
+</ul><h2>Install</h2>
 
 <ol>
-<li>From within the Slogger folder, run <code>./slogger</code> to create the initial configuration file. If this doesn't work, you may need to make the file executable: <code>chmod a+x slogger</code> from within the Slogger folder.</li>
-<li>Edit the file <code>slogger_config</code> that shows up
+<li>Download and unzip (or clone using git) the Slogger project. It can be stored in your home directory, a scripts folder or anywhere else on your drive.</li>
+<li>Default plugins are stored in <code>/plugins/</code>, additional plugins are usually found in <code>/plugins_disabled/</code>. Plugins are enabled and disabled by adding/removing them from the <code>/plugins/</code> folder. Move any additional plugins you want to use into <code>/plugins/</code> and disable any other plugins by moving them from <code>/plugins/</code> to <code>plugins_disabled</code>. (Plugins that are found in <code>plugins</code> but not configured will not break anything, but you'll see warnings when run.)</li>
+<li>From within the Slogger folder, run <code>./slogger --update-config</code> to create the initial configuration file. If this doesn't work, you may need to make the file executable: <code>chmod a+x slogger</code> from within the Slogger folder. Note that any time you add new plugins or update existing ones, you'll want to run <code>./slogger --update-config</code> to ensure that your available options are up to date.</li>
+<li>
+<p>Edit the file <code>slogger_config</code> that shows up in your Slogger folder</p>
 
 <ul>
-<li>The only options will be 'storage:' and 'image_filename_is_title:'</li>
+<li>The required options will be 'storage:', 'image_filename_is_title:', 'date_format:' and 'time_format:'</li>
 <li>storage: should be one of
 
 <ul>
@@ -181,29 +184,34 @@
 </ul>
 </li>
 <li>image_filename_is_title: should be set to true or false. If true, it will use the base filename (without extension) as the title of images imported individually.</li>
+<li>date_format and time_format should be set to your preferred style (strftime)</li>
 </ul>
 </li>
-<li>Move any additional plugins you want to use from <code>/plugins_disabled/</code> into <code>/plugins/</code>.</li>
-<li>Run <code>./slogger</code> again to update the configuration file with enabled plugin options.</li>
-<li>Edit <code>slogger_config</code> again and fill in the necessary parameters for listed configuration settings.</li>
-<li>Next time you run <code>./slogger</code>, it will execute the plugins and generate your log entries. </li>
+<li><p>Edit additional configuration options for any plugins defined. The config file is formatted as YAML, and your options need to conform to that syntax. For the most part, you can just maintain the formatting (quotes, dashes, brackets, etc.) of the default settings when updating.</p></li>
+<li><p>Next time you run <code>./slogger</code>, it will execute the enabled and configured plugins and generate your journal entries. </p></li>
 </ol><h2>Usage</h2>
 
 <ol>
 <li>From within the Slogger folder, run <code>./slogger</code> to run the data
 capture for the plugins you have in you <code>/plugins/</code> directory. </li>
-<li>You may run <code>./slogger</code> manually to test, or if you do not wish to automate the process.</li>
-<li>If you wish to automate slogger, use Lingon (launchd) or other scheduling app.</li>
-<li>You can install a launchd task that will automatically run at 11:50pm every night by running <code>install.rb</code>. It's the same as Lingon would create, but all automatic and everything.
+<li>Check the output to see if there are any errors occurring. Plugin configuration errors can be ignored, or you can remove offending plugins from the <code>/plugins/</code> folder (if you don't need them).</li>
+<li>If you wish to automate slogger: 
+
+<ul>
+<li>use <a href="http://www.peterborgapps.com/lingon/">Lingon</a>, <a href="http://www.soma-zone.com/LaunchControl/">LaunchControl</a>, or other <code>launchd</code> scheduling app, <strong>or</strong>...</li>
+<li>run <code>./install.rb</code> to automatically install a launchd task that will run at 11:50pm every night. It's the same as Lingon would create, but all free and stuff.
 
 <ul>
 <li>To uninstall the launchd task, run the command <code>rm ~/Library/LaunchAgents/com.brettterpstra.slogger.plist</code> and then log out and back in.</li>
+</ul>
+</li>
 </ul>
 </li>
 </ol><h2>Command line options</h2>
 
 <pre><code>$ ./slogger -h
 Usage: slogger [-dq] [-r X] [/path/to/image.jpg]
+    --update-config                  Create or update a slogger_config file. No plugins will be run.
     -c, --config FILE                Specify alternate configuration file
     -d, --develop                    Develop mode
     -h, --help                       Display this screen
@@ -217,7 +225,7 @@ Usage: slogger [-dq] [-r X] [/path/to/image.jpg]
 </code></pre>
 
 <blockquote>
-<p><strong>Note:</strong> You can use the <code>-s</code> option to only log since the last run date, handy if you want to run Slogger more than once per day or are testing plugins. </p>
+<p><strong>Note:</strong> You can use the <code>-s</code> option to only log since the last run date, handy if you want to run Slogger more or less than once per day or are testing plugins. </p>
 
 <p>You can also use <code>-o</code> to run only a certain plugin in the standard plugin directory: just provide it with enough of the name to be unique, e.g. <code>slogger -o gist</code>.</p>
 
@@ -249,6 +257,8 @@ Usage: slogger [-dq] [-r X] [/path/to/image.jpg]
 <code>:retries</code> is the number of retries to attempt on any given operation. Create loops in network calls and parsing routines to allow for retry on failure, and use <code>$options[:retries]</code> to determine how many times to iterate.</li>
 </ul><p><code>@timespan</code> is available to all plugins and contains a date object based on the timespan setting. This defaults to 24 hours prior to the run.</p>
 
+<p><code>@date_format</code>, <code>@time_format</code> and <code>@datetime_format</code> (this is just the conjunction of the first two) are available to all plugins and should be used wherever you output a date or time to DayOne files, e.g. <code>Time.now.strftime(@date_format)</code>.</p>
+
 <h2>License</h2>
 
 <pre><code> __  _
@@ -257,26 +267,12 @@ Usage: slogger [-dq] [-r X] [/path/to/image.jpg]
 _\ \| | (_) | (_| | (_| |  __/ |
 \__/|_|\___/ \__, |\__, |\___|_|
              |___/ |___/
-     Copyright 2012, Brett Terpstra
+     Copyright 2013, Brett Terpstra
            http://brettterpstra.com
                --------------------
 </code></pre>
 
-<p>[The BSD License]</p>
-
-<p>Copyright (c) 2012 Brett Terpstra</p>
-
-<p>All rights reserved.</p>
-
-<blockquote>
-<p>Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:</p>
-
-<p>Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.</p>
-
-<p>Neither the name of the author nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.</p>
-
-<p><strong>THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.</strong></p>
-</blockquote>
+<p>Slogger by Brett Terpstra is licensed under a <a href="http://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_US">Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License</a>.</p>
       </section>
       <footer>
         <p><small>Hosted on <a href="https://pages.github.com">GitHub Pages</a> using the Dinky theme</small></p>
