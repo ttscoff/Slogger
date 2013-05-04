@@ -234,7 +234,6 @@ class TwitterLogger < Slogger
       if result
         success = true
       else
-        @log.error e
         retries += 1
         @log.error("Error performing action, retrying (#{retries}/#{$options[:max_retries]})")
         sleep 2
