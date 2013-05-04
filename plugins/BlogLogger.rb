@@ -13,18 +13,21 @@ Notes:
   - blog_feeds is an array of feeds separated by commas, a single feed is fine, but it should be inside of brackets `[]`
   - markdownify_posts will convert links and emphasis in the post to Markdown for display in Day One
   - star_posts will star entries created for new posts
+  - get_most_popular (true/false) create a separate entry showing the day's top 5 most tweeted posts from recent entries
   - blog_tags are tags you want to add to every entry, e.g. "#social #blogging"
 =end
 
 config = {
   'description' => ['Logs individual blog posts for the current timespan using RSS feeds',
                     'blog_feeds is an array of feeds separated by commas, a single feed is fine, but it should be inside of brackets `[]`',
-                    'markdownify_posts will convert links and emphasis in the post to Markdown for display in Day One',
-                    'star_posts will create a starred post for new RSS posts',
+                    'markdownify_posts (true/false) will convert links and emphasis in the post to Markdown for display in Day One',
+                    'star_posts (true/false) will create a starred post for new RSS posts',
+                    'get_most_popular (true/false) create a separate entry showing the day\'s top 5 most tweeted posts from recent entries',
                     'blog_tags are tags you want to add to every entry, e.g. "#social #rss"'],
   'blog_feeds' => [],
   'markdownify_posts' => true,
   'star_posts' => false,
+  'get_most_popular' => false,
   'blog_tags' => '#social #blogging'
 }
 $slog.register_plugin({ 'class' => 'BlogLogger', 'config' => config })
@@ -86,6 +89,40 @@ class BlogLogger < Slogger
       end
 
       rss = RSS::Parser.parse(rss_content, false)
+
+      if @blogconfig['get_most_popular']
+        @log.info("Checking for most tweeted posts on #{rss.title.content}")
+        posts = []
+        rss.items.each { |item|
+          url = item.link.href
+          count = 0
+          begin
+            open("http://urls.api.twitter.com/1/urls/count.json?url=#{CGI.escape(url)}") do |f|
+              json = JSON.parse(f.read)
+              count = json['count']
+            end
+            posts << {
+              'title' => item.title.content.gsub(/\n+/,' '),
+              'url' => url,
+              'count' => count
+            }
+          rescue
+            @log.error("Error retrieving Twitter count for #{url}")
+          end
+        }
+        unless posts.empty?
+          options = {}
+          options['content'] = "## Most Tweeted posts on #{rss.title.content} for #{Time.now.strftime('%b %d, %Y')}\n\n"
+          posts.sort_by { |post| post['count'] }.reverse[0..5].each {|post|
+            options['content'] += "* [#{post['title']}](#{post['url']}) (#{post['count']})\n"
+          }
+          options['content'] += "\n#{tags}"
+          options['datestamp'] = Time.now.utc.iso8601
+          options['starred'] = false
+          sl = DayOne.new
+          sl.to_dayone(options)
+        end
+      end
       rss.items.each { |item|
         begin
           if item.class == RSS::Atom::Feed::Entry
