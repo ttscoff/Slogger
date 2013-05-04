@@ -232,6 +232,12 @@ Usage: slogger [-dq] [-r X] [/path/to/image.jpg]
 <p>The <code>-u X</code> option will undo the last X runs. This works by checking the timestamp of the run and deleting any entries created after that timestamp. <strong>It should not be used if you have manually created entries since the last Slogger run.</strong> It also does not remove the run timestamps from the list, so running <code>./slogger -u 4</code> will remove the entries created by the last four runs, and then running <code>./slogger -u 5</code> will undo one more run in history.</p>
 </blockquote>
 
+<h2>Updating Slogger</h2>
+
+<p>Slogger is currently actively maintained, meaning new fixes and features are regularly available. To update your Slogger installation, download the zip file for the latest version (the link on this page is always current) into a new folder. Copy the new files over existing files to update them. If you've enabled plugins that are disabled by default, you'll need to copy them from the new folder's "plugins_disabled" folder to your current "plugins" folder.</p>
+
+<p>As long as you don't move or delete your <code>slogger_config</code> file, all of your settings will be preserved after the update.</p>
+
 <h2>Plugin development</h2>
 
 <p><em>More documentation coming</em>. See <code>plugin_template.rb</code> to get started.</p>
