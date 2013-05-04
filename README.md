@@ -108,6 +108,12 @@ Slogger indexes various public social services and creates Day One (<http://dayo
 >
 > The `-u X` option will undo the last X runs. This works by checking the timestamp of the run and deleting any entries created after that timestamp. **It should not be used if you have manually created entries since the last Slogger run.** It also does not remove the run timestamps from the list, so running `./slogger -u 4` will remove the entries created by the last four runs, and then running `./slogger -u 5` will undo one more run in history.
 
+## Updating Slogger ##
+
+Slogger is currently actively maintained, meaning new fixes and features are regularly available. To update your Slogger installation, download the zip file for the latest version (the link on this page is always current) into a new folder. Copy the new files over existing files to update them. If you've enabled plugins that are disabled by default, you'll need to copy them from the new folder's "plugins_disabled" folder to your current "plugins" folder.
+
+As long as you don't move or delete your `slogger_config` file, all of your settings will be preserved after the update.
+
 ## Plugin development ##
 
 *More documentation coming*. See `plugin_template.rb` to get started.
