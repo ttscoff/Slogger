@@ -58,7 +58,7 @@ class GaugesLogger < Slogger
     end
     @log.info("Logging Gaug.es stats")
 
-    date = @timespan
+    date = @timespan + (60 * 60 * 24)
 
     json = gauges_api_call(key,"gauges")
     return false unless json

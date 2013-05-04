@@ -250,12 +250,14 @@ class Slogger
         end
         @config[_namespace][_namespace+"_last_run"] = Time.now.strftime('%c')
       end
-      # credit to Hilton Lipschitz (@hiltmon)
-      updated_config = eval(plugin['class']).new.do_log
-      if updated_config && updated_config.class.to_s == 'Hash'
-          updated_config.each { |k,v|
-            @config[_namespace][k] = v
-          }
+      unless $options[:config_only]
+        # credit to Hilton Lipschitz (@hiltmon)
+        updated_config = eval(plugin['class']).new.do_log
+        if updated_config && updated_config.class.to_s == 'Hash'
+            updated_config.each { |k,v|
+              @config[_namespace][k] = v
+            }
+        end
       end
     end
     ConfigTools.new({'config_file' => $options[:config_file]}).dump_config(@config)
@@ -310,6 +312,9 @@ $options = {}
 optparse = OptionParser.new do|opts|
   opts.banner = "Usage: slogger [-dq] [-r X] [/path/to/image.jpg]"
   $options[:config_file] = File.expand_path(File.dirname(__FILE__)+'/slogger_config')
+  opts.on('--update-config', 'Create or update a configuration file') do
+    $options[:config_only] = true
+  end
   opts.on( '-c', '--config FILE', 'Specify configuration file to use') do |file|
     file = File.expand_path(file)
     $options[:config_file] = file
@@ -330,7 +335,7 @@ optparse = OptionParser.new do|opts|
   opts.on( '-q','--quiet', 'Run quietly (no notifications/messages)' ) do
    $options[:quiet] = true
   end
-  $options[:max_retries] = 1
+  $options[:max_retries] = 3
   opts.on( '-r','--retries COUNT', 'Maximum number of retries per plugin (int)' ) do |count|
     $options[:max_retries] = count.to_i
   end
