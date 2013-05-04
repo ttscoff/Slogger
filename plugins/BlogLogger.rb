@@ -112,7 +112,7 @@ class BlogLogger < Slogger
         }
         unless posts.empty?
           options = {}
-          options['content'] = "## Most Tweeted posts on #{rss.title.content} for #{Time.now.strftime('%b %d, %Y')}\n\n"
+          options['content'] = "## Most Tweeted posts on #{rss.title.content} for #{Time.now.strftime(@date_format)}\n\n"
           posts.sort_by { |post| post['count'] }.reverse[0..5].each {|post|
             options['content'] += "* [#{post['title']}](#{post['url']}) (#{post['count']})\n"
           }
