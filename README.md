@@ -59,35 +59,38 @@ Slogger indexes various public social services and creates Day One (<http://dayo
         -  Note that Slogger does not delete the original file, so your script needs to move files out of the folder manually to avoid double-processing.
 - **NEW:** #tags in posts are saved as native tags. Default tags specified in the config are saved, as well as any hashtags present in the post. Github #XX issue references are ignored.
 
-## Configure ##
+## Install ##
 
-1. From within the Slogger folder, run `./slogger` to create the initial configuration file. If this doesn't work, you may need to make the file executable: `chmod a+x slogger` from within the Slogger folder.
-2. Edit the file `slogger_config` that shows up
-    - The only options will be 'storage:', 'image_filename_is_title:', 'date_format:' and 'time_format:'
+1. Download and unzip (or clone using git) the Slogger project. It can be stored in your home directory, a scripts folder or anywhere else on your drive.
+2. Default plugins are stored in `/plugins/`, additional plugins are usually found in `/plugins_disabled/`. Plugins are enabled and disabled by adding/removing them from the `/plugins/` folder. Move any additional plugins you want to use into `/plugins/` and disable any other plugins by moving them from `/plugins/` to `plugins_disabled`. (Plugins that are found in `plugins` but not configured will not break anything, but you'll see warnings when run.)
+3. From within the Slogger folder, run `./slogger --update-config` to create the initial configuration file. If this doesn't work, you may need to make the file executable: `chmod a+x slogger` from within the Slogger folder. Note that any time you add new plugins or update existing ones, you'll want to run `./slogger --update-config` to ensure that your available options are up to date.
+4. Edit the file `slogger_config` that shows up in your Slogger folder
+    - The required options will be 'storage:', 'image_filename_is_title:', 'date_format:' and 'time_format:'
     - storage: should be one of
         -  'icloud'
         -  a path to a Dropbox-synced Journal (e.g. '/Users/username/Dropbox/Apps/Day One/Journal.dayone')
         -  a path to a folder for storing markdown files and related images (if the path doesn't end in "Journal.dayone", markdown storage is triggered automatically)
     - image_filename_is_title: should be set to true or false. If true, it will use the base filename (without extension) as the title of images imported individually.
-    - date_format and time_format should be set to your favorite style (strftime)
-3. Move any additional plugins you want to use from `/plugins_disabled/` into `/plugins/`.
-4. Run `./slogger` again to update the configuration file with enabled plugin options.
-5. Edit `slogger_config` again and fill in the necessary parameters for listed configuration settings.
-6. Next time you run `./slogger`, it will execute the plugins and generate your log entries. 
+    - date_format and time_format should be set to your preferred style (strftime)
+
+5. Edit additional configuration options for any plugins defined. The config file is formatted as YAML, and your options need to conform to that syntax. For the most part, you can just maintain the formatting (quotes, dashes, brackets, etc.) of the default settings when updating.
+6. Next time you run `./slogger`, it will execute the enabled and configured plugins and generate your journal entries. 
 
 ## Usage ##
 
 1. From within the Slogger folder, run `./slogger` to run the data
    capture for the plugins you have in you `/plugins/` directory. 
-2. You may run `./slogger` manually to test, or if you do not wish to automate the process.
-3. If you wish to automate slogger, use Lingon (launchd) or other scheduling app.
-4. You can install a launchd task that will automatically run at 11:50pm every night by running `install.rb`. It's the same as Lingon would create, but all automatic and everything.
-    - To uninstall the launchd task, run the command `rm ~/Library/LaunchAgents/com.brettterpstra.slogger.plist` and then log out and back in.
+2. Check the output to see if there are any errors occurring. Plugin configuration errors can be ignored, or you can remove offending plugins from the `/plugins/` folder (if you don't need them).
+3. If you wish to automate slogger: 
+    - use [Lingon](http://www.peterborgapps.com/lingon/), [LaunchControl](http://www.soma-zone.com/LaunchControl/), or other `launchd` scheduling app, **or**...
+    - run `./install.rb` to automatically install a launchd task that will run at 11:50pm every night. It's the same as Lingon would create, but all free and stuff.
+        - To uninstall the launchd task, run the command `rm ~/Library/LaunchAgents/com.brettterpstra.slogger.plist` and then log out and back in.
 
 ## Command line options ##
 
     $ ./slogger -h
     Usage: slogger [-dq] [-r X] [/path/to/image.jpg]
+        --update-config                  Create or update a slogger_config file. No plugins will be run.
         -c, --config FILE                Specify alternate configuration file
         -d, --develop                    Develop mode
         -h, --help                       Display this screen
@@ -99,7 +102,7 @@ Slogger indexes various public social services and creates Day One (<http://dayo
         -u, --undo COUNT                 Undo the last COUNT runs
         -v, --version                    Display the version number
 
-> **Note:** You can use the `-s` option to only log since the last run date, handy if you want to run Slogger more than once per day or are testing plugins. 
+> **Note:** You can use the `-s` option to only log since the last run date, handy if you want to run Slogger more or less than once per day or are testing plugins. 
 >
 > You can also use `-o` to run only a certain plugin in the standard plugin directory: just provide it with enough of the name to be unique, e.g. `slogger -o gist`.
 >
@@ -136,20 +139,10 @@ When developing plugins you can create a directory called 'plugins_develop' in t
     _\ \| | (_) | (_| | (_| |  __/ |
     \__/|_|\___/ \__, |\__, |\___|_|
                  |___/ |___/
-         Copyright 2012, Brett Terpstra
+         Copyright 2013, Brett Terpstra
                http://brettterpstra.com
                    --------------------
 
-[The BSD License]
+Slogger by Brett Terpstra is licensed under a [Creative Commons Attribution-NonCommercial-ShareAlike 3.0 Unported License][license].
 
-Copyright (c) 2012 Brett Terpstra
-
-All rights reserved.
-
-> Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
-
-> Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer. Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
-
-> Neither the name of the author nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
-
-> **THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.**
+[license]: http://creativecommons.org/licenses/by-nc-sa/3.0/deed.en_US
