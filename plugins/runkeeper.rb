@@ -16,7 +16,6 @@
 config = {
     'runkeeper_description' => [
     'Gets runkeeper activity information'],
-    'runkeeper_app_id' => '',
     'runkeeper_access_token' => '',
     'runkeeper_tags' => '#activities #workout #runkeeper',
     'runkeeper_save_data_file' => '',
