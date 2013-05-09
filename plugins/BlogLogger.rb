@@ -89,12 +89,18 @@ class BlogLogger < Slogger
       end
 
       rss = RSS::Parser.parse(rss_content, false)
-
+      p rss.class
       if @blogconfig['get_most_popular']
         @log.info("Checking for most tweeted posts on #{rss.title.content}")
         posts = []
         rss.items.each { |item|
-          url = item.link.href
+          if item.class == RSS::Atom::Feed::Entry
+            title = item.title.content.gsub(/\n+/,' ')
+            url = item.link.href
+          else
+            title = item.title.gsub(/\n+/,' ')
+            url = item.link
+          end
           count = 0
           begin
             open("http://urls.api.twitter.com/1/urls/count.json?url=#{CGI.escape(url)}") do |f|
@@ -102,7 +108,7 @@ class BlogLogger < Slogger
               count = json['count']
             end
             posts << {
-              'title' => item.title.content.gsub(/\n+/,' '),
+              'title' => title,
               'url' => url,
               'count' => count
             }
@@ -124,6 +130,9 @@ class BlogLogger < Slogger
         end
       end
       rss.items.each { |item|
+        puts item.inspect
+        puts item.class
+        puts item.methods
         begin
           if item.class == RSS::Atom::Feed::Entry
             item_date = Time.parse(item.updated.to_s) + Time.now.gmt_offset
