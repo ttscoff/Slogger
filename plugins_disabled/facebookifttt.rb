@@ -27,6 +27,8 @@ Notes:
   - You should set facebook_ifttt_input_file to this value, substituting username appropriately.
 =end
 
+require 'date'
+
 config = {
   'description' => ['Parses Facebook posts logged by IFTTT.com',
                     'facebook_ifttt_input_file is a string pointing to the location of the file created by IFTTT.',
@@ -90,14 +92,8 @@ class FacebookIFTTTLogger < Slogger
           line = line.gsub(',', '')
 
           month, day, year, time = line.split
-          hour,min = time.split(/:/)
-          min = min.gsub(ampm, '')
-
-          if line =~ pm
-            x = hour.to_i
-            x += 12
-            hour = x.to_s
-          end
+          parseTime = DateTime.parse(time).strftime("%H:%M")
+          hour,min = parseTime.split(/:/)
 
           month = Date::MONTHNAMES.index(month)
           ltime = Time.local(year, month, day, hour, min, 0, 0)
