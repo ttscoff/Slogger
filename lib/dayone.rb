@@ -77,8 +77,19 @@ class DayOne < Slogger
     match = orig.match(/(\..{3,4})$/)
     return false if match.nil?
     ext = match[1]
-    @log.info("Resizing image #{File.basename(orig)}")
-    res = %x{sips -Z 1600 "#{orig}" 2>&1}
+    @log.info("Processing image #{File.basename(orig)}")
+    sips_available = %x{sips 2>&1}
+    if sips_available.include? "command not found"
+      @log.warn("sips not available, cannot resize image")
+      # TODO: fall back on something else to resize images
+    else
+      height = Integer(%x{sips --getProperty pixelHeight "#{orig}" 2>&1}.split(":")[1])
+      width = Integer(%x{sips --getProperty pixelWidth "#{orig}" 2>&1}.split(":")[1])
+      if width > 1600 || height > 1600
+        @log.info("Resizing image #{File.basename(orig)}")
+        res = %x{sips -Z 1600 "#{orig}" 2>&1}
+      end
+    end
     unless ext =~ /\.jpg$/
       case ext
       when '.jpeg'
