@@ -21,7 +21,17 @@ config = {
     'runkeeper_save_data_file' => '',
 }
 
-$slog.register_plugin({ 'class' => 'RunkeeperLogger', 'config' => config })
+# Needed to request an access token
+auth = {
+  'type' => :oauth2,
+  'id' => '',       # Get this from http://runkeeper.com/partner/applications
+  'secret' => '',   # 
+  'site' => 'https://runkeeper.com',
+  'authorize' => '/apps/authorize',
+  'token' => '/apps/token',
+}
+
+$slog.register_plugin({ 'class' => 'RunkeeperLogger', 'config' => config, 'auth' => auth })
 
 require 'rubygems'
 require 'time'
