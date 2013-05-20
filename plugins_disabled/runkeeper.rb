@@ -20,7 +20,7 @@ config = {
     'runkeeper_access_token' => '',
     'runkeeper_tags' => '#activities #workout #runkeeper',
     'runkeeper_save_data_file' => '',
-    'metric_distance' => false
+    'metric_distance' => false,
 }
 
 $slog.register_plugin({ 'class' => 'RunkeeperLogger', 'config' => config })
