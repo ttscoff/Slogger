@@ -9,6 +9,7 @@
    runkeeper_access_token
    runkeeper_tags: '#activities #workout #runkeeper'
    runkeeper_save_data_file: '/home/users/username/data/runkeeper.txt'
+   metric_distance: false
 
 =end
 
@@ -19,6 +20,7 @@ config = {
     'runkeeper_access_token' => '',
     'runkeeper_tags' => '#activities #workout #runkeeper',
     'runkeeper_save_data_file' => '',
+    'metric_distance' => false
 }
 
 $slog.register_plugin({ 'class' => 'RunkeeperLogger', 'config' => config })
@@ -44,6 +46,7 @@ class RunkeeperLogger < Slogger
                 
         rk_token = config['runkeeper_access_token']
         save_data_file = config['runkeeper_save_data_file']
+        metric_value = config['metric_distance']
         developMode = $options[:develop]
         
 
@@ -53,7 +56,7 @@ class RunkeeperLogger < Slogger
         # in the Day One journal entries.
 
         activitiesReq = sprintf('curl https://api.runkeeper.com/fitnessActivities -s -X GET -H "Authorization: Bearer %s"', rk_token)
-        activities = JSON.parse(`#{activitiesReq}`)
+        activities = JSON.parse(`#{activiiesReq}`)
         
         # ============================================================
         # iterate over the days and create entries
@@ -72,7 +75,11 @@ class RunkeeperLogger < Slogger
                 activityReq = sprintf('curl https://api.runkeeper.com%s -s -X GET -H "Authorization: Bearer %s"', activity["uri"], rk_token)
                 active = JSON.parse(`#{activityReq}`)
                 type = active["type"]
-                distance = (active["total_distance"]/1609.34*100).round / 100.0
+                if(!metric_value)
+                    distance = (active["total_distance"]/1609.34*100).round / 100.0
+                else
+                    distance = (active["total_distance"]/10).round / 100.0
+                end
                 duration = (active["duration"]/60*100).round / 100
                 time = active["start_time"]
                 notes = active["notes"]
@@ -86,7 +93,13 @@ class RunkeeperLogger < Slogger
                   @log.info("#{notes}")
                   @log.info("#{equipment}")
                 end
-                output = output + "\n\n### Activity: #{type}\n* **Time**: #{time}\n* **Distance**: #{distance} miles\n* **Duration**: #{duration} minutes\n"
+                output = output + "\n\n### Activity: #{type}\n* **Time**: #{time}\n"
+                if(!metric_value)
+                    output = output + "* **Distance**: #{distance} miles\n"
+                else
+                    output = output + "* **Distance**: #{distance} kilometers\n"
+                end
+                output = output + "* **Duration**: #{duration} minutes\n"
                 output = output + "* **Equipment**: #{equipment}\n" unless equipment == "None"
                 output = output + "* **Notes**: #{notes}\n" unless notes.nil?
                 
