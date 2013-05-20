@@ -56,7 +56,7 @@ class RunkeeperLogger < Slogger
         # in the Day One journal entries.
 
         activitiesReq = sprintf('curl https://api.runkeeper.com/fitnessActivities -s -X GET -H "Authorization: Bearer %s"', rk_token)
-        activities = JSON.parse(`#{activiiesReq}`)
+        activities = JSON.parse(`#{activitiesReq}`)
         
         # ============================================================
         # iterate over the days and create entries
