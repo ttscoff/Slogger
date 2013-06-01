@@ -44,7 +44,7 @@ class ThingsLogger < Slogger
       values = %x{osascript <<'APPLESCRIPT'
         set filter to "#{filter}"
 
-        set dteToday to setDate("#{timespan}")
+        set dteToday to short date string (setDate("#{timespan}"))
         
         set completedItems to ""
         tell application id "com.culturedcode.Things"
