@@ -28,7 +28,8 @@ class ThingsLogger < Slogger
     end
     @log.info("Logging Things for completed tasks")
 
-    additional_config_option = config['additional_config_option'] || false
+    # Unassigned Var
+    #additional_config_option = config['additional_config_option'] || false
     tags = config['tags'] || ''
     tags = "\n\n#{@tags}\n" unless @tags == ''
 
@@ -44,11 +45,11 @@ class ThingsLogger < Slogger
       values = %x{osascript <<'APPLESCRIPT'
         set filter to "#{filter}"
 
-        set dteToday to short date string (setDate("#{timespan}"))
-        
+        set dteToday to short date string of (setDate("#{timespan}"))
+
         set completedItems to ""
         tell application id "com.culturedcode.Things"
-          
+
           -- Move all completed items to Logbook
           log completed now
         repeat with td in to dos of list "Logbook"
@@ -58,21 +59,21 @@ class ThingsLogger < Slogger
               			if (project of td) is not missing value then
               				set aProject to project of td
               				set projectName to name of aProject
-				
+
               				if projectName = filter then
               					exit repeat
               				end if
               			end if
-			
+
               			if dc = dteToday then
               				set myName to name of td
-            					set completedItems to completedItems & myName & linefeed				
+            					set completedItems to completedItems & myName & linefeed
               			end if
               		end repeat
         	end repeat
         end tell
         return completedItems
-          
+
         on setDate(theDateStr)
           set {TID, text item delimiters} to {text item delimiters, "/"}
           set {dd, mm, yy, text item delimiters} to every text item in theDateStr & TID
