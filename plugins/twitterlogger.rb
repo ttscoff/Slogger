@@ -199,7 +199,7 @@ class TwitterLogger < Slogger
       return
     end
 
-    if @twitter_config['oauth_token'] == '' || @twitter_config['oauth_token_secret'] == ''
+    if @twitter_config['oauth_token'].nil? || @twitter_config['oauth_token_secret'].nil? || @twitter_config['oauth_token'] == '' || @twitter_config['oauth_token_secret'] == ''
       client = TwitterOAuth::Client.new(
           :consumer_key => "53aMoQiFaQfoUtxyJIkGdw",
           :consumer_secret => "Twnh3SnDdtQZkJwJ3p8Tu5rPbL5Gt1I0dEMBBtQ6w"
