@@ -18,16 +18,13 @@ config = {
     'save_images (true/false) determines whether TwitterLogger will look for image urls and include them in the entry',
     'save_favorites (true/false) determines whether TwitterLogger will look for the favorites of the given usernames and include them in the entry',
     'save_images_from_favorites (true/false) determines whether TwitterLogger will download images for the favorites of the given usernames and include them in the entry',
-    'save_retweets (true/false) determines whether TwitterLogger will look for the retweets of the given usernames and include them in the entry',
-    'save_images_from_retweets (true/false) determines whether TwitterLogger will download images for the retweets of the given usernames and include them in the entry',
+    'save_retweets (true/false) determines whether TwitterLogger will include retweets in the posts for the day',
     'droplr_domain: if you have a custom droplr domain, enter it here, otherwise leave it as d.pr ',
     'oauth_token and oauth_secret should be left blank and will be filled in by the plugin'],
   'twitter_users' => [],
   'save_favorites' => true,
   'save_images' => true,
   'save_images_from_favorites' => true,
-  'save_retweets' => true,
-  'save_images_from_retweets' => true,
   'droplr_domain' => 'd.pr',
   'twitter_tags' => '#social #twitter',
   'oauth_token' => '',
@@ -88,12 +85,8 @@ class TwitterLogger < Slogger
         tweet_obj = Twitter.favorites(params)
 
       when 'timeline'
-        params = { "count" => 250, "screen_name" => user, "include_entities" => true, "exclude_replies" => @twitter_config['exclude_replies']}
+        params = { "count" => 250, "screen_name" => user, "include_entities" => true, "exclude_replies" => @twitter_config['exclude_replies'], "include_rts" => @twitter_config['save_retweets']}
         tweet_obj = Twitter.user_timeline(params)
-
-      when 'retweets'
-        params = { "count" => 250, "screen_name" => user, "include_entities" => true }
-        tweet_obj = Twitter.retweeted_by_user(params)
 
     end
 
@@ -107,9 +100,10 @@ class TwitterLogger < Slogger
         tweet_text = tweet.text.gsub(/\n/,"\n\t")
         if type == 'favorites'
           # TODO: Prepend favorite's username/link
-          screen_name = tweet.user.status.retweeted_status.user.screen_name
+          screen_name = tweet.user.status.user.screen_name
           tweet_text = "[#{screen_name}](http://twitter.com/#{screen_name}): #{tweet_text}"
         end
+
         tweet_id = tweet.id
         unless tweet.urls.empty?
           tweet.urls.each { |url|
@@ -181,7 +175,7 @@ class TwitterLogger < Slogger
       return tweets.reverse.join("\n")
     rescue Exception => e
       @log.warn("Error getting #{type} for #{user}")
-      # p e
+      p e
       return false
     end
 
@@ -199,7 +193,7 @@ class TwitterLogger < Slogger
       return
     end
 
-    if @twitter_config['oauth_token'].nil? || @twitter_config['oauth_token_secret'].nil? || @twitter_config['oauth_token'] == '' || @twitter_config['oauth_token_secret'] == ''
+    if @twitter_config['oauth_token'] == '' || @twitter_config['oauth_token_secret'] == ''
       client = TwitterOAuth::Client.new(
           :consumer_key => "53aMoQiFaQfoUtxyJIkGdw",
           :consumer_secret => "Twnh3SnDdtQZkJwJ3p8Tu5rPbL5Gt1I0dEMBBtQ6w"
@@ -248,12 +242,6 @@ class TwitterLogger < Slogger
         favs = ''
       end
 
-      if @twitter_config['save_retweets']
-        retweets = try { self.get_tweets(user, 'retweets')}
-      else
-        retweets = ''
-      end
-
       unless tweets == ''
         tweets = "## Tweets\n\n### Posts by @#{user} on #{Time.now.strftime(@date_format)}\n\n#{tweets}#{tags}"
         sl.to_dayone({'content' => tweets})
@@ -261,10 +249,6 @@ class TwitterLogger < Slogger
       unless favs == ''
         favs = "## Favorite Tweets\n\n### Favorites from @#{user} for #{Time.now.strftime(@date_format)}\n\n#{favs}#{tags}"
         sl.to_dayone({'content' => favs})
-      end
-      unless  retweets == ''
-        retweets = "## Retweets\n\n### Retweets from @#{user} for #{Time.now.strftime(@date_format)}\n\n#{retweets}#{tags}"
-        sl.to_dayone({'content' => retweets})
       end
     end
 
