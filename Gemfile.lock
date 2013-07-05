@@ -1,14 +1,26 @@
 GEM
   remote: https://rubygems.org/
   specs:
+    faraday (0.8.7)
+      multipart-post (~> 1.1)
     feed-normalizer (1.5.2)
       hpricot (>= 0.6)
       simple-rss (>= 1.1)
     hpricot (0.8.6)
+    multi_json (1.7.7)
+    multipart-post (1.2.0)
     simple-rss (1.2.3)
+    simple_oauth (0.2.0)
+    system_timer (1.2.4)
+    twitter (4.8.1)
+      faraday (~> 0.8, < 0.10)
+      multi_json (~> 1.0)
+      simple_oauth (~> 0.2)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
   feed-normalizer
+  system_timer
+  twitter

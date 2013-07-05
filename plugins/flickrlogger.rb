@@ -17,7 +17,7 @@ config = {
   'flickr_description' => [
     'Logs today\'s photos from Flickr.',
     'flickr_ids is an array of one or more IDs',
-    'flickr_datetype can be the "upload" or "taken" date that has tpo be used',
+    'flickr_datetype can be the "upload" or "taken" date to be used',
     'Get your Flickr ID at <http://idgettr.com/>',
     'Get your Flickr API key at <http://www.flickr.com/services/apps/create/noncommercial/>'],
   'flickr_api_key' => '',

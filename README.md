@@ -62,9 +62,12 @@ Slogger indexes various public social services and creates Day One (<http://dayo
 ## Install ##
 
 1. Download and unzip (or clone using git) the Slogger project. It can be stored in your home directory, a scripts folder or anywhere else on your drive.
-2. Default plugins are stored in `/plugins/`, additional plugins are usually found in `/plugins_disabled/`. Plugins are enabled and disabled by adding/removing them from the `/plugins/` folder. Move any additional plugins you want to use into `/plugins/` and disable any other plugins by moving them from `/plugins/` to `plugins_disabled`. (Plugins that are found in `plugins` but not configured will not break anything, but you'll see warnings when run.)
-3. From within the Slogger folder, run `./slogger --update-config` to create the initial configuration file. If this doesn't work, you may need to make the file executable: `chmod a+x slogger` from within the Slogger folder. Note that any time you add new plugins or update existing ones, you'll want to run `./slogger --update-config` to ensure that your available options are up to date.
-4. Edit the file `slogger_config` that shows up in your Slogger folder
+2. From the command line, change to the Slogger folder and run the following commands:
+        sudo gem install bundle
+        bundle install 
+3. Default plugins are stored in `/plugins/`, additional plugins are usually found in `/plugins_disabled/`. Plugins are enabled and disabled by adding/removing them from the `/plugins/` folder. Move any additional plugins you want to use into `/plugins/` and disable any other plugins by moving them from `/plugins/` to `plugins_disabled`. (Plugins that are found in `plugins` but not configured will not break anything, but you'll see warnings when run.)
+4. From within the Slogger folder, run `./slogger --update-config` to create the initial configuration file. If this doesn't work, you may need to make the file executable: `chmod a+x slogger` from within the Slogger folder. Note that any time you add new plugins or update existing ones, you'll want to run `./slogger --update-config` to ensure that your available options are up to date.
+5. Edit the file `slogger_config` that shows up in your Slogger folder
     - The required options will be 'storage:', 'image_filename_is_title:', 'date_format:' and 'time_format:'
     - storage: should be one of
         -  'icloud'
@@ -73,8 +76,9 @@ Slogger indexes various public social services and creates Day One (<http://dayo
     - image_filename_is_title: should be set to true or false. If true, it will use the base filename (without extension) as the title of images imported individually.
     - date_format and time_format should be set to your preferred style (strftime)
 
-5. Edit additional configuration options for any plugins defined. The config file is formatted as YAML, and your options need to conform to that syntax. For the most part, you can just maintain the formatting (quotes, dashes, brackets, etc.) of the default settings when updating.
-6. Next time you run `./slogger`, it will execute the enabled and configured plugins and generate your journal entries. 
+6. Edit additional configuration options for any plugins defined. The config file is formatted as YAML, and your options need to conform to that syntax. For the most part, you can just maintain the formatting (quotes, dashes, brackets, etc.) of the default settings when updating.
+    - **Note:** Some plugins have options that will be filled in automatically. For example, the Twitter plugin requires you to log in on the command line and enter a PIN, after which it completes the authorization and saves your token to the configuration. If you install a plugin which requires oAuth, be sure to run Slogger from the command line with "./slogger -o plugin_name" once to complete the login procedure and save your credentials.
+7. Next time you run `./slogger`, it will execute the enabled and configured plugins and generate your journal entries. 
 
 ## Usage ##
 
@@ -124,7 +128,7 @@ When developing plugins you can create a directory called 'plugins_develop' in t
 
 `@log` is a global logger object. use `@log.info("Message")` (or `warn`/`error`/`fatal`) to generate log messages using the default formatter.
 
-`@config` is the global configuration object. Your plugin settings will be stored under `@config[PluginClassName]`.
+`@config` is the global configuration object. Your plugin settings will be stored under `@config[PluginClassName]`. If you return the config object at the end of your do_log function, any modifications will be stored (e.g. for saving oAuth tokens).
 
 `$options` contains options parsed from the command line. Use `$options[:optionname]` to read the setting.
 
