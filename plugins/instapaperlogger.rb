@@ -18,6 +18,7 @@ config = {
     'instapaper_feeds is an array of one or more RSS feeds',
   'Find the RSS feed for any folder at the bottom of a web interface page'],
   'instapaper_feeds' => [],
+  'instapaper_include_content_preview' => true,
   'instapaper_tags' => '#social #reading'
 }
 $slog.register_plugin({ 'class' => 'InstapaperLogger', 'config' => config })
@@ -58,7 +59,8 @@ class InstapaperLogger < Slogger
           item_date = Time.parse(item.pubDate.to_s)
           if item_date > @timespan
             content = item.description.gsub(/\n/,"\n    ") unless item.description == ''
-            feed_output += "* [#{item.title}](#{item.link})\n\n     #{content}\n"
+            feed_output += "* [#{item.title}](#{item.link})\n"
+            feed_output += "\n     #{content}\n" if config['instapaper_include_content_preview'] == true
           else
             break
           end
