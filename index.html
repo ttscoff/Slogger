@@ -32,15 +32,18 @@
       <section>
         <p>Support Slogger by contributing to my <a href="https://www.gittip.com/ttscoff/">GitTip fund</a>.</p>
 
-<h2>Upgrade Note</h2>
+<h2>
+<a name="upgrade-note" class="anchor" href="#upgrade-note"><span class="octicon octicon-link"></span></a>Upgrade Note</h2>
 
 <p><em>If you are upgrading from a version prior to 2.0.12, please remove the RSSLogger section from <code>slogger_config</code> and regenerate it by running slogger again. A new section will be added in addition to RSSLogger called Bloglogger. RSSLogger now logs all entries for the timespan as a single digest entry, whereas Bloglogger loads each item found as an individual "post."</em></p>
 
-<h2>Description</h2>
+<h2>
+<a name="description" class="anchor" href="#description"><span class="octicon octicon-link"></span></a>Description</h2>
 
 <p>Slogger indexes various public social services and creates Day One (<a href="http://dayoneapp.com/">http://dayoneapp.com/</a>) journal entries or plain text Markdown files for them. It allows you to keep a personal journal that collects your online social life automatically, all in one place.</p>
 
-<h2>Features</h2>
+<h2>
+<a name="features" class="anchor" href="#features"><span class="octicon octicon-link"></span></a>Features</h2>
 
 <ul>
 <li>Slogger 2.x uses a plugin architecture to allow easy extension
@@ -164,10 +167,14 @@
 </li>
 <li>
 <strong>NEW:</strong> #tags in posts are saved as native tags. Default tags specified in the config are saved, as well as any hashtags present in the post. Github #XX issue references are ignored.</li>
-</ul><h2>Install</h2>
+</ul><h2>
+<a name="install" class="anchor" href="#install"><span class="octicon octicon-link"></span></a>Install</h2>
 
 <ol>
 <li>Download and unzip (or clone using git) the Slogger project. It can be stored in your home directory, a scripts folder or anywhere else on your drive.</li>
+<li>From the command line, change to the Slogger folder and run the following commands:
+    sudo gem install bundle
+    bundle install </li>
 <li>Default plugins are stored in <code>/plugins/</code>, additional plugins are usually found in <code>/plugins_disabled/</code>. Plugins are enabled and disabled by adding/removing them from the <code>/plugins/</code> folder. Move any additional plugins you want to use into <code>/plugins/</code> and disable any other plugins by moving them from <code>/plugins/</code> to <code>plugins_disabled</code>. (Plugins that are found in <code>plugins</code> but not configured will not break anything, but you'll see warnings when run.)</li>
 <li>From within the Slogger folder, run <code>./slogger --update-config</code> to create the initial configuration file. If this doesn't work, you may need to make the file executable: <code>chmod a+x slogger</code> from within the Slogger folder. Note that any time you add new plugins or update existing ones, you'll want to run <code>./slogger --update-config</code> to ensure that your available options are up to date.</li>
 <li>
@@ -187,9 +194,17 @@
 <li>date_format and time_format should be set to your preferred style (strftime)</li>
 </ul>
 </li>
-<li><p>Edit additional configuration options for any plugins defined. The config file is formatted as YAML, and your options need to conform to that syntax. For the most part, you can just maintain the formatting (quotes, dashes, brackets, etc.) of the default settings when updating.</p></li>
+<li>
+<p>Edit additional configuration options for any plugins defined. The config file is formatted as YAML, and your options need to conform to that syntax. For the most part, you can just maintain the formatting (quotes, dashes, brackets, etc.) of the default settings when updating.</p>
+
+<ul>
+<li>
+<strong>Note:</strong> Some plugins have options that will be filled in automatically. For example, the Twitter plugin requires you to log in on the command line and enter a PIN, after which it completes the authorization and saves your token to the configuration. If you install a plugin which requires oAuth, be sure to run Slogger from the command line with "./slogger -o plugin_name" once to complete the login procedure and save your credentials.</li>
+</ul>
+</li>
 <li><p>Next time you run <code>./slogger</code>, it will execute the enabled and configured plugins and generate your journal entries. </p></li>
-</ol><h2>Usage</h2>
+</ol><h2>
+<a name="usage" class="anchor" href="#usage"><span class="octicon octicon-link"></span></a>Usage</h2>
 
 <ol>
 <li>From within the Slogger folder, run <code>./slogger</code> to run the data
@@ -207,7 +222,8 @@ capture for the plugins you have in you <code>/plugins/</code> directory. </li>
 </li>
 </ul>
 </li>
-</ol><h2>Command line options</h2>
+</ol><h2>
+<a name="command-line-options" class="anchor" href="#command-line-options"><span class="octicon octicon-link"></span></a>Command line options</h2>
 
 <pre><code>$ ./slogger -h
 Usage: slogger [-dq] [-r X] [/path/to/image.jpg]
@@ -232,13 +248,15 @@ Usage: slogger [-dq] [-r X] [/path/to/image.jpg]
 <p>The <code>-u X</code> option will undo the last X runs. This works by checking the timestamp of the run and deleting any entries created after that timestamp. <strong>It should not be used if you have manually created entries since the last Slogger run.</strong> It also does not remove the run timestamps from the list, so running <code>./slogger -u 4</code> will remove the entries created by the last four runs, and then running <code>./slogger -u 5</code> will undo one more run in history.</p>
 </blockquote>
 
-<h2>Updating Slogger</h2>
+<h2>
+<a name="updating-slogger" class="anchor" href="#updating-slogger"><span class="octicon octicon-link"></span></a>Updating Slogger</h2>
 
 <p>Slogger is currently actively maintained, meaning new fixes and features are regularly available. To update your Slogger installation, download the zip file for the latest version (the link on this page is always current) into a new folder. Copy the new files over existing files to update them. If you've enabled plugins that are disabled by default, you'll need to copy them from the new folder's "plugins_disabled" folder to your current "plugins" folder.</p>
 
 <p>As long as you don't move or delete your <code>slogger_config</code> file, all of your settings will be preserved after the update.</p>
 
-<h2>Plugin development</h2>
+<h2>
+<a name="plugin-development" class="anchor" href="#plugin-development"><span class="octicon octicon-link"></span></a>Plugin development</h2>
 
 <p><em>More documentation coming</em>. See <code>plugin_template.rb</code> to get started.</p>
 
@@ -248,7 +266,7 @@ Usage: slogger [-dq] [-r X] [/path/to/image.jpg]
 
 <p><code>@log</code> is a global logger object. use <code>@log.info("Message")</code> (or <code>warn</code>/<code>error</code>/<code>fatal</code>) to generate log messages using the default formatter.</p>
 
-<p><code>@config</code> is the global configuration object. Your plugin settings will be stored under <code>@config[PluginClassName]</code>.</p>
+<p><code>@config</code> is the global configuration object. Your plugin settings will be stored under <code>@config[PluginClassName]</code>. If you return the config object at the end of your do_log function, any modifications will be stored (e.g. for saving oAuth tokens).</p>
 
 <p><code>$options</code> contains options parsed from the command line. Use <code>$options[:optionname]</code> to read the setting.</p>
 
@@ -265,7 +283,8 @@ Usage: slogger [-dq] [-r X] [/path/to/image.jpg]
 
 <p><code>@date_format</code>, <code>@time_format</code> and <code>@datetime_format</code> (this is just the conjunction of the first two) are available to all plugins and should be used wherever you output a date or time to DayOne files, e.g. <code>Time.now.strftime(@date_format)</code>.</p>
 
-<h2>License</h2>
+<h2>
+<a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
 
 <pre><code> __  _
 / _\| | ___   __ _  __ _  ___ _ __
