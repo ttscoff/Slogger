@@ -19,13 +19,14 @@ require 'logger'
 require 'optparse'
 require 'fileutils'
 require 'rexml/parsers/pullparser'
+require 'rubygems'
 
 SLOGGER_HOME = File.dirname(File.expand_path(__FILE__))
 ENV['SLOGGER_HOME'] = SLOGGER_HOME
 
 require SLOGGER_HOME + '/lib/sociallogger'
 require SLOGGER_HOME + '/lib/configtools'
-require SLOGGER_HOME + '/lib/json'
+# require SLOGGER_HOME + '/lib/json'
 
 class String
   def markdownify

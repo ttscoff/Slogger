@@ -1,6 +1,6 @@
 =begin
 Plugin: Twitter Logger
-Version: 2.0
+Version: 3.0
 Description: Logs updates and favorites for specified Twitter users
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
@@ -20,7 +20,8 @@ config = {
     'save_images_from_favorites (true/false) determines whether TwitterLogger will download images for the favorites of the given usernames and include them in the entry',
     'save_retweets (true/false) determines whether TwitterLogger will look for the retweets of the given usernames and include them in the entry',
     'save_images_from_retweets (true/false) determines whether TwitterLogger will download images for the retweets of the given usernames and include them in the entry',
-    'droplr_domain: if you have a custom droplr domain, enter it here, otherwise leave it as d.pr '],
+    'droplr_domain: if you have a custom droplr domain, enter it here, otherwise leave it as d.pr ',
+    'oauth_token and oauth_secret should be left blank and will be filled in by the plugin'],
   'twitter_users' => [],
   'save_favorites' => true,
   'save_images' => true,
@@ -28,11 +29,15 @@ config = {
   'save_retweets' => true,
   'save_images_from_retweets' => true,
   'droplr_domain' => 'd.pr',
-  'twitter_tags' => '#social #twitter'
+  'twitter_tags' => '#social #twitter',
+  'oauth_token' => '',
+  'oauth_token_secret' => '',
+  'exclude_replies' => true
 }
 $slog.register_plugin({ 'class' => 'TwitterLogger', 'config' => config })
 
-require 'rexml/document'
+require 'twitter'
+require 'twitter_oauth'
 
 class TwitterLogger < Slogger
 
@@ -68,50 +73,55 @@ class TwitterLogger < Slogger
 
   def get_tweets(user,type='timeline')
     @log.info("Getting Twitter #{type} for #{user}")
+
+    Twitter.configure do |auth_config|
+      auth_config.consumer_key = "53aMoQiFaQfoUtxyJIkGdw"
+      auth_config.consumer_secret = "Twnh3SnDdtQZkJwJ3p8Tu5rPbL5Gt1I0dEMBBtQ6w"
+      auth_config.oauth_token = @twitter_config["oauth_token"]
+      auth_config.oauth_token_secret = @twitter_config["oauth_token_secret"]
+    end
+
     case type
+
       when 'favorites'
-        url = URI.parse("http://api.twitter.com/1/favorites.xml?count=200&screen_name=#{user}&include_entities=true&count=200")
+        params = { "count" => 250, "screen_name" => user, "include_entities" => true }
+        tweet_obj = Twitter.favorites(params)
 
       when 'timeline'
-        url = URI.parse("http://api.twitter.com/1/statuses/user_timeline.xml?screen_name=#{user}&count=200&exclude_replies=true&include_entities=true")
+        params = { "count" => 250, "screen_name" => user, "include_entities" => true, "exclude_replies" => @twitter_config['exclude_replies']}
+        tweet_obj = Twitter.user_timeline(params)
 
       when 'retweets'
-        url = URI.parse("http://api.twitter.com/1/statuses/retweeted_by_user.xml?screen_name=#{user}&count=200&include_entities=true")
+        params = { "count" => 250, "screen_name" => user, "include_entities" => true }
+        tweet_obj = Twitter.retweeted_by_user(params)
 
     end
 
-    tweets = []
     images = []
+    tweets = []
     begin
-      begin
-        res = Net::HTTP.get_response(url).body
-      rescue Exception => e
-        @log.warn("Failure getting response from Twitter")
-        # p e
-        return false
-      end
-      REXML::Document.new(res).elements.each("statuses/status") { |tweet|
+      tweet_obj.each { |tweet|
         today = @timespan
-        tweet_date = Time.parse(tweet.elements['created_at'].text)
+        tweet_date = tweet.created_at
         break if tweet_date < today
-        tweet_text = tweet.elements['text'].text.gsub(/\n/,"\n\t")
+        tweet_text = tweet.text.gsub(/\n/,"\n\t")
         if type == 'favorites'
           # TODO: Prepend favorite's username/link
-          screen_name = tweet.elements['user/screen_name'].text
+          screen_name = tweet.user.status.retweeted_status.user.screen_name
           tweet_text = "[#{screen_name}](http://twitter.com/#{screen_name}): #{tweet_text}"
         end
-        tweet_id = tweet.elements['id'].text
-        unless tweet.elements['entities/urls'].nil? || tweet.elements['entities/urls'].length == 0
-          tweet.elements.each("entities/urls/url") { |url|
-            tweet_text.gsub!(/#{url.elements['url'].text}/,"[#{url.elements['display_url'].text}](#{url.elements['expanded_url'].text})")
+        tweet_id = tweet.id
+        unless tweet.urls.empty?
+          tweet.urls.each { |url|
+            tweet_text.gsub!(/#{url.url}/,"[#{url.display_url}](#{url.expanded_url})")
           }
         end
         begin
           if @twitter_config['save_images']
             tweet_images = []
-            unless tweet.elements['entities/media'].nil? || tweet.elements['entities/media'].length == 0
-              tweet.elements.each("entities/media/creative") { |img|
-                tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => img.elements['media_url'].text }
+            unless tweet.media.empty?
+              tweet.media.each { |img|
+                tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => img.media_url }
               }
             end
 
@@ -153,6 +163,7 @@ class TwitterLogger < Slogger
           @log.warn("Failure gathering image urls")
           p e
         end
+
         if tweet_images.empty? or !@twitter_config["save_images_from_#{type}"]
           tweets.push("* [[#{tweet_date.strftime(@time_format)}](https://twitter.com/#{user}/status/#{tweet_id})] #{tweet_text}")
         else
@@ -188,11 +199,43 @@ class TwitterLogger < Slogger
       return
     end
 
+    if @twitter_config['oauth_token'] == '' || @twitter_config['oauth_token_secret'] == ''
+      client = TwitterOAuth::Client.new(
+          :consumer_key => "53aMoQiFaQfoUtxyJIkGdw",
+          :consumer_secret => "Twnh3SnDdtQZkJwJ3p8Tu5rPbL5Gt1I0dEMBBtQ6w"
+      )
+
+      request_token = client.authentication_request_token(
+        :oauth_callback => 'oob'
+      )
+      @log.info("Twitter requires configuration, please run from the command line and follow the prompts")
+      puts
+      puts "------------- Twitter Configuration --------------"
+      puts "Slogger will now open an authorization page in your default web browser. Copy the code you receive and return here."
+      print "Press Enter to continue..."
+      gets
+      %x{open "#{request_token.authorize_url}"}
+      print "Paste the code you received here: "
+      code = gets.strip
+
+      access_token = client.authorize(
+        request_token.token,
+        request_token.secret,
+        :oauth_verifier => code
+      )
+      if client.authorized?
+        @twitter_config['oauth_token'] = access_token.params["oauth_token"]
+        @twitter_config['oauth_token_secret'] = access_token.params["oauth_token_secret"]
+        puts
+        log.info("Twitter successfully configured, run Slogger again to continue")
+        return @twitter_config
+      end
+    end
     @twitter_config['save_images'] ||= true
     @twitter_config['droplr_domain'] ||= 'd.pr'
 
     sl = DayOne.new
-    @twitter_config['twitter_tags'] ||= ''
+    @twitter_config['twitter_tags'] ||= '#social #twitter'
     tags = "\n\n#{@twitter_config['twitter_tags']}\n" unless @twitter_config['twitter_tags'] == ''
 
     @twitter_config['twitter_users'].each do |user|
@@ -224,6 +267,8 @@ class TwitterLogger < Slogger
         sl.to_dayone({'content' => retweets})
       end
     end
+
+    return @twitter_config
   end
 
   def try(&action)

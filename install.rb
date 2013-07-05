@@ -36,7 +36,7 @@ if File.exists?(dir+"/slogger")
 	puts "Is your Mac routinely offline at 11:50PM?"
 	print "(Y/n)"
 	ans = gets.chomp
-	flags += " -s" if ans.downcase == "y"
+	flags += "-s" unless ans.downcase == "n"
 
 	print "Setting up launchd... "
 	xml=<<LAUNCHCTLPLIST
@@ -49,7 +49,8 @@ if File.exists?(dir+"/slogger")
 	<key>ProgramArguments</key>
 	<array>
 		<string>/usr/bin/ruby</string>
-		<string>#{dir}/slogger#{flags}</string>
+		<string>#{dir}/slogger</string>
+		<string>#{flags}</string>
 	</array>
 	<key>StartCalendarInterval</key>
 	<dict>
