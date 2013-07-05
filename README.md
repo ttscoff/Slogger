@@ -63,6 +63,7 @@ Slogger indexes various public social services and creates Day One (<http://dayo
 
 1. Download and unzip (or clone using git) the Slogger project. It can be stored in your home directory, a scripts folder or anywhere else on your drive.
 2. From the command line, change to the Slogger folder and run the following commands:
+        
         sudo gem install bundle
         bundle install 
 3. Default plugins are stored in `/plugins/`, additional plugins are usually found in `/plugins_disabled/`. Plugins are enabled and disabled by adding/removing them from the `/plugins/` folder. Move any additional plugins you want to use into `/plugins/` and disable any other plugins by moving them from `/plugins/` to `plugins_disabled`. (Plugins that are found in `plugins` but not configured will not break anything, but you'll see warnings when run.)
