@@ -172,11 +172,15 @@
 
 <ol>
 <li>Download and unzip (or clone using git) the Slogger project. It can be stored in your home directory, a scripts folder or anywhere else on your drive.</li>
-<li>From the command line, change to the Slogger folder and run the following commands:
-    sudo gem install bundle
-    bundle install </li>
-<li>Default plugins are stored in <code>/plugins/</code>, additional plugins are usually found in <code>/plugins_disabled/</code>. Plugins are enabled and disabled by adding/removing them from the <code>/plugins/</code> folder. Move any additional plugins you want to use into <code>/plugins/</code> and disable any other plugins by moving them from <code>/plugins/</code> to <code>plugins_disabled</code>. (Plugins that are found in <code>plugins</code> but not configured will not break anything, but you'll see warnings when run.)</li>
-<li>From within the Slogger folder, run <code>./slogger --update-config</code> to create the initial configuration file. If this doesn't work, you may need to make the file executable: <code>chmod a+x slogger</code> from within the Slogger folder. Note that any time you add new plugins or update existing ones, you'll want to run <code>./slogger --update-config</code> to ensure that your available options are up to date.</li>
+<li>
+<p>From the command line, change to the Slogger folder and run the following commands:</p>
+
+<pre><code>sudo gem install bundle
+bundle install 
+</code></pre>
+</li>
+<li><p>Default plugins are stored in <code>/plugins/</code>, additional plugins are usually found in <code>/plugins_disabled/</code>. Plugins are enabled and disabled by adding/removing them from the <code>/plugins/</code> folder. Move any additional plugins you want to use into <code>/plugins/</code> and disable any other plugins by moving them from <code>/plugins/</code> to <code>plugins_disabled</code>. (Plugins that are found in <code>plugins</code> but not configured will not break anything, but you'll see warnings when run.)</p></li>
+<li><p>From within the Slogger folder, run <code>./slogger --update-config</code> to create the initial configuration file. If this doesn't work, you may need to make the file executable: <code>chmod a+x slogger</code> from within the Slogger folder. Note that any time you add new plugins or update existing ones, you'll want to run <code>./slogger --update-config</code> to ensure that your available options are up to date.</p></li>
 <li>
 <p>Edit the file <code>slogger_config</code> that shows up in your Slogger folder</p>
 
