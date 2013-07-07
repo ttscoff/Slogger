@@ -10,7 +10,7 @@
 #                  --------------------
 MAJOR_VERSION = 2.1
 MINOR_VERSION = 0
-BUILD_NUMBER = 3
+BUILD_NUMBER = 4
 
 init_env = ENV['SLOGGER_NO_INITIALIZE'].to_s
 ENV['SLOGGER_NO_INITIALIZE'] = "false"
