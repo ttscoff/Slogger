@@ -1,16 +1,22 @@
 =begin
 Plugin: Last.fm Logger
-Version: 1.2
+Version: 1.3
 Description: Logs playlists and loved tracks for the day
 Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
   lastfm_user: lastfmusername
   lastfm_tags: "#social #blogging"
 Notes:
-
+- added timestamps option
 =end
 config = {
-  'lastfm_description' => ['Logs songs scrobbled for time period.','lastfm_user is your Last.fm username.'],
+  'lastfm_description' => [
+    'Logs songs scrobbled for time period.',
+    'lastfm_user is your Last.fm username.',
+    'lastfm_feeds is an array that determines whether it grabs recent tracks, loved tracks, or both'
+    'lastfm_include_timestamps (true/false) will add a timestamp prefix based on @time_format to each song'
+  ],
+  'lastfm_include_timestamps' => false,
   'lastfm_user' => '',
   'lastfm_feeds' => ['recent', 'loved'],
   'lastfm_tags' => '#social #music'
@@ -73,8 +79,10 @@ class LastFMLogger < Slogger
       title_to_link = {}
 
       rss.items.each { |item|
-        break if Time.parse(item.pubDate.to_s) < today
-        title = String(item.title).e_link()
+        timestamp = Time.parse(item.pubDate.to_s)
+        break if timestamp < today
+        ts = config['lastfm_include_timestamps'] ? "[#{timestamp.strftime(@time_format)}] " : ""
+        title = ts + String(item.title).e_link()
         link = String(item.link).e_link()
 
         # keep track of URL for each song title
