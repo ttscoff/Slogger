@@ -13,7 +13,7 @@ config = {
   'lastfm_description' => [
     'Logs songs scrobbled for time period.',
     'lastfm_user is your Last.fm username.',
-    'lastfm_feeds is an array that determines whether it grabs recent tracks, loved tracks, or both'
+    'lastfm_feeds is an array that determines whether it grabs recent tracks, loved tracks, or both',
     'lastfm_include_timestamps (true/false) will add a timestamp prefix based on @time_format to each song'
   ],
   'lastfm_include_timestamps' => false,
