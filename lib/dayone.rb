@@ -78,7 +78,7 @@ class DayOne < Slogger
     return false if match.nil?
     ext = match[1]
     @log.info("Resizing image #{File.basename(orig)}")
-    res = %x{sips -Z 1600 "#{orig}" 2>&1}
+    res = %x{sips -Z 2100 "#{orig}" 2>&1}
     unless ext =~ /\.jpg$/
       case ext
       when '.jpeg'

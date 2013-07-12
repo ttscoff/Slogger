@@ -24,6 +24,7 @@ config = {
     'fitbit_tags' => '#activities',
     'fitbit_log_water' => true,
     'fitbit_log_body_measurements' => true,
+    'fitbit_log_sleep' => false,
 }
 
 $slog.register_plugin({ 'class' => 'FitbitLogger', 'config' => config })
@@ -113,6 +114,18 @@ class FitbitLogger < Slogger
                 loggedWater = waterSummary['water']
                 waterUnit = client.label_for_measurement(:liquids, false)		
             end            
+            if config['fitbit_log_sleep']
+                sleep = client.sleep_on_date(timestring)
+                sleepSummary = sleep['summary']
+                
+                hoursInBed = sleepSummary['totalTimeInBed'] / 60
+                minutesInBed = sleepSummary['totalTimeInBed'] - (hoursInBed * 60)
+                timeInBed = "#{hoursInBed}h #{minutesInBed}min"
+                
+                hoursAsleep = sleepSummary['totalMinutesAsleep'] / 60
+                minutesAsleep = sleepSummary['totalMinutesAsleep'] - (hoursAsleep * 60)
+                timeAsleep = "#{hoursAsleep}h #{minutesAsleep}min"
+            end
 		     
             if developMode
                 @log.info("Steps: #{steps}")
@@ -122,6 +135,8 @@ class FitbitLogger < Slogger
 				@log.info("Weight: #{weight} #{weightUnit}")
 				@log.info("BMI: #{bmi}")     
 				@log.info("Water Intake: #{loggedWater} #{waterUnit}")        
+                @log.info("Time In Bed: #{timeInBed}")
+                @log.info("Time Asleep: #{timeAsleep}")
             end
             
             tags = config['fitbit_tags'] || ''
@@ -134,6 +149,10 @@ class FitbitLogger < Slogger
             end
             if config['fitbit_log_water']
             	output += "**Water Intake:** #{loggedWater} #{waterUnit}\n"
+            end
+            if config['fitbit_log_sleep']
+                output += "**Time In Bed:** #{timeInBed}\n"
+                output += "**Time Asleep:** #{timeAsleep}\n"
             end
             
             # Create a journal entry
