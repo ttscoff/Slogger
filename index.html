@@ -288,6 +288,56 @@ Usage: slogger [-dq] [-r X] [/path/to/image.jpg]
 <p><code>@date_format</code>, <code>@time_format</code> and <code>@datetime_format</code> (this is just the conjunction of the first two) are available to all plugins and should be used wherever you output a date or time to DayOne files, e.g. <code>Time.now.strftime(@date_format)</code>.</p>
 
 <h2>
+<a name="troubleshooting" class="anchor" href="#troubleshooting"><span class="octicon octicon-link"></span></a>Troubleshooting</h2>
+
+<h3>
+<a name="system-requirements" class="anchor" href="#system-requirements"><span class="octicon octicon-link"></span></a>System Requirements</h3>
+
+<p>Slogger depends on Apple’s system Ruby version to run. You can check the Ruby version by typing <code>ruby -v</code> in your terminal, it should return something like <code>ruby 1.8.7 (2012-02-08 patchlevel 358) [universal-darwin12.0]</code>.</p>
+
+<p>Slogger does not currently support Ruby 1.9.x or 2.x.</p>
+
+<p>If you are using RVM or RBENV to manage your Ruby installation, you can set the system Ruby as the default.</p>
+
+<p>For RVM check here: <a href="https://rvm.io/rubies/default">https://rvm.io/rubies/default</a></p>
+
+<p>For RBENV check here: <a href="https://github.com/sstephenson/rbenv#choosing-the-ruby-version">https://github.com/sstephenson/rbenv#choosing-the-ruby-version</a></p>
+
+<h3>
+<a name="xcode-command-line-tools" class="anchor" href="#xcode-command-line-tools"><span class="octicon octicon-link"></span></a>Xcode Command Line Tools</h3>
+
+<p>In order for Slogger to run you must have an up-to-date version of Xcode's Command Line Tools installed.</p>
+
+<p>Simply download Xcode from the OSX App Store. When it has downloaded launch it, open "Preferences", and under "Downloads" select "Install" on "Command Line Tools".</p>
+
+<h3>
+<a name="plugins" class="anchor" href="#plugins"><span class="octicon octicon-link"></span></a>Plugins</h3>
+
+<p>If Slogger is running, but returning an error message, it may be an issue with a plugin configuration.</p>
+
+<p>It may help to move all plugins to the Disabled Plugins directory, and then add them back into the Plugins directory one by one, running <code>./slogger</code> each time to ensure it is not returning any errors. That way, you can identify if there is an issue with a particular Plugin.</p>
+
+<p>Common issues with Plugins:</p>
+
+<ol>
+<li><p>Feeds entered incorrectly. Multiple RSS feeds should be entered like
+<code>feeds: [http://feed1.com/feed1.rss, http://feed2.com/feed2.rss, http://feed3.com/feed3.rss]</code></p></li>
+<li><p>Attempting to fetch an invalid feed. Feeds can be validated here: <a href="http://validator.w3.org/feed/">http://validator.w3.org/feed/</a></p></li>
+</ol><h3>
+<a name="sync--dropbox" class="anchor" href="#sync--dropbox"><span class="octicon octicon-link"></span></a>Sync / Dropbox</h3>
+
+<p>It's not uncommon to have some sync issues using iCloud. The developers of the Day One app explicitly favour using Dropbox to sync your journal between your Mac and iPhone or iPad. So maybe use Dropbox.</p>
+
+<p>If you are using Dropbox, a common location for your Day One Journal, which will need to be entered in the Slogger Config file under "Storage" is <code>/Users/YOURUSERNAME/Dropbox/Apps/Day One/Journal.dayone</code>. Please note that if you have moved your Dropbox, to your Desktop for instance, that would change the path required to <code>/Users/YOURUSERNAME/Desktop/Dropbox/Apps/Day One/Journal.dayone</code></p>
+
+<h3>
+<a name="date-and-time-formats" class="anchor" href="#date-and-time-formats"><span class="octicon octicon-link"></span></a>Date and Time Formats</h3>
+
+<p>By default Slogger sets the Date format to ISO 8601 (Y/m/d) <code>"%F"</code> and the Time format to H:M (24-hour clock) <code>"%R"</code>. These settings can be changed to anything from the <code>strftime</code> specification, viewable here: <a href="http://linux.die.net/man/3/strftime">http://linux.die.net/man/3/strftime</a>.</p>
+
+<p>The European Date format dd/mm/yy is not supported. The closest option is probably to set date to <code>"%x"</code> which is "The preferred date representation for the current locale without the time." </p>
+
+<h2>
 <a name="license" class="anchor" href="#license"><span class="octicon octicon-link"></span></a>License</h2>
 
 <pre><code> __  _
