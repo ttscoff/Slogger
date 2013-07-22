@@ -42,7 +42,7 @@ class YahooFinanceLogger < Slogger
     @log.info("Logging <YahooFinanceLogger> Tickers")
 
     tickers = config['tickers']
-    tags = config['tags'] || ''
+    @tags = config['tags'] || ''
     tags = "\n\n#{@tags}\n" unless @tags == ''
     show_details = (config['show_details'] == true)
 
