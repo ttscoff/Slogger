@@ -7,7 +7,6 @@ Configuration:
   trakt_save_image: true
   trakt_tv_tags: "#trakt #tv"
   trakt_movie_tags: "#trakt #movie"
-  trakt_tz: "timezone in [+-]\d\d\d\d format"
 Notes:
   This plugin depends on a VIP subscription to trakt.tv, which enable you to get an RSS
   feed of movies and TV shows that you've watched.
@@ -19,13 +18,11 @@ config = {# description and a primary key (username, url, etc.) required
           'description' => ['trakt_feed is a string containing the RSS feed for your read books',
                             'trakt_save_image will save the media image as the main image for the entry',
                             'trakt_tv_tags are tags you want to add to every TV entry',
-                            'trakt_movie_tags are tags you want to add to every movie entry',
-                            'trakt_tz is the timezone offset for where you live. Necessary due to a bug in trakt RSS'],
+                            'trakt_movie_tags are tags you want to add to every movie entry'],
           'trakt_feed' => '',
           'trakt_save_image' => true,
           'trakt_tv_tags' => '#trakt #tv',
-          'trakt_movie_tags' => '#trakt #movie',
-          'trakt_tz' => ''
+          'trakt_movie_tags' => '#trakt #movie'
 }
 
 $slog.register_plugin({'class' => 'TraktLogger', 'config' => config})
@@ -80,8 +77,6 @@ class TraktLogger < Slogger
     movie_tags = config['trakt_movie_tags'] || ''
     movie_tags = "\n\n#{movie_tags}\n" unless movie_tags == ''
 
-    tz = config['trakt_tz'] || ''
-
     begin
       rss_content = ""
 
@@ -92,9 +87,7 @@ class TraktLogger < Slogger
       doc.root.each_element('//item') { |item|
         content = ''
 
-        item_date_text = item.elements['pubDate'].text
-        item_date_text.sub!(/-0700/, tz) if tz && !tz.empty?
-        item_date = Time.parse(item_date_text)
+        item_date = Time.parse(item.elements['pubDate'].text)
 
         if item_date > @timespan
           title = item.elements['title'].text
