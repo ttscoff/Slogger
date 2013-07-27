@@ -20,6 +20,7 @@ require 'optparse'
 require 'fileutils'
 require 'rexml/parsers/pullparser'
 require 'rubygems'
+require 'json'
 
 SLOGGER_HOME = File.dirname(File.expand_path(__FILE__))
 ENV['SLOGGER_HOME'] = SLOGGER_HOME
