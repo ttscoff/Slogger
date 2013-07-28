@@ -62,7 +62,7 @@ class LastFMLogger < Slogger
 
     today = @timespan
 
-    @log.info("Getting Last.fm playists for #{config['lastfm_user']}")
+    @log.info("Getting Last.fm playlists for #{config['lastfm_user']}")
 
     feeds.each do |rss_feed|
       entrytext = ''
