@@ -30,8 +30,8 @@ class ThingsLogger < Slogger
 
     # Unassigned Var
     #additional_config_option = config['additional_config_option'] || false
-    tags = config['tags'] || ''
-    tags = "\n\n#{@tags}\n" unless @tags == ''
+    config['things_tags'] ||= ''
+    tags = config['things_tags'] == '' ? '' : "\n\n#{config['things_tags']}\n"
 
     timespan = @timespan.strftime('%d/%m/%Y')
     output = ''
