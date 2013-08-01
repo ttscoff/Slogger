@@ -19,7 +19,7 @@ config = {
     'pinboard_feeds is an array of one or more Pinboard RSS feeds'],
   'pinboard_feeds' => [],
   'pinboard_tags' => '#social #bookmarks',
-  'pinboard_save_hashtags' => true
+  'pinboard_save_hashtags' => true,
   'pinboard_digest' => true
 }
 $slog.register_plugin({ 'class' => 'PinboardLogger', 'config' => config })
