@@ -148,6 +148,7 @@ class FitbitLogger < Slogger
                 
                 mealList = Hash.new
                 foodsEaten = ""
+                totalCalories = 0
                 foods.each do |foodEntry|
                     food = foodEntry['loggedFood']
                     mealId = food['mealTypeId']
@@ -159,6 +160,7 @@ class FitbitLogger < Slogger
                 end
                 mealList.each do |key,meal|
                     foodsEaten += meal.to_s
+                    totalCalories += meal.calories
                 end
 
             end
@@ -192,7 +194,7 @@ class FitbitLogger < Slogger
                 output += "**Time Asleep:** #{timeAsleep}\n"
             end
             if config['fitbit_log_food']
-                output += "**Foods eaten:**\n#{foodsEaten}"
+                output += "**Foods eaten:** #{totalCalories} calories\n#{foodsEaten}"
             end
             
             # Create a journal entry
@@ -240,6 +242,10 @@ class Meal
             mealString += "  * #{food}\n"
         end
         return mealString
+    end
+    
+    def calories
+        @calories
     end
 end
     
