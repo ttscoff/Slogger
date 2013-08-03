@@ -24,7 +24,8 @@ config = {
     'fitbit_tags' => '#activities',
     'fitbit_log_water' => true,
     'fitbit_log_body_measurements' => true,
-    'fitbit_log_sleep' => false
+    'fitbit_log_sleep' => false,
+    'fitbit_log_food' => false
 }
 
 $slog.register_plugin({ 'class' => 'FitbitLogger', 'config' => config })
@@ -114,6 +115,7 @@ class FitbitLogger < Slogger
             distance = summary['distances'][0]['distance']
             distanceUnit = client.label_for_measurement(:distance, false)
             activityPoints = summary['activeScore']
+            foodsEaten = ""
             
             if config['fitbit_log_body_measurements']
                 measurements = client.body_measurements_on_date(timestring)
@@ -140,6 +142,27 @@ class FitbitLogger < Slogger
                 timeAsleep = "#{hoursAsleep}h #{minutesAsleep}min"
             end
             
+            if config['fitbit_log_food']
+                foodData = client.foods_on_date(timestring)
+                foods = foodData['foods']
+                
+                mealList = Hash.new
+                foodsEaten = ""
+                foods.each do |foodEntry|
+                    food = foodEntry['loggedFood']
+                    mealId = food['mealTypeId']
+                    if !mealList.has_key?(mealId)
+                        mealList[mealId] = Meal.new(translateMeal(mealId))
+                    end
+                    meal = mealList[mealId]
+                    meal.addFood(food['name'],food['amount'],food['unit']['plural'],food['calories'])
+                end
+                mealList.each do |key,meal|
+                    foodsEaten += meal.to_s
+                end
+
+            end
+            
             if developMode
                 @log.info("Steps: #{steps}")
                 @log.info("Distance: #{distance} #{distanceUnit}")
@@ -150,6 +173,7 @@ class FitbitLogger < Slogger
 				@log.info("Water Intake: #{loggedWater} #{waterUnit}")        
                 @log.info("Time In Bed: #{timeInBed}")
                 @log.info("Time Asleep: #{timeAsleep}")
+                @log.info("Foods Eaten:\n #{foodsEaten}")
             end
             
             tags = config['fitbit_tags'] || ''
@@ -167,6 +191,9 @@ class FitbitLogger < Slogger
                 output += "**Time In Bed:** #{timeInBed}\n"
                 output += "**Time Asleep:** #{timeAsleep}\n"
             end
+            if config['fitbit_log_food']
+                output += "**Foods eaten:**\n#{foodsEaten}"
+            end
             
             # Create a journal entry
             options = {}
@@ -178,4 +205,42 @@ class FitbitLogger < Slogger
         end
         return config
     end
+                                 
+    def translateMeal(mealId)
+        case mealId
+        when 1
+            return "Breakfast"
+        when 2
+            return "Morning Snack"
+        when 3
+            return "Lunch"
+        when 4
+            return "Afternoon Snack"
+        when 5
+            return "Dinner"
+        else
+            return "Anytime"
+        end
+    end
 end
+class Meal
+    def initialize(name)
+        @name = name
+        @foods = Array.new
+        @calories = 0
+    end
+    def addFood(name, amount, unit, calories)
+        @foods.push("#{name} (#{amount} #{unit}, #{calories} calories)")
+        @calories += calories
+    end
+
+    def to_s
+        mealString = " * #{@name}: #{@calories} calories\n"
+        @foods.each do |food|
+            mealString += "  * #{food}\n"
+        end
+        return mealString
+    end
+end
+    
+
