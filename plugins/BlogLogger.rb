@@ -159,7 +159,7 @@ class BlogLogger < Slogger
           end
 
           imageurl = false
-          image_match = content.match(/src="(http:.*?\.(jpg|png))(\?.*?)?"/i) rescue nil
+          image_match = content.match(/src="(https?:.*?\.(jpg|png|jpeg))(\?.*?)?"/i) rescue nil
           imageurl = image_match[1] unless image_match.nil?
 
           # can't find a way to truncate partial html without nokogiri or other gems...

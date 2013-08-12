@@ -3,7 +3,7 @@
 *.taskpaper
 *.develop
 .DS_Store
-slogger_config
+*_config
 plugins_develop
 runlog.txt
 /slogger.log
