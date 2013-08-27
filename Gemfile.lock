@@ -14,7 +14,6 @@ GEM
     oauth (0.4.7)
     simple-rss (1.2.3)
     simple_oauth (0.2.0)
-    system_timer (1.2.4)
     twitter (4.8.1)
       faraday (~> 0.8, < 0.10)
       multi_json (~> 1.0)
@@ -29,6 +28,6 @@ PLATFORMS
 
 DEPENDENCIES
   feed-normalizer
-  system_timer
+  json
   twitter
   twitter_oauth
