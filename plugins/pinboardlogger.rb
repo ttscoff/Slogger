@@ -14,15 +14,16 @@ Notes:
 
 =end
 config = {
-  'pinboard_description' => [
-    'Logs bookmarks for today from Pinboard.in.',
-    'pinboard_feeds is an array of one or more Pinboard RSS feeds'],
-  'pinboard_feeds' => [],
-  'pinboard_tags' => '#social #bookmarks',
-  'pinboard_save_hashtags' => true
-  'pinboard_digest' => true
+    'pinboard_description' => [
+        'Logs bookmarks for today from Pinboard.in.',
+        'pinboard_feeds is an array of one or more Pinboard RSS feeds',
+        'pinboard_digest true will group all new bookmarks into one post, false will split them into individual posts dated when the bookmark was created'],
+    'pinboard_feeds' => [],
+    'pinboard_tags' => '#social #bookmarks',
+    'pinboard_save_hashtags' => true,
+    'pinboard_digest' => true
 }
-$slog.register_plugin({ 'class' => 'PinboardLogger', 'config' => config })
+$slog.register_plugin({'class' => 'PinboardLogger', 'config' => config})
 
 require 'rexml/document'
 require 'rss/dublincore'
@@ -69,20 +70,18 @@ class PinboardLogger < Slogger
               content = "\n\n> " + item.description.gsub(/\n/, "\n> ").strip unless item.description.nil?
             end
             if config['pinboard_save_hashtags']
-              post_tags = "\n    " + item.dc_subject.split(' ').map {|tag| "##{tag}"}.join(' ') + "\n" unless item.dc_subject.nil?
+              post_tags = "\n" + item.dc_subject.split(' ').map { |tag| "##{tag}" }.join(' ') + "\n" unless item.dc_subject.nil?
             end
             feed_output += "#{config['pinboard_digest'] ? '* ' : ''}[#{item.title.gsub(/\n/, ' ').strip}](#{item.link})#{content}#{post_tags}"
           else
             break
           end
-          if config['pinboard_digest']
-            output = feed_output
-            unless output == ''
-              options = {}
-              options['datestamp'] = Time.parse(item.date.to_s).utc.iso8601
-              options['content'] = "## New Pinboard bookmark\n#{output}#{tags}"
-              sl.to_dayone(options)
-            end
+          output = feed_output unless config['pinboard_digest']
+          unless output == '' || config['pinboard_digest']
+            options = {}
+            options['datestamp'] = Time.parse(item.date.to_s).utc.iso8601
+            options['content'] = "## New Pinboard bookmark\n#{output}#{tags}"
+            sl.to_dayone(options)
           end
         }
         output += "#### [#{rss.channel.title}](#{rss.channel.link})\n\n" + feed_output + "\n" unless feed_output == ''
