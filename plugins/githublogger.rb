@@ -17,8 +17,6 @@ config = {
 }
 $slog.register_plugin({ 'class' => 'GithubLogger', 'config' => config })
 
-require 'json'
-
 class GithubLogger < Slogger
 
   def do_log
