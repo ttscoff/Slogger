@@ -326,7 +326,7 @@ optparse = OptionParser.new do|opts|
     $options[:develop] = true
   end
   $options[:onlyrun] = false
-  opts.on( '-o','--onlyrun NAME[,NAME2...]','Only run plugins matching items in comma-delimited string') do |plugin_string|
+  opts.on( '-o','--onlyrun NAME','Only run plugins matching items in comma-delimited string') do |plugin_string|
     $options[:onlyrun] = plugin_string.split(/,/).map {|frag| frag.strip }
   end
   $options[:timespan] = 1
