@@ -51,7 +51,9 @@ class AsanaLogger < Slogger
       ws_id = ws_info['id']
       ws_name = ws_info['name']
       @log.info("Getting tasks for #{ws_name}")
-      finished_tasks = get_finished_tasks(api_key, ws_id)
+      tasks = asana(api_key, "/workspaces/#{ws_id}/tasks?include_archived=true&assignee=me")['data']
+      finished_tasks = tasks.map {|t| asana(api_key, "/tasks/#{t['id']}")['data']}
+      finished_tasks.select! {|t| t['completed'] and Time.parse(t['completed_at']) > @timespan}
       unless finished_tasks.empty?
         content += "### Tasks finished today:\n\n"
         finished_tasks.each do |t|
@@ -59,7 +61,8 @@ class AsanaLogger < Slogger
         end
         content += "\n"
       end
-      added_tasks = get_added_tasks(api_key, ws_id)
+      added_tasks = tasks.map {|t| asana(api_key, "/tasks/#{t['id']}")['data']}
+      added_tasks.select! {|t| Time.parse(t['created_at']) > @timespan}
       unless added_tasks.empty?
         content += "### Tasks added today:\n\n"
         added_tasks.each do |t|
@@ -92,22 +95,6 @@ class AsanaLogger < Slogger
   def get_workspaces(key)
     user_info = asana(key, '/users/me')
     user_info['data']['workspaces']
-  end
-
-  def get_added_tasks(key, workspace)
-    tasks = asana(key, "/workspaces/#{workspace}/tasks?include_archived=true&assignee=me")['data']
-    tasks.map! {|t| asana(key, "/tasks/#{t['id']}")['data']}
-    tasks.select {|t| Time.parse(t['created_at']) > @timespan}
-  end
-
-  def get_finished_tasks(key, workspace)
-    tasks = asana(key, "/workspaces/#{workspace}/tasks?include_archived=true&assignee=me")['data']
-    tasks.map! {|t| asana(key, "/tasks/#{t['id']}")['data']}
-    tasks.select {|t| t['completed'] and Time.parse(t['completed_at']) > @timespan}
-  end
-
-  def order_tasks(tasks)
-    tasks.sort_by! {|t| t['projects']}
   end
 
   def format_task(task)
