@@ -42,8 +42,8 @@ class AsanaLogger < Slogger
     end
     @log.info("Logging AsanaLogger posts")
 
-    tags = config['tags'] || ''
-    tags = "\n\n#{@tags}\n" unless @tags == ''
+    asana_tags = config['asana_tags'] || ''
+    asana_tags = "\n\n#{asana_tags}\n" unless asana_tags == ''
 
     # Perform necessary functions to retrieve posts
     content = ""
@@ -82,7 +82,7 @@ class AsanaLogger < Slogger
     # Create a journal entry
     unless content.empty?
       sl = DayOne.new
-      options['content'] = "## Asana activity\n\n#{content}\n#{tags}"
+      options['content'] = "## Asana activity\n\n#{content}#{asana_tags}"
       sl.to_dayone(options)
     end
 
