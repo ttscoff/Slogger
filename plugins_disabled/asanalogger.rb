@@ -10,9 +10,10 @@ Notes:
 
 config = { # description and a primary key (username, url, etc.) required
   'description' => ['Logs daily Asana activity',
-                    'asana_api_key is a string with your personal Asana API key'],
+                    'asana_api_key is a string with your personal Asana API key.',
+                    'This can be obtained from your profile screen in Asana.'],
   'asana_api_key' => '',
-  'tags' => '#tasks' 
+  'asana_tags' => '#tasks' 
 }
 # Update the class key to match the unique classname below
 $slog.register_plugin({ 'class' => 'AsanaLogger', 'config' => config })
@@ -21,10 +22,8 @@ require "JSON"
 require "net/https"
 
 class AsanaLogger < Slogger
-  # every plugin must contain a do_log function which creates a new entry using the DayOne class (example below)
   # @config is available with all of the keys defined in "config" above
   # @timespan and @dayonepath are also available
-  # returns: nothing
   def do_log
     if @config.key?(self.class.name)
       config = @config[self.class.name]
@@ -72,8 +71,7 @@ class AsanaLogger < Slogger
       end
     end
 
-    # create an options array to pass to 'to_dayone'
-    # all options have default fallbacks, so you only need to create the options you want to specify
+    # set up day one post
     options = {}
     options['datestamp'] = Time.now.utc.iso8601
     options['starred'] = true
@@ -85,11 +83,6 @@ class AsanaLogger < Slogger
       options['content'] = "## Asana activity\n\n#{content}#{asana_tags}"
       sl.to_dayone(options)
     end
-
-    # To create an image entry, use `sl.to_dayone(options) if sl.save_image(imageurl,options['uuid'])`
-    # save_image takes an image path and a uuid that must be identical the one passed to to_dayone
-    # save_image returns false if there's an error
-
   end
 
   def get_workspaces(key)
