@@ -160,7 +160,9 @@ For RBENV check here: [https://github.com/sstephenson/rbenv#choosing-the-ruby-ve
 
 In order for Slogger to run you must have an up-to-date version of Xcode's Command Line Tools installed.
 
-Simply download Xcode from the OSX App Store. When it has downloaded launch it, open "Preferences", and under "Downloads" select "Install" on "Command Line Tools".
+Download Xcode from the OSX App Store. When it has downloaded launch it, open "Preferences", and under "Downloads" click on the arrow to the right of "Command Line Tools".
+
+![](https://f.cloud.github.com/assets/222514/1398971/ee9b6a00-3cad-11e3-8583-c0c1ce804e3a.png)
 
 ### Plugins
 
