@@ -65,14 +65,16 @@ class PinboardLogger < Slogger
             content = ''
             post_tags = ''
             if config['pinboard_digest']
-              content = "\n\n        " + item.description.gsub(/\n/, "\n        ").strip unless item.description.nil?
+              content = "\n        " + item.description.gsub(/\n/, "\n        ").strip unless item.description.nil?
             else
-              content = "\n\n> " + item.description.gsub(/\n/, "\n> ").strip unless item.description.nil?
+              content = "\n> " + item.description.gsub(/\n/, "\n> ").strip unless item.description.nil?
             end
+            content = "\n#{content}\n" unless content == ''
             if config['pinboard_save_hashtags']
               post_tags = "\n" + item.dc_subject.split(' ').map { |tag| "##{tag}" }.join(' ') + "\n" unless item.dc_subject.nil?
             end
-            feed_output += "#{config['pinboard_digest'] ? '* ' : ''}[#{item.title.gsub(/\n/, ' ').strip}](#{item.link})#{content}#{post_tags}"
+            post_tags = "\n#{post_tags}\n" unless post_tags == ''
+            feed_output += "#{config['pinboard_digest'] ? '* ' : ''}[#{item.title.gsub(/\n/, ' ').strip}](#{item.link})\n#{content}#{post_tags}"
           else
             break
           end

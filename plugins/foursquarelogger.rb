@@ -1,5 +1,5 @@
 =begin
-Plugin: FourSquare Logger
+Plugin: Foursquare Logger
 Version: 1.0
 Description: Checks Foursquare feed once a day for that day's posts.
 Author: [Jeff Mueller](https://github.com/jeffmueller)
@@ -23,17 +23,17 @@ class FoursquareLogger < Slogger
     if @config.key?(self.class.name)
       config = @config[self.class.name]
       if !config.key?('foursquare_feed') || config['foursquare_feed'] == ''
-        @log.warn("FourSquare feed has not been configured, please edit your slogger_config file.")
+        @log.warn("Foursquare feed has not been configured, please edit your slogger_config file.")
         return
       else
         @feed = config['foursquare_feed']
       end
     else
-      @log.warn("FourSquare feed has not been configured, please edit your slogger_config file.")
+      @log.warn("Foursquare feed has not been configured, please edit your slogger_config file.")
       return
     end
 
-    @log.info("Getting FourSquare checkins")
+    @log.info("Getting Foursquare checkins")
 
     config['foursquare_tags'] ||= ''
     @tags = "\n\n#{config['foursquare_tags']}\n" unless config['foursquare_tags'] == ''
