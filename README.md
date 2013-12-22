@@ -146,11 +146,11 @@ When developing plugins you can create a directory called 'plugins_develop' in t
 
 ### System Requirements
 
-Slogger depends on Apple’s system Ruby version to run. You can check the Ruby version by typing `ruby -v` in your terminal, it should return something like `ruby 1.8.7 (2012-02-08 patchlevel 358) [universal-darwin12.0]`.
+Slogger depends on Apple’s system Ruby version to run. You can check the Ruby version by typing `ruby -v` in your terminal, it should return something like `ruby 2.0.0p247 (2013-06-27 revision 41674) [universal.x86_64-darwin13]`.
 
-Slogger does not currently support Ruby 1.9.x or 2.x.
+As of the release of Mavericks Apple are providing Ruby version 2.0. Slogger is transitioning to full 2.0 support so meanwhile your mileage may vary.
 
-If you are using RVM or RBENV to manage your Ruby installation, you can set the system Ruby as the default.
+If you are using RVM or RBENV to manage your Ruby installation, you can set the an alternative Ruby version as the default.
 
 For RVM check here: [https://rvm.io/rubies/default](https://rvm.io/rubies/default)
 
