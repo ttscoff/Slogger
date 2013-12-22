@@ -57,12 +57,19 @@ class InstapaperLogger < Slogger
         feed_output = ''
         rss.items.each { |item|
           item_date = Time.parse(item.pubDate.to_s)
-          if item_date > @timespan
+          # Instapaper shows times in GMT, but doesn't display that in pubDate,
+          # which means Time.parse will parse it as the local time and potentially
+          # missing some items. Subtracting the gmt_offset fixes this.
+          if item_date > (@timespan - item_date.gmt_offset)
             content = item.description.gsub(/\n/,"\n    ") unless item.description == ''
             feed_output += "* [#{item.title}](#{item.link})\n"
             feed_output += "\n     #{content}\n" if config['instapaper_include_content_preview'] == true
           else
-            break
+            # The archive orders posts inconsistenly so older items can
+            # show up before newer ones
+            if rss.channel.title != "Instapaper: Archive"
+              break
+            end
           end
         }
         output += "#### #{rss.channel.title}\n\n" + feed_output + "\n" unless feed_output == ''
