@@ -29,7 +29,8 @@ config = {
   'twitter_tags' => '#social #twitter',
   'oauth_token' => '',
   'oauth_token_secret' => '',
-  'exclude_replies' => true
+  'exclude_replies' => true,
+  'save_retweets' => false
 }
 $slog.register_plugin({ 'class' => 'TwitterLogger', 'config' => config })
 
@@ -71,22 +72,22 @@ class TwitterLogger < Slogger
   def get_tweets(user,type='timeline')
     @log.info("Getting Twitter #{type} for #{user}")
 
-    Twitter.configure do |auth_config|
-      auth_config.consumer_key = "53aMoQiFaQfoUtxyJIkGdw"
-      auth_config.consumer_secret = "Twnh3SnDdtQZkJwJ3p8Tu5rPbL5Gt1I0dEMBBtQ6w"
-      auth_config.oauth_token = @twitter_config["oauth_token"]
-      auth_config.oauth_token_secret = @twitter_config["oauth_token_secret"]
+    client = Twitter::REST::Client.new do |config|
+      config.consumer_key        = "53aMoQiFaQfoUtxyJIkGdw"
+      config.consumer_secret     = "Twnh3SnDdtQZkJwJ3p8Tu5rPbL5Gt1I0dEMBBtQ6w"
+      config.access_token        = @twitter_config["oauth_token"]
+      config.access_token_secret = @twitter_config["oauth_token_secret"]
     end
 
     case type
 
       when 'favorites'
         params = { "count" => 250, "screen_name" => user, "include_entities" => true }
-        tweet_obj = Twitter.favorites(params)
+        tweet_obj = client.favorites(params)
 
       when 'timeline'
         params = { "count" => 250, "screen_name" => user, "include_entities" => true, "exclude_replies" => @twitter_config['exclude_replies'], "include_rts" => @twitter_config['save_retweets']}
-        tweet_obj = Twitter.user_timeline(params)
+        tweet_obj = client.user_timeline(params)
 
     end
 
