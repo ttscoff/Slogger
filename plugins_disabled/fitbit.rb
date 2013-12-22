@@ -57,14 +57,14 @@ class FitbitLogger < Slogger
         fitbit_consumer_key = config['fitbit_consumer_key']
         fitbit_consumer_secret = config['fitbit_consumer_secret']
         
-        client = Fitgem::Client.new(:consumer_key => fitbit_consumer_key, :consumer_secret => fitbit_consumer_secret, :unit_system => config['fitbit_unit_system'])
+        client = Fitgem::Client.new(:consumer_key => fitbit_consumer_key, :consumer_secret => fitbit_consumer_secret, :unit_system => translateUnitSystem(config['fitbit_unit_system']))
         developMode = $options[:develop]
         
         
         # ============================================================
         # request oauth token if needed
         @log.info("#{oauth_token}")
-        if  !oauth_token.nil? && !oauth_secret.nil?
+        if  !oauth_token.nil? && !oauth_secret.nil? && !oauth_token.empty? && !oauth_secret.empty?
             access_token = client.reconnect(oauth_token, oauth_secret)
         else
             request_token = client.request_token
@@ -222,6 +222,19 @@ class FitbitLogger < Slogger
             return "Dinner"
         else
             return "Anytime"
+        end
+    end
+
+    def translateUnitSystem(unitSystemString)
+        case unitSystemString
+        when "US"
+            return Fitgem::ApiUnitSystem.US
+        when "METRIC"
+            return Fitgem::ApiUnitSystem.METRIC
+        when "UK"
+            return Fitgem::ApiUnitSystem.UK
+        else 
+            return Fitgem::ApiUnitSystem.US
         end
     end
 end
