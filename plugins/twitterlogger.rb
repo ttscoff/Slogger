@@ -71,7 +71,7 @@ class TwitterLogger < Slogger
   def get_tweets(user,type='timeline')
     @log.info("Getting Twitter #{type} for #{user}")
 
-    Twitter.configure do |auth_config|
+    client = Twitter::REST::Client.new do |auth_config|
       auth_config.consumer_key = "53aMoQiFaQfoUtxyJIkGdw"
       auth_config.consumer_secret = "Twnh3SnDdtQZkJwJ3p8Tu5rPbL5Gt1I0dEMBBtQ6w"
       auth_config.oauth_token = @twitter_config["oauth_token"]
@@ -82,11 +82,11 @@ class TwitterLogger < Slogger
 
       when 'favorites'
         params = { "count" => 250, "screen_name" => user, "include_entities" => true }
-        tweet_obj = Twitter.favorites(params)
+        tweet_obj = client.favorites(params)
 
       when 'timeline'
         params = { "count" => 250, "screen_name" => user, "include_entities" => true, "exclude_replies" => @twitter_config['exclude_replies'], "include_rts" => @twitter_config['save_retweets']}
-        tweet_obj = Twitter.user_timeline(params)
+        tweet_obj = client.user_timeline(params)
 
     end
 
