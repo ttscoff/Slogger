@@ -91,21 +91,24 @@ class GoodreadsLogger < Slogger
         item_date = Time.parse(item.elements['pubDate'].text)
         if item_date > @timespan
           imageurl = false
-          #  need to filter out unread items, can do it by those that have a rating assigned to them
+          #  read items are those where the guid type begins with 'Review'
             #debugger
-          break if item.elements['user_rating'].text=="0"
+          next if !item.elements['guid'].text.start_with?('Review')
+          desc = item.elements['description'].cdatas().join
           if save_image
-            imageurl = item.elements['book_large_image_url'].text rescue false
+            imageurl = desc.match(/src="([^"]*)" /)[1].gsub(/\/([0-9]+)s\//) { "/#{$1}l/" } rescue false
           end
-          content += "* Author: #{item.elements['author_name'].text}\n" rescue ''
-          content += "* Average rating: #{item.elements['average_rating'].text}\n" rescue ''
-          content += "* My rating: #{item.elements['user_rating'].text}\n" rescue ''
-          content += "* My review:\n\n    #{item.elements['user_review'].text}\n" rescue ''
+          content += "* Author: #{desc.match(/class="authorName"\>(.*)\<\/a\>/)[1]}\n" rescue ''
+          content += "* My rating: #{desc.match(/gave ([0-5]) stars/)[1]} / 5\n" rescue ''
+          review = desc.partition('<br/>')[2].strip
+          if !review.empty?
+            content += "* My review:\n\n    #{review}\n" rescue ''
+          end
           content = content != '' ? "\n\n#{content}" : ''
 
           options = {}
-          options['content'] = "Finished reading [#{item.elements['title'].text.gsub(/\n+/,' ').strip}](#{item.elements['link'].text.strip})#{content}#{tags}"
-          options['datestamp'] = Time.parse(item.elements['user_read_at'].text).utc.iso8601 rescue Time.parse(item.elements['pubDate'].text).utc.iso8601
+          options['content'] = "Finished reading [#{desc.match(/class="bookTitle"\>(.*)\<\/a\>/)[1]}](#{item.elements['link'].text.strip})#{content}#{tags}"
+          options['datestamp'] = Time.parse(item.elements['pubDate'].text).utc.iso8601
           options['starred'] = starred
           options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
           sl = DayOne.new
