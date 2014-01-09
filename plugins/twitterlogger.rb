@@ -20,6 +20,7 @@ config = {
     'save_images_from_favorites (true/false) determines whether TwitterLogger will download images for the favorites of the given usernames and include them in the entry',
     'save_retweets (true/false) determines whether TwitterLogger will include retweets in the posts for the day',
     'droplr_domain: if you have a custom droplr domain, enter it here, otherwise leave it as d.pr ',
+    'digest_timeline: if true will create a single entry for all tweets',
     'oauth_token and oauth_secret should be left blank and will be filled in by the plugin'],
   'twitter_users' => [],
   'save_favorites' => true,
@@ -29,7 +30,9 @@ config = {
   'twitter_tags' => '#social #twitter',
   'oauth_token' => '',
   'oauth_token_secret' => '',
-  'exclude_replies' => true
+  'exclude_replies' => true,
+  #'digest_favorites' => true, # Not implemented yet
+  'digest_timeline' => true,
 }
 $slog.register_plugin({ 'class' => 'TwitterLogger', 'config' => config })
 
@@ -50,19 +53,24 @@ class TwitterLogger < Slogger
     return res.body
   end
 
-  def download_images(images)
+  def single_entry(tweet)
 
     @twitter_config['twitter_tags'] ||= ''
-    tags = "\n\n#{@twitter_config['twitter_tags']}\n" unless @twitter_config['twitter_tags'] == ''
 
-    images.each do |image|
-      next if image['content'].nil? || image['url'].nil?
-      options = {}
-      options['content'] = "#{image['content']}#{tags}"
-      options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
-      sl = DayOne.new
-      path = sl.save_image(image['url'],options['uuid'])
-      sl.store_single_photo(path,options) unless path == false
+    options = {}
+    options['content'] = "#{tweet[:text]}\n\n-- [@#{tweet[:screen_name]}](https://twitter.com/#{tweet[:screen_name]}/status/#{tweet[:id]})\n\n#{@twitter_config['twitter_tags']}\n"
+    options['datestamp'] = tweet[:date].utc.iso8601
+
+    sl = DayOne.new
+
+    if tweet[:images] == []
+      sl.to_dayone(options)      
+    else
+      tweet[:images].each do |imageurl|
+        options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
+        path = sl.save_image(imageurl,options['uuid'])
+        sl.store_single_photo(path,options) unless path == false
+      end
     end
 
     return true
@@ -98,6 +106,7 @@ class TwitterLogger < Slogger
         tweet_date = tweet.created_at
         break if tweet_date < today
         tweet_text = tweet.text.gsub(/\n/,"\n\t")
+        screen_name = user
         if type == 'favorites'
           # TODO: Prepend favorite's username/link
           screen_name = tweet.user.status.user.screen_name
@@ -115,7 +124,7 @@ class TwitterLogger < Slogger
             tweet_images = []
             unless tweet.media.empty?
               tweet.media.each { |img|
-                tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => img.media_url }
+                tweet_images.push(img.media_url)
               }
             end
 
@@ -125,7 +134,7 @@ class TwitterLogger < Slogger
               burl="http://twitpic.com/show/large#{aurl.path}"
               curl = RedirectFollower.new(burl).resolve
               final_url=curl.url
-              tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => final_url } unless final_url.nil?
+              tweet_images.push(final_url) unless final_url.nil?
               #tweet_images=[tweet_text,tweet_date.utc.iso8601,final_url] unless final_url.nil?
             end
             tweet_text.scan(/\((http:\/\/campl.us\/\w+?)\)/).each do |picurl|
@@ -133,7 +142,7 @@ class TwitterLogger < Slogger
               burl="http://campl.us/#{aurl.path}:800px"
               curl = RedirectFollower.new(burl).resolve
               final_url=curl.url
-              tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => final_url } unless final_url.nil?
+              tweet_images.push(final_url) unless final_url.nil?
             end
             # Drop.lr downloads temporarily broken
             # tweet_text.scan(/\((http:\/\/#{@twitter_config['droplr_domain']}\/\w+?)\)/).each do |picurl|
@@ -143,14 +152,14 @@ class TwitterLogger < Slogger
 
             tweet_text.scan(/\((http:\/\/instagr\.am\/\w\/.+?\/)\)/).each do |picurl|
               final_url=self.get_body(picurl[0]).match(/http:\/\/distilleryimage.*?\.com\/[a-z0-9_]+\.jpg/)
-              tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => final_url[0] } unless final_url.nil?
+              tweet_images.push(final_url[0]) unless final_url.nil?
             end
             tweet_text.scan(/http:\/\/[\w\.]*yfrog\.com\/[\w]+/).each do |picurl|
               aurl=URI.parse(picurl)
               burl="http://yfrog.com#{aurl.path}:medium"
               curl = RedirectFollower.new(burl).resolve
               final_url=curl.url
-              tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => final_url } unless final_url.nil?
+              tweet_images.push(final_url) unless final_url.nil?
             end
           end
         rescue Exception => e
@@ -158,21 +167,10 @@ class TwitterLogger < Slogger
           p e
         end
 
-        if tweet_images.empty? or !@twitter_config["save_images_from_#{type}"]
-          tweets.push("* [[#{tweet_date.strftime(@time_format)}](https://twitter.com/#{user}/status/#{tweet_id})] #{tweet_text}")
-        else
-          images.concat(tweet_images)
-        end
+        tweets.push({:text => tweet_text, :date => tweet_date, :screen_name => screen_name, :images => tweet_images, :id => tweet_id})
+
       }
-      if @twitter_config['save_images'] && images != []
-        begin
-          self.download_images(images)
-        rescue Exception => e
-          @log.warn("Failure downloading images: #{e}")
-          # p e
-        end
-      end
-      return tweets.reverse.join("\n")
+      return tweets
     rescue Exception => e
       @log.warn("Error getting #{type} for #{user}")
       p e
@@ -243,8 +241,24 @@ class TwitterLogger < Slogger
       end
 
       unless tweets == ''
-        tweets = "## Tweets\n\n### Posts by @#{user} on #{Time.now.strftime(@date_format)}\n\n#{tweets}#{tags}"
-        sl.to_dayone({'content' => tweets})
+        if @twitter_config['digest_timeline']
+          content = "## Tweets\n\n### Posts by @#{user} on #{Time.now.strftime(@date_format)}\n\n"
+          tweets.each do |t|
+            content << "* [[#{t[:date].strftime(@time_format)}](https://twitter.com/#{t[:screen_name]}/status/#{t[:id]})] #{t[:text]}\n"
+
+            if @twitter_config['save_images'] && t[:images] != []
+              self.single_entry(t)
+            end
+          end
+          content << tags
+          sl.to_dayone({'content' => content})
+        
+        else
+          tweets.each do |t|
+            self.single_entry(t)
+          end
+        end
+          
       end
       unless favs == ''
         favs = "## Favorite Tweets\n\n### Favorites from @#{user} for #{Time.now.strftime(@date_format)}\n\n#{favs}#{tags}"

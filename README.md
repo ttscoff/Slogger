@@ -150,7 +150,7 @@ Slogger depends on Apple’s system Ruby version to run. You can check the Ruby 
 
 As of the release of Mavericks Apple are providing Ruby version 2.0. Slogger is transitioning to full 2.0 support so meanwhile your mileage may vary.
 
-If you are using RVM or RBENV to manage your Ruby installation, you can set the an alternative Ruby version as the default.
+If you are using RVM or RBENV to manage your Ruby installation, you can set an alternative Ruby version as the default.
 
 For RVM check here: [https://rvm.io/rubies/default](https://rvm.io/rubies/default)
 
@@ -163,6 +163,8 @@ In order for Slogger to run you must have an up-to-date version of Xcode's Comma
 Download Xcode from the OSX App Store. When it has downloaded launch it, open "Preferences", and under "Downloads" click on the arrow to the right of "Command Line Tools".
 
 ![](https://f.cloud.github.com/assets/222514/1398971/ee9b6a00-3cad-11e3-8583-c0c1ce804e3a.png)
+
+Alternatively you can download the command line tools from Apple here: [https://developer.apple.com/downloads/index.action](https://developer.apple.com/downloads/index.action)
 
 ### Plugins
 
