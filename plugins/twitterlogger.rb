@@ -64,7 +64,7 @@ class TwitterLogger < Slogger
     sl = DayOne.new
 
     if tweet[:images] == []
-      sl.to_dayone(options)      
+      sl.to_dayone(options)
     else
       tweet[:images].each do |imageurl|
         options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
@@ -167,14 +167,15 @@ class TwitterLogger < Slogger
           p e
         end
 
-        tweets.push({:text => tweet_text, :date => tweet_date, :screen_name => screen_name, :images => tweet_images, :id => tweet_id})
-
+        if tweet_id
+          tweets.push({:text => tweet_text, :date => tweet_date, :screen_name => screen_name, :images => tweet_images, :id => tweet_id})
+        end
       }
       return tweets
     rescue Exception => e
       @log.warn("Error getting #{type} for #{user}")
       p e
-      return false
+      return []
     end
 
   end
@@ -237,36 +238,38 @@ class TwitterLogger < Slogger
       if @twitter_config['save_favorites']
         favs = try { self.get_tweets(user, 'favorites')}
       else
-        favs = ''
+        favs = []
       end
 
-      unless tweets == ''
+      unless tweets.empty?
         if @twitter_config['digest_timeline']
           content = "## Tweets\n\n### Posts by @#{user} on #{Time.now.strftime(@date_format)}\n\n"
-          tweets.each do |t|
-            content << "* [[#{t[:date].strftime(@time_format)}](https://twitter.com/#{t[:screen_name]}/status/#{t[:id]})] #{t[:text]}\n"
-
-            if @twitter_config['save_images'] && t[:images] != []
-              self.single_entry(t)
-            end
-          end
-          content << tags
+          content << digest_entry(tweets, tags)
           sl.to_dayone({'content' => content})
-        
+          if @twitter_config['save_images']
+            tweets.select {|t| !t[:images].empty? }.each {|t| self.single_entry(t) }
+          end
         else
           tweets.each do |t|
             self.single_entry(t)
           end
         end
-          
+
       end
-      unless favs == ''
-        favs = "## Favorite Tweets\n\n### Favorites from @#{user} for #{Time.now.strftime(@date_format)}\n\n#{favs}#{tags}"
-        sl.to_dayone({'content' => favs})
+      unless favs.empty?
+        content = "## Favorite Tweets\n\n### Favorites from @#{user} for #{Time.now.strftime(@date_format)}\n\n"
+        content << digest_entry(favs, tags)
+        sl.to_dayone({'content' => content})
       end
     end
 
     return @twitter_config
+  end
+
+  def digest_entry(tweets, tags)
+    tweets.reverse.map do |t|
+      "* [[#{t[:date].strftime(@time_format)}](https://twitter.com/#{t[:screen_name]}/status/#{t[:id]})] #{t[:text]}\n"
+    end.join("\n") << "\n#{tags}"
   end
 
   def try(&action)
