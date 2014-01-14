@@ -60,7 +60,8 @@ class TwitterLogger < Slogger
 
     options = {}
     options['content'] = "#{tweet[:text]}\n\n-- [@#{tweet[:screen_name]}](https://twitter.com/#{tweet[:screen_name]}/status/#{tweet[:id]})\n\n#{@twitter_config['twitter_tags']}\n"
-    options['datestamp'] = tweet[:date].utc.iso8601
+    tweet_time = Time.parse(tweet[:date].to_s)
+    options['datestamp'] = tweet_time.utc.iso8601
 
     sl = DayOne.new
 
@@ -125,7 +126,7 @@ class TwitterLogger < Slogger
             tweet_images = []
             unless tweet.media.empty?
               tweet.media.each { |img|
-                tweet_images.push(img.media_url)
+                tweet_images.push(img.media_url.to_s)
               }
             end
 
