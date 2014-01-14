@@ -31,9 +31,9 @@ config = {
   'oauth_token' => '',
   'oauth_token_secret' => '',
   'exclude_replies' => true,
-  'save_retweets' => false
+  'save_retweets' => false,
   #'digest_favorites' => true, # Not implemented yet
-  'digest_timeline' => true,
+  'digest_timeline' => true
 }
 $slog.register_plugin({ 'class' => 'TwitterLogger', 'config' => config })
 
