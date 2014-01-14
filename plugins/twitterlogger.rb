@@ -226,6 +226,7 @@ class TwitterLogger < Slogger
     end
     @twitter_config['save_images'] ||= true
     @twitter_config['droplr_domain'] ||= 'd.pr'
+    @twitter_config['digest_timeline'] ||= true
 
     sl = DayOne.new
     @twitter_config['twitter_tags'] ||= '#social #twitter'
