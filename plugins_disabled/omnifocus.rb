@@ -78,9 +78,9 @@ class OmniFocusLogger < Slogger
           tell application id "com.omnigroup.OmniFocus"
           	tell default document
           		if filter is equal to "NONE" then
-          			set refDoneToday to a reference to (flattened tasks where (completion date ≥ dteToday))
+          			set refDoneToday to a reference to (flattened tasks where (completion date >= dteToday))
           		else
-          			set refDoneToday to a reference to (flattened tasks where (completion date ≥ dteToday) and name of containing project's folder = filter)
+          			set refDoneToday to a reference to (flattened tasks where (completion date >= dteToday) and name of containing project's folder = filter)
 			
           		end if
           		set {lstName, lstContext, lstProject, lstNote} to {name, name of its context, name of its containing project, note} of refDoneToday
