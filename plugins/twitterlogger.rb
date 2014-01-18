@@ -31,8 +31,9 @@ config = {
   'oauth_token' => '',
   'oauth_token_secret' => '',
   'exclude_replies' => true,
+  'save_retweets' => false,
   #'digest_favorites' => true, # Not implemented yet
-  'digest_timeline' => true,
+  'digest_timeline' => true
 }
 $slog.register_plugin({ 'class' => 'TwitterLogger', 'config' => config })
 
@@ -59,12 +60,13 @@ class TwitterLogger < Slogger
 
     options = {}
     options['content'] = "#{tweet[:text]}\n\n-- [@#{tweet[:screen_name]}](https://twitter.com/#{tweet[:screen_name]}/status/#{tweet[:id]})\n\n#{@twitter_config['twitter_tags']}\n"
-    options['datestamp'] = tweet[:date].utc.iso8601
+    tweet_time = Time.parse(tweet[:date].to_s)
+    options['datestamp'] = tweet_time.utc.iso8601
 
     sl = DayOne.new
 
     if tweet[:images] == []
-      sl.to_dayone(options)      
+      sl.to_dayone(options)
     else
       tweet[:images].each do |imageurl|
         options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
@@ -79,22 +81,22 @@ class TwitterLogger < Slogger
   def get_tweets(user,type='timeline')
     @log.info("Getting Twitter #{type} for #{user}")
 
-    Twitter.configure do |auth_config|
-      auth_config.consumer_key = "53aMoQiFaQfoUtxyJIkGdw"
-      auth_config.consumer_secret = "Twnh3SnDdtQZkJwJ3p8Tu5rPbL5Gt1I0dEMBBtQ6w"
-      auth_config.oauth_token = @twitter_config["oauth_token"]
-      auth_config.oauth_token_secret = @twitter_config["oauth_token_secret"]
+    client = Twitter::REST::Client.new do |config|
+      config.consumer_key        = "53aMoQiFaQfoUtxyJIkGdw"
+      config.consumer_secret     = "Twnh3SnDdtQZkJwJ3p8Tu5rPbL5Gt1I0dEMBBtQ6w"
+      config.access_token        = @twitter_config["oauth_token"]
+      config.access_token_secret = @twitter_config["oauth_token_secret"]
     end
 
     case type
 
       when 'favorites'
         params = { "count" => 250, "screen_name" => user, "include_entities" => true }
-        tweet_obj = Twitter.favorites(params)
+        tweet_obj = client.favorites(params)
 
       when 'timeline'
         params = { "count" => 250, "screen_name" => user, "include_entities" => true, "exclude_replies" => @twitter_config['exclude_replies'], "include_rts" => @twitter_config['save_retweets']}
-        tweet_obj = Twitter.user_timeline(params)
+        tweet_obj = client.user_timeline(params)
 
     end
 
@@ -124,7 +126,7 @@ class TwitterLogger < Slogger
             tweet_images = []
             unless tweet.media.empty?
               tweet.media.each { |img|
-                tweet_images.push(img.media_url)
+                tweet_images.push(img.media_url.to_s)
               }
             end
 
@@ -167,14 +169,15 @@ class TwitterLogger < Slogger
           p e
         end
 
-        tweets.push({:text => tweet_text, :date => tweet_date, :screen_name => screen_name, :images => tweet_images, :id => tweet_id})
-
+        if tweet_id
+          tweets.push({:text => tweet_text, :date => tweet_date, :screen_name => screen_name, :images => tweet_images, :id => tweet_id})
+        end
       }
       return tweets
     rescue Exception => e
       @log.warn("Error getting #{type} for #{user}")
       p e
-      return false
+      return []
     end
 
   end
@@ -225,6 +228,7 @@ class TwitterLogger < Slogger
     end
     @twitter_config['save_images'] ||= true
     @twitter_config['droplr_domain'] ||= 'd.pr'
+    @twitter_config['digest_timeline'] ||= true
 
     sl = DayOne.new
     @twitter_config['twitter_tags'] ||= '#social #twitter'
@@ -237,36 +241,38 @@ class TwitterLogger < Slogger
       if @twitter_config['save_favorites']
         favs = try { self.get_tweets(user, 'favorites')}
       else
-        favs = ''
+        favs = []
       end
 
-      unless tweets == ''
+      unless tweets.empty?
         if @twitter_config['digest_timeline']
           content = "## Tweets\n\n### Posts by @#{user} on #{Time.now.strftime(@date_format)}\n\n"
-          tweets.each do |t|
-            content << "* [[#{t[:date].strftime(@time_format)}](https://twitter.com/#{t[:screen_name]}/status/#{t[:id]})] #{t[:text]}\n"
-
-            if @twitter_config['save_images'] && t[:images] != []
-              self.single_entry(t)
-            end
-          end
-          content << tags
+          content << digest_entry(tweets, tags)
           sl.to_dayone({'content' => content})
-        
+          if @twitter_config['save_images']
+            tweets.select {|t| !t[:images].empty? }.each {|t| self.single_entry(t) }
+          end
         else
           tweets.each do |t|
             self.single_entry(t)
           end
         end
-          
+
       end
-      unless favs == ''
-        favs = "## Favorite Tweets\n\n### Favorites from @#{user} for #{Time.now.strftime(@date_format)}\n\n#{favs}#{tags}"
-        sl.to_dayone({'content' => favs})
+      unless favs.empty?
+        content = "## Favorite Tweets\n\n### Favorites from @#{user} for #{Time.now.strftime(@date_format)}\n\n"
+        content << digest_entry(favs, tags)
+        sl.to_dayone({'content' => content})
       end
     end
 
     return @twitter_config
+  end
+
+  def digest_entry(tweets, tags)
+    tweets.reverse.map do |t|
+      "* [[#{t[:date].strftime(@time_format)}](https://twitter.com/#{t[:screen_name]}/status/#{t[:id]})] #{t[:text]}\n"
+    end.join("\n") << "\n#{tags}"
   end
 
   def try(&action)

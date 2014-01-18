@@ -1,23 +1,41 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    faraday (0.8.7)
-      multipart-post (~> 1.1)
+    addressable (2.3.5)
+    atomic (1.1.14)
+    buftok (0.2.0)
+    descendants_tracker (0.0.3)
+    equalizer (0.0.7)
+    faraday (0.8.8)
+      multipart-post (~> 1.2.0)
     feed-normalizer (1.5.2)
       hpricot (>= 0.6)
       simple-rss (>= 1.1)
     hpricot (0.8.6)
+    http (0.5.0)
+      http_parser.rb
+    http_parser.rb (0.6.0)
     json (1.8.0)
+    memoizable (0.3.1)
+      thread_safe (~> 0.1.3)
     mime-types (1.23)
-    multi_json (1.7.7)
     multipart-post (1.2.0)
     oauth (0.4.7)
     simple-rss (1.2.3)
     simple_oauth (0.2.0)
-    twitter (4.8.1)
-      faraday (~> 0.8, < 0.10)
-      multi_json (~> 1.0)
-      simple_oauth (~> 0.2)
+    thread_safe (0.1.3)
+      atomic
+    twitter (5.3.0)
+      addressable (~> 2.3)
+      buftok (~> 0.2.0)
+      descendants_tracker (~> 0.0.1)
+      equalizer (~> 0.0.7, != 0.0.8)
+      faraday (>= 0.8, < 0.10)
+      http (~> 0.5.0)
+      http_parser.rb (~> 0.6.0)
+      json (~> 1.8)
+      memoizable (~> 0.3.1)
+      simple_oauth (~> 0.2.0)
     twitter_oauth (0.4.94)
       json (>= 1.8.0)
       mime-types (>= 1.16)
@@ -29,5 +47,5 @@ PLATFORMS
 DEPENDENCIES
   feed-normalizer
   json
-  twitter
+  twitter (~> 5.3.0)
   twitter_oauth
