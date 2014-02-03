@@ -60,7 +60,7 @@ class ThingsLogger < Slogger
           log completed now
         repeat with td in to dos of list "Logbook"
               set tcd to the completion date of td
-              set dc to short date string of (tcd)
+              set dc to my intlDateFormat(tcd)
               repeat 1 times
                     if (project of td) is not missing value then
                       set aProject to project of td
@@ -79,6 +79,11 @@ class ThingsLogger < Slogger
           end repeat
         end tell
         return completedItems
+
+        on intlDateFormat(dt)
+          set {year:y, month:m, day:d} to dt
+          tell (y * 10000 + m * 100 + d) as string to text 1 thru 4 & "-" & text 5 thru 6 & "-" & text 7 thru 8
+        end intlDateFormat
 
         on setDate(theDateStr)
           set {TID, text item delimiters} to {text item delimiters, "/"}
@@ -99,7 +104,7 @@ class ThingsLogger < Slogger
           entry = value.split('-::-')
           # We set the date of the entries to 23:55 and format it correctly
           date_to_format = entry[0] + 'T23:55:00'
-          todo_date = Time.strptime(date_to_format, '%d-%m-%yT%H:%M:%S')
+          todo_date = Time.strptime(date_to_format, '%Y-%m-%dT%H:%M:%S')
           formatted_date = todo_date.utc.iso8601
 
           # create an array for the uncollated entries
