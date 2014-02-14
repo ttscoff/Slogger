@@ -59,7 +59,7 @@ class TwitterLogger < Slogger
     @twitter_config['twitter_tags'] ||= ''
 
     options = {}
-    options['content'] = "#{tweet[:text]}\n\n-- [@#{tweet[:screen_name]}](https://twitter.com/#{tweet[:screen_name]}/status/#{tweet[:id]})\n\n#{@twitter_config['twitter_tags']}\n"
+    options['content'] = "#{tweet[:text]}\n\n-- [@#{tweet[:screen_name]}](https://twitter.com/#{tweet[:screen_name]}/status/#{tweet[:id]})\n\n(#{@twitter_config['twitter_tags']})\n"
     tweet_time = Time.parse(tweet[:date].to_s)
     options['datestamp'] = tweet_time.utc.iso8601
 
@@ -246,8 +246,8 @@ class TwitterLogger < Slogger
     @twitter_config['digest_timeline'] ||= true
 
     sl = DayOne.new
-    @twitter_config['twitter_tags'] ||= '#social #twitter'
-    tags = "\n\n#{@twitter_config['twitter_tags']}\n" unless @twitter_config['twitter_tags'] == ''
+    @twitter_config['twitter_tags'] ||= ''
+    tags = "\n\n(#{@twitter_config['twitter_tags']})\n" unless @twitter_config['twitter_tags'] == ''
 
     @twitter_config['twitter_users'].each do |user|
 
