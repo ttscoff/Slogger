@@ -53,7 +53,7 @@ class BlogLogger < Slogger
       retries = 0
       success = false
       until success
-        if parse_feed(rss_feed)
+        if parse_feed(rss_feed, retries)
           success = true
         else
           break if $options[:max_retries] == retries
@@ -69,7 +69,7 @@ class BlogLogger < Slogger
     end
   end
 
-  def parse_feed(rss_feed)
+  def parse_feed(rss_feed, retries)
     markdownify = @blogconfig['markdownify_posts']
     unless (markdownify.is_a? TrueClass or markdownify.is_a? FalseClass)
       markdownify = true
@@ -90,7 +90,7 @@ class BlogLogger < Slogger
 
       rss = RSS::Parser.parse(rss_content, false)
 
-      if @blogconfig['get_most_popular']
+      if @blogconfig['get_most_popular'] && retries == 0
         @log.info("Checking for most tweeted posts on #{rss.title.content}")
         posts = []
         rss.items.each { |item|
@@ -129,8 +129,8 @@ class BlogLogger < Slogger
           sl.to_dayone(options)
         end
       end
-      rss.items.each { |item|
 
+      rss.items.each { |item|
         begin
           if item.class == RSS::Atom::Feed::Entry
             item_date = Time.parse(item.updated.to_s) + Time.now.gmt_offset
