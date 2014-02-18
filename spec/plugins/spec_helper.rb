@@ -1,17 +1,16 @@
+$:.unshift File.join(File.dirname(__FILE__))
+$:.unshift File.join(File.dirname(__FILE__), '..', '..', 'plugins')
 $:.unshift File.join(File.dirname(__FILE__), '..', '..', 'plugins_disabled')
 
-require 'rspec/mocks/standalone'
-$slog = double.as_null_object
+require 'mock_slogger'
+require 'vcr'
+
+VCR.configure do |c|
+  c.cassette_library_dir = File.join(File.dirname(__FILE__), 'fixtures')
+  c.hook_into :webmock
+end
 
 RSpec.configure do |config|
   config.color_enabled = true
-end
-
-class Slogger
-  def initialize
-    RSpec::Mocks::setup(self)
-    @config = {}
-    @log = double.as_null_object
-  end
 end
 

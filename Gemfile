@@ -8,4 +8,6 @@ gem 'json'
 group :test do
   gem 'rake'
   gem 'rspec'
+  gem 'vcr'
+  gem 'webmock'
 end
