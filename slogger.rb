@@ -29,6 +29,11 @@ require SLOGGER_HOME + '/lib/sociallogger'
 require SLOGGER_HOME + '/lib/configtools'
 # require SLOGGER_HOME + '/lib/json'
 
+if RUBY_VERSION.to_f > 1.9
+  Encoding.default_external = Encoding::UTF_8
+  Encoding.default_internal = Encoding::UTF_8
+end
+
 class String
   def markdownify
     contents = ''
