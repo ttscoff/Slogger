@@ -45,7 +45,7 @@ describe StravaLogger do
       options['datestamp'].should == '2014-02-17T17:59:58Z'
 
       expected_content = <<-eos.unindent
-        # Strava Ride - 2.00 mi - 0h 31m 34s - 3.8 mph - Afternoon Walk
+        # Strava Activity - 2.00 mi - 0h 31m 34s - 3.8 mph - Afternoon Walk
 
         * **Type**: Walk
         * **Distance**: 2.00 mi

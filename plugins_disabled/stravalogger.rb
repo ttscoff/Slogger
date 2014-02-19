@@ -98,7 +98,7 @@ class StravaLogger < Slogger
           end
 
           output = ''
-          output += "# Strava Ride - %.2f %s - %dh %dm %ds - %.1f %s - %s\n\n" % [activity['distance'], unit[1], moving_time_hours, moving_time_minutes, moving_time_seconds, activity['average_speed'], unit[2], activity['name']] unless activity['name'].nil?
+          output += "# Strava Activity - %.2f %s - %dh %dm %ds - %.1f %s - %s\n\n" % [activity['distance'], unit[1], moving_time_hours, moving_time_minutes, moving_time_seconds, activity['average_speed'], unit[2], activity['name']] unless activity['name'].nil?
           output += "* **Description**: #{activity['description']}\n" unless activity['description'].nil?
           output += "* **Type**: #{activity['type']}\n" unless activity['type'].nil?
           output += "* **Distance**: %.2f %s\n" % [activity['distance'], unit[1]] unless activity['distance'].nil?
