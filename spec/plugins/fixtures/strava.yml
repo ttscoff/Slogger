@@ -1,0 +1,151 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://www.strava.com/api/v3/athlete/activities?access_token=the_access_token
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+      Accept:
+      - '*/*'
+      User-Agent:
+      - Ruby
+      Host:
+      - www.strava.com
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Content-Type:
+      - application/json; charset=utf-8
+      Status:
+      - '200'
+      X-Ratelimit-Limit:
+      - '600,30000'
+      X-Ratelimit-Usage:
+      - '1,4'
+      X-Ua-Compatible:
+      - IE=Edge,chrome=1
+      Content-Length:
+      - '1481'
+      Connection:
+      - keep-alive
+    body:
+      encoding: UTF-8
+      string: '[{"id":114100845,"resource_state":2,"external_id":null,"upload_id":null,"athlete":{"id":3880480,"resource_state":1},"name":"Afternoon
+        Walk","distance":3218.7,"moving_time":1894,"elapsed_time":1894,"total_elevation_gain":0.0,"type":"Walk","start_date":"2014-02-17T23:59:58Z","start_date_local":"2014-02-17T17:59:58Z","timezone":"(GMT-06:00)
+        America/Chicago","start_latlng":null,"end_latlng":null,"location_city":null,"location_state":null,"location_country":"United
+        States","start_latitude":null,"start_longitude":null,"achievement_count":0,"kudos_count":0,"comment_count":0,"athlete_count":1,"photo_count":0,"map":{"id":"a114100845","summary_polyline":null,"resource_state":2},"trainer":false,"commute":false,"manual":true,"private":false,"flagged":false,"gear_id":null,"average_speed":1.7,"max_speed":0.0,"calories":0,"truncated":null,"has_kudoed":false},{"id":113800428,"resource_state":2,"external_id":"3E31A010-63C0-45C2-B5F3-1102EBEE44CF","upload_id":124431086,"athlete":{"id":3880480,"resource_state":1},"name":"Afternoon
+        Walk","distance":3161.5,"moving_time":2018,"elapsed_time":2357,"total_elevation_gain":0.0,"type":"Walk","start_date":"2014-02-16T19:02:12Z","start_date_local":"2014-02-16T13:02:12Z","timezone":"(GMT-06:00)
+        America/Chicago","start_latlng":[41.85,-94.02],"end_latlng":[41.85,-94.02],"location_city":"Bouton","location_state":"IA","location_country":"United
+        States","start_latitude":41.85,"start_longitude":-94.02,"achievement_count":0,"kudos_count":0,"comment_count":0,"athlete_count":1,"photo_count":0,"map":{"id":"a113800428","summary_polyline":"_km~Fjlz|PbBsl@bLoAQ{EqK??w[rDf@f@bGtDf@P~WoKnAkCnn@","resource_state":2},"trainer":false,"commute":false,"manual":false,"private":false,"flagged":false,"gear_id":null,"average_speed":1.6,"max_speed":4.1,"calories":0,"truncated":null,"has_kudoed":false}]'
+    http_version: 
+  recorded_at: Tue, 18 Feb 2014 13:01:34 GMT
+recorded_with: VCR 2.8.0
+
+#[
+#  {
+#    "id": 114100845,
+#    "resource_state": 2,
+#    "external_id": null,
+#    "upload_id": null,
+#    "athlete": {
+#      "id": 3880480,
+#      "resource_state": 1
+#    },
+#    "name": "Afternoon Walk",
+#    "distance": 3218.7,
+#    "moving_time": 1894,
+#    "elapsed_time": 1894,
+#    "total_elevation_gain": 0.0,
+#    "type": "Walk",
+#    "start_date": "2014-02-17T23:59:58Z",
+#    "start_date_local": "2014-02-17T17:59:58Z",
+#    "timezone": "(GMT-06:00) America/Chicago",
+#    "start_latlng": null,
+#    "end_latlng": null,
+#    "location_city": null,
+#    "location_state": null,
+#    "location_country": "United States",
+#    "start_latitude": null,
+#    "start_longitude": null,
+#    "achievement_count": 0,
+#    "kudos_count": 0,
+#    "comment_count": 0,
+#    "athlete_count": 1,
+#    "photo_count": 0,
+#    "map": {
+#      "id": "a114100845",
+#      "summary_polyline": null,
+#      "resource_state": 2
+#    },
+#    "trainer": false,
+#    "commute": false,
+#    "manual": true,
+#    "private": false,
+#    "flagged": false,
+#    "gear_id": null,
+#    "average_speed": 1.7,
+#    "max_speed": 0.0,
+#    "calories": 0,
+#    "truncated": null,
+#    "has_kudoed": false
+#  },
+#  {
+#    "id": 113800428,
+#    "resource_state": 2,
+#    "external_id": "3E31A010-63C0-45C2-B5F3-1102EBEE44CF",
+#    "upload_id": 124431086,
+#    "athlete": {
+#      "id": 3880480,
+#      "resource_state": 1
+#    },
+#    "name": "Afternoon Walk",
+#    "distance": 3161.5,
+#    "moving_time": 2018,
+#    "elapsed_time": 2357,
+#    "total_elevation_gain": 0.0,
+#    "type": "Walk",
+#    "start_date": "2014-02-16T19:02:12Z",
+#    "start_date_local": "2014-02-16T13:02:12Z",
+#    "timezone": "(GMT-06:00) America/Chicago",
+#    "start_latlng": [
+#      41.85,
+#      -94.02
+#    ],
+#    "end_latlng": [
+#      41.85,
+#      -94.02
+#    ],
+#    "location_city": "Bouton",
+#    "location_state": "IA",
+#    "location_country": "United States",
+#    "start_latitude": 41.85,
+#    "start_longitude": -94.02,
+#    "achievement_count": 0,
+#    "kudos_count": 0,
+#    "comment_count": 0,
+#    "athlete_count": 1,
+#    "photo_count": 0,
+#    "map": {
+#      "id": "a113800428",
+#      "summary_polyline": "_km~Fjlz|PbBsl@bLoAQ{EqK??w[rDf@f@bGtDf@P~WoKnAkCnn@",
+#      "resource_state": 2
+#    },
+#    "trainer": false,
+#    "commute": false,
+#    "manual": false,
+#    "private": false,
+#    "flagged": false,
+#    "gear_id": null,
+#    "average_speed": 1.6,
+#    "max_speed": 4.1,
+#    "calories": 0,
+#    "truncated": null,
+#    "has_kudoed": false
+#  }
+#]
