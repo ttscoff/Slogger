@@ -42,7 +42,7 @@ describe StravaLogger do
       options = DayOne.to_dayone_options.first
       options['uuid'].should_not be_nil
       options['starred'].should be_false
-      options['datestamp'].should == '2014-02-17T17:59:58Z'
+      options['datestamp'].should == '2014-02-17T23:59:58Z'
 
       expected_content = <<-eos.unindent
         # Strava Activity - 2.00 mi - 0h 31m 34s - 3.8 mph - Afternoon Walk

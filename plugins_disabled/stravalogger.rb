@@ -65,7 +65,7 @@ class StravaLogger < Slogger
     begin
       res = Net::HTTP.get_response(URI.parse(rss_feed))
     rescue Exception => e
-      raise "ERROR retrieving Strava ride list url: #{rss_feed}"
+      raise "ERROR retrieving Strava activity list url: #{rss_feed} - #{e}"
     end
 
     return false if res.nil?
@@ -113,7 +113,7 @@ class StravaLogger < Slogger
 
           options = {}
           options['content'] = "#{output}#{tags}"
-          options['datestamp'] = date.utc.iso8601
+          options['datestamp'] = Time.parse(activity['start_date']).iso8601
           options['starred'] = false
           options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip 
 
