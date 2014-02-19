@@ -42,25 +42,110 @@ http_interactions:
         States","start_latitude":null,"start_longitude":null,"achievement_count":0,"kudos_count":0,"comment_count":0,"athlete_count":1,"photo_count":0,"map":{"id":"a114100845","summary_polyline":null,"resource_state":2},"trainer":false,"commute":false,"manual":true,"private":false,"flagged":false,"gear_id":null,"average_speed":1.7,"max_speed":0.0,"calories":0,"truncated":null,"has_kudoed":false},{"id":113800428,"resource_state":2,"external_id":"3E31A010-63C0-45C2-B5F3-1102EBEE44CF","upload_id":124431086,"athlete":{"id":3880480,"resource_state":1},"name":"Afternoon
         Walk","distance":3161.5,"moving_time":2018,"elapsed_time":2357,"total_elevation_gain":0.0,"type":"Walk","start_date":"2014-02-16T19:02:12Z","start_date_local":"2014-02-16T13:02:12Z","timezone":"(GMT-06:00)
         America/Chicago","start_latlng":[41.85,-94.02],"end_latlng":[41.85,-94.02],"location_city":"Bouton","location_state":"IA","location_country":"United
-        States","start_latitude":41.85,"start_longitude":-94.02,"achievement_count":0,"kudos_count":0,"comment_count":0,"athlete_count":1,"photo_count":0,"map":{"id":"a113800428","summary_polyline":"_km~Fjlz|PbBsl@bLoAQ{EqK??w[rDf@f@bGtDf@P~WoKnAkCnn@","resource_state":2},"trainer":false,"commute":false,"manual":false,"private":false,"flagged":false,"gear_id":null,"average_speed":1.6,"max_speed":4.1,"calories":0,"truncated":null,"has_kudoed":false},{"id":113752860,"resource_state":2,"external_id":null,"upload_id":null,"athlete":{"id":3880480,"resource_state":1},"name":"Evening
-        Walk","distance":3252.8,"moving_time":1910,"elapsed_time":1894,"total_elevation_gain":0.0,"type":"Walk","start_date":"2014-02-16T01:00:33Z","start_date_local":"2014-02-15T19:00:33Z","timezone":"(GMT-06:00)
-        America/Chicago","start_latlng":null,"end_latlng":null,"location_city":null,"location_state":null,"location_country":"United
-        States","start_latitude":null,"start_longitude":null,"achievement_count":0,"kudos_count":0,"comment_count":0,"athlete_count":1,"photo_count":0,"map":{"id":"a113752860","summary_polyline":null,"resource_state":2},"trainer":false,"commute":false,"manual":true,"private":false,"flagged":false,"gear_id":null,"average_speed":1.7,"max_speed":0.0,"calories":0,"truncated":null,"has_kudoed":false},{"id":113076174,"resource_state":2,"external_id":"D59F06A8-7387-4AD3-9C76-EF39B4813111","upload_id":123558962,"athlete":{"id":3880480,"resource_state":1},"name":"Lunch
-        Walk","distance":4484.5,"moving_time":2587,"elapsed_time":2587,"total_elevation_gain":0.0,"type":"Walk","start_date":"2014-02-13T18:41:26Z","start_date_local":"2014-02-13T12:41:26Z","timezone":"(GMT-06:00)
-        America/Chicago","start_latlng":[41.85,-94.02],"end_latlng":[41.85,-94.02],"location_city":"Bouton","location_state":"IA","location_country":"United
-        States","start_latitude":41.85,"start_longitude":-94.02,"achievement_count":0,"kudos_count":0,"comment_count":0,"athlete_count":1,"photo_count":0,"map":{"id":"a113076174","summary_polyline":"_km~Ffnz|PRs]bBkMg@s]{aASnbARRr]oAfJ{@v`@","resource_state":2},"trainer":false,"commute":false,"manual":false,"private":false,"flagged":false,"gear_id":null,"average_speed":1.7,"max_speed":3.1,"calories":0,"truncated":null,"has_kudoed":false},{"id":112905173,"resource_state":2,"external_id":"6C0D08FC-189F-4AD9-AED3-00D7C55C799C","upload_id":123352438,"athlete":{"id":3880480,"resource_state":1},"name":"Afternoon
-        Walk","distance":3384.6,"moving_time":2014,"elapsed_time":2014,"total_elevation_gain":0.0,"type":"Walk","start_date":"2014-02-12T21:11:04Z","start_date_local":"2014-02-12T15:11:04Z","timezone":"(GMT-06:00)
-        America/Chicago","start_latlng":[41.85,-94.02],"end_latlng":[41.85,-94.02],"location_city":"Bouton","location_state":"IA","location_country":"United
-        States","start_latitude":41.85,"start_longitude":-94.02,"achievement_count":0,"kudos_count":0,"comment_count":0,"athlete_count":1,"photo_count":0,"map":{"id":"a112905173","summary_polyline":"_km~Fznz|PRw`@nAkMpK{@?{EqK{@S_XrDg@z@bGfJf@RbQeERUbG{JRcBnn@","resource_state":2},"trainer":false,"commute":false,"manual":false,"private":false,"flagged":false,"gear_id":null,"average_speed":1.7,"max_speed":7.0,"calories":0,"truncated":null,"has_kudoed":false},{"id":112702592,"resource_state":2,"external_id":"C8238E5D-837F-4A95-B5C8-2E60E1842758","upload_id":123116909,"athlete":{"id":3880480,"resource_state":1},"name":"Afternoon
-        Walk","distance":3349.9,"moving_time":1938,"elapsed_time":1938,"total_elevation_gain":0.0,"type":"Walk","start_date":"2014-02-11T21:30:08Z","start_date_local":"2014-02-11T15:30:08Z","timezone":"(GMT-06:00)
-        America/Chicago","start_latlng":[41.85,-94.02],"end_latlng":[41.85,-94.02],"location_city":"Bouton","location_state":"IA","location_country":"United
-        States","start_latitude":41.85,"start_longitude":-94.02,"achievement_count":0,"kudos_count":0,"comment_count":0,"athlete_count":1,"photo_count":0,"map":{"id":"a112702592","summary_polyline":"_km~Ffnz|PRg^nAgOpKoA?gE}J?SoFbQS?sIoAoA?gEsNRRrg@oAbG{@v`@","resource_state":2},"trainer":false,"commute":false,"manual":false,"private":false,"flagged":false,"gear_id":null,"average_speed":1.7,"max_speed":2.9,"calories":0,"truncated":null,"has_kudoed":false},{"id":112251289,"resource_state":2,"external_id":"28631CE6-F79A-4A06-ADD7-9F43DED34719","upload_id":122594361,"athlete":{"id":3880480,"resource_state":1},"name":"Afternoon
-        Walk","distance":2898.8,"moving_time":1699,"elapsed_time":1699,"total_elevation_gain":0.0,"type":"Walk","start_date":"2014-02-09T19:10:57Z","start_date_local":"2014-02-09T13:10:57Z","timezone":"(GMT-06:00)
-        America/Chicago","start_latlng":[41.85,-94.02],"end_latlng":[41.85,-94.02],"location_city":"Bouton","location_state":"IA","location_country":"United
-        States","start_latitude":41.85,"start_longitude":-94.02,"achievement_count":0,"kudos_count":0,"comment_count":0,"athlete_count":1,"photo_count":0,"map":{"id":"a112251289","summary_polyline":"skm~Ffnz|PvBon@zJSToFdEg@SoFqDSUkRsDR?nFgER?v`@{@vG{@n_@","resource_state":2},"trainer":false,"commute":false,"manual":false,"private":false,"flagged":false,"gear_id":null,"average_speed":1.7,"max_speed":2.5,"calories":0,"truncated":null,"has_kudoed":false},{"id":111773831,"resource_state":2,"external_id":"77F8DFC8-A154-40FD-B82F-A16C07CB468B","upload_id":122077587,"athlete":{"id":3880480,"resource_state":1},"name":"Afternoon
-        Walk","distance":2936.9,"moving_time":1684,"elapsed_time":1768,"total_elevation_gain":0.0,"type":"Walk","start_date":"2014-02-07T19:48:46Z","start_date_local":"2014-02-07T13:48:46Z","timezone":"(GMT-06:00)
-        America/Chicago","start_latlng":[41.85,-94.02],"end_latlng":[41.85,-94.02],"location_city":"Bouton","location_state":"IA","location_country":"United
-        States","start_latitude":41.85,"start_longitude":-94.02,"achievement_count":0,"kudos_count":0,"comment_count":0,"athlete_count":1,"photo_count":0,"map":{"id":"a111773831","summary_polyline":"_km~Fnoz|PvBwo@fJSf@cGrDS?cQoA{@SoFsNf@Rzh@oAvGg@b`@","resource_state":2},"trainer":false,"commute":false,"manual":false,"private":false,"flagged":false,"gear_id":null,"average_speed":1.7,"max_speed":3.5,"calories":0,"truncated":null,"has_kudoed":false}]'
+        States","start_latitude":41.85,"start_longitude":-94.02,"achievement_count":0,"kudos_count":0,"comment_count":0,"athlete_count":1,"photo_count":0,"map":{"id":"a113800428","summary_polyline":"_km~Fjlz|PbBsl@bLoAQ{EqK??w[rDf@f@bGtDf@P~WoKnAkCnn@","resource_state":2},"trainer":false,"commute":false,"manual":false,"private":false,"flagged":false,"gear_id":null,"average_speed":1.6,"max_speed":4.1,"calories":0,"truncated":null,"has_kudoed":false}]'
     http_version: 
   recorded_at: Tue, 18 Feb 2014 13:01:34 GMT
 recorded_with: VCR 2.8.0
+
+#[
+#  {
+#    "id": 114100845,
+#    "resource_state": 2,
+#    "external_id": null,
+#    "upload_id": null,
+#    "athlete": {
+#      "id": 3880480,
+#      "resource_state": 1
+#    },
+#    "name": "Afternoon Walk",
+#    "distance": 3218.7,
+#    "moving_time": 1894,
+#    "elapsed_time": 1894,
+#    "total_elevation_gain": 0.0,
+#    "type": "Walk",
+#    "start_date": "2014-02-17T23:59:58Z",
+#    "start_date_local": "2014-02-17T17:59:58Z",
+#    "timezone": "(GMT-06:00) America/Chicago",
+#    "start_latlng": null,
+#    "end_latlng": null,
+#    "location_city": null,
+#    "location_state": null,
+#    "location_country": "United States",
+#    "start_latitude": null,
+#    "start_longitude": null,
+#    "achievement_count": 0,
+#    "kudos_count": 0,
+#    "comment_count": 0,
+#    "athlete_count": 1,
+#    "photo_count": 0,
+#    "map": {
+#      "id": "a114100845",
+#      "summary_polyline": null,
+#      "resource_state": 2
+#    },
+#    "trainer": false,
+#    "commute": false,
+#    "manual": true,
+#    "private": false,
+#    "flagged": false,
+#    "gear_id": null,
+#    "average_speed": 1.7,
+#    "max_speed": 0.0,
+#    "calories": 0,
+#    "truncated": null,
+#    "has_kudoed": false
+#  },
+#  {
+#    "id": 113800428,
+#    "resource_state": 2,
+#    "external_id": "3E31A010-63C0-45C2-B5F3-1102EBEE44CF",
+#    "upload_id": 124431086,
+#    "athlete": {
+#      "id": 3880480,
+#      "resource_state": 1
+#    },
+#    "name": "Afternoon Walk",
+#    "distance": 3161.5,
+#    "moving_time": 2018,
+#    "elapsed_time": 2357,
+#    "total_elevation_gain": 0.0,
+#    "type": "Walk",
+#    "start_date": "2014-02-16T19:02:12Z",
+#    "start_date_local": "2014-02-16T13:02:12Z",
+#    "timezone": "(GMT-06:00) America/Chicago",
+#    "start_latlng": [
+#      41.85,
+#      -94.02
+#    ],
+#    "end_latlng": [
+#      41.85,
+#      -94.02
+#    ],
+#    "location_city": "Bouton",
+#    "location_state": "IA",
+#    "location_country": "United States",
+#    "start_latitude": 41.85,
+#    "start_longitude": -94.02,
+#    "achievement_count": 0,
+#    "kudos_count": 0,
+#    "comment_count": 0,
+#    "athlete_count": 1,
+#    "photo_count": 0,
+#    "map": {
+#      "id": "a113800428",
+#      "summary_polyline": "_km~Fjlz|PbBsl@bLoAQ{EqK??w[rDf@f@bGtDf@P~WoKnAkCnn@",
+#      "resource_state": 2
+#    },
+#    "trainer": false,
+#    "commute": false,
+#    "manual": false,
+#    "private": false,
+#    "flagged": false,
+#    "gear_id": null,
+#    "average_speed": 1.6,
+#    "max_speed": 4.1,
+#    "calories": 0,
+#    "truncated": null,
+#    "has_kudoed": false
+#  }
+#]

@@ -71,59 +71,51 @@ class StravaLogger < Slogger
     return false if res.nil?
 
     begin
-      JSON.parse(res.body)['rides'].each {|rides|
-        @log.info("Examining ride #{rides['id']}: #{rides['name']}")
+      JSON.parse(res.body).each {|activity|
+        @log.info("Examining activity #{activity['id']}: #{activity['name']}")
 
-        begin
-          res2 = Net::HTTP.get_response(URI.parse("http://www.strava.com/api/v1/rides/#{rides['id']}"));
-        rescue Exception => e
-          raise "ERROR retrieving Strava ride #{rides['id']}: http://www.strava.com/api/v1/rides/#{rides['id']}"
-        end
-
-        ride_json = JSON.parse(res2.body)
-        @log.info("Parsed ride #{rides['id']}")
-        strava = ride_json['ride']
-        date = Time.parse(strava['startDate'])
+        date = Time.parse(activity['start_date_local'])
 
         if date > @timespan
-          movingTime = Integer(strava['movingTime'])
-          movingTimeMM, movingTimeSS = movingTime.divmod(60)
-          movingTimeHH, movingTimeMM = movingTimeMM.divmod(60)
-          elapsedTime = Integer(strava['elapsedTime'])
-          elapsedTimeMM, elapsedTimeSS = elapsedTime.divmod(60)
-          elapsedTimeHH, elapsedTimeMM = elapsedTimeMM.divmod(60)
+          moving_time = Integer(activity['moving_time'])
+          moving_time_minutes, moving_time_seconds = moving_time.divmod(60)
+          moving_time_hours, moving_time_minutes = moving_time_minutes.divmod(60)
+          elapsed_time = Integer(activity['elapsed_time'])
+          elapsed_time_minutes, elapsed_time_seconds = elapsed_time.divmod(60)
+          elapsed_time_hours, elapsed_time_minutes = elapsed_time_minutes.divmod(60)
 
           if @grconfig['strava_unit'] == 'imperial'
             unit = ['ft', 'mi', 'mph']
-            strava['distance'] *= 0.000621371 #mi
-            strava['averageSpeed'] *= 2.23694 #mi
-            strava['maximumSpeed'] *= 0.000621371 #mi
-            strava['elevationGain'] *= 3.28084 #ft
-          elsif @grconfig['strava_unit'] == 'metric'
+            activity['distance'] *= 0.000621371 #mi
+            activity['average_speed'] *= 2.23694 #mi
+            activity['max_speed'] *= 0.000621371 #mi
+            activity['total_elevation_gain'] *= 3.28084 #ft
+          else
             unit = ['m', 'km', 'kph']
-            strava['distance'] *= 0.001001535 #km
-            strava['averageSpeed'] *= 3.611940299 #km
-            strava['maximumSpeed'] *= 0.001000553 #km
+            activity['distance'] *= 0.001001535 #km
+            activity['average_speed'] *= 3.611940299 #km
+            activity['max_speed'] *= 0.001000553 #km
           end
 
           output = ''
-          output += "# Strava Ride - %.2f %s - %dh %dm %ds - %.1f %s - %s\n\n" % [strava['distance'], unit[1], movingTimeHH, movingTimeMM, movingTimeSS, strava['averageSpeed'], unit[2], strava['name']] unless strava['name'].nil?
-          output += "* **Description**: #{strava['description']}\n" unless strava['description'].nil?
-          output += "* **Distance**: %.2f %s\n" % [strava['distance'], unit[1]] unless strava['distance'].nil?
-          output += "* **Elevation Gain**: %d %s\n" % [strava['elevationGain'], unit[0]] unless strava['elevationGain'].nil?
-          output += "* **Bike**: #{strava['bike']['name']}\n" unless strava['bike'].nil?
-          output += "* **Average Speed**: %.1f %s\n" % [strava['averageSpeed'], unit[2]] unless strava['averageSpeed'].nil?
-          output += "* **Max Speed**: %.1f %s\n" % [strava['maximumSpeed'], unit[2]] unless strava['maximumSpeed'].nil?
-          output += "* **Location**: #{strava['location']}\n" unless strava['location'].nil?
-          output += "* **Elapsed Time**: %02d:%02d:%02d\n" % [elapsedTimeHH, elapsedTimeMM, elapsedTimeSS] unless strava['elapsedTime'].nil?
-          output += "* **Moving Time**: %02d:%02d:%02d\n" % [movingTimeHH, movingTimeMM, movingTimeSS] unless strava['movingTime'].nil?
-          output += "* **Link**: http://app.strava.com/rides/#{rides['id']}\n\n"
+          output += "# Strava Ride - %.2f %s - %dh %dm %ds - %.1f %s - %s\n\n" % [activity['distance'], unit[1], moving_time_hours, moving_time_minutes, moving_time_seconds, activity['average_speed'], unit[2], activity['name']] unless activity['name'].nil?
+          output += "* **Description**: #{activity['description']}\n" unless activity['description'].nil?
+          output += "* **Type**: #{activity['type']}\n" unless activity['type'].nil?
+          output += "* **Distance**: %.2f %s\n" % [activity['distance'], unit[1]] unless activity['distance'].nil?
+          output += "* **Elevation Gain**: %d %s\n" % [activity['total_elevation_gain'], unit[0]] unless activity['total_elevation_gain'].nil?
+          output += "* **Average Speed**: %.1f %s\n" % [activity['average_speed'], unit[2]] unless activity['average_speed'].nil?
+          output += "* **Max Speed**: %.1f %s\n" % [activity['max_speed'], unit[2]] unless activity['max_speed'].nil?
+          #TODO: turn location into a Day One location
+          output += "* **Location**: #{activity['location_city']}\n" unless activity['location_city'].nil?
+          output += "* **Elapsed Time**: %02d:%02d:%02d\n" % [elapsed_time_hours, elapsed_time_minutes, elapsed_time_seconds] unless activity['elapsed_time'].nil?
+          output += "* **Moving Time**: %02d:%02d:%02d\n" % [moving_time_hours, moving_time_minutes, moving_time_seconds] unless activity['moving_time'].nil?
+          output += "* **Link**: http://www.strava.com/activities/#{activity['id']}\n"
 
           options = {}
-          options['content'] = "#{output}\n\n#{tags}"
+          options['content'] = "#{output}#{tags}"
           options['datestamp'] = date.utc.iso8601
           options['starred'] = false
-          options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip #TODO: turn location into a Day One location
+          options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip 
 
           DayOne.new.to_dayone(options)
         else

@@ -2,7 +2,7 @@ class Slogger
   RSpec::Mocks::setup(self)
   $slog = double.as_null_object
 
-  attr_accessor :config, :log
+  attr_accessor :config, :log, :timespan
 
   def initialize
     RSpec::Mocks::setup(self)
