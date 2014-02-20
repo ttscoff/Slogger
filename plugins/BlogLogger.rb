@@ -79,7 +79,7 @@ class BlogLogger < Slogger
       starred = true
     end
     tags = @blogconfig['blog_tags'] || ''
-    tags = "\n\n#{tags}\n" unless tags == ''
+    tags = "\n\n(#{tags})\n" unless tags == ''
 
     today = @timespan
     begin

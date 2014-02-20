@@ -132,7 +132,7 @@ class GoogleAnalyticsLogger < Slogger
 
       config['access_token'] = new_tokens['access_token']
       config['refresh_token'] = new_tokens['refresh_token']
-      # 
+      #
       # mutable_config['GoogleAnalyticsLogger']['access_token'] = new_tokens['access_token']
       # mutable_config['GoogleAnalyticsLogger']['refresh_token'] = new_tokens['refresh_token']
     end
@@ -295,7 +295,7 @@ class GoogleAnalyticsLogger < Slogger
       tags = config['tags'] || ''
       content.each do |key, body|
         logdate = "#{key[0..3]}-#{key[4..5]}-#{key[6..7]}"
-        body << "#{tags}" unless tags == ''
+        body << "(#{tags})" unless tags == ''
 
         # And Log to Day One
         options = {}
