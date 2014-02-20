@@ -62,7 +62,7 @@ class FlickrLogger < Slogger
 
     sl = DayOne.new
     config['flickr_tags'] ||= ''
-    tags = config['flickr_tags'] == '' ? '' : "\n\n#{config['flickr_tags']}\n"
+    tags = config['flickr_tags'] == '' ? '' : "\n\n(#{config['flickr_tags']})\n"
     today = @timespan.to_i
 
     @log.info("Getting Flickr images for #{config['flickr_ids'].join(', ')}")

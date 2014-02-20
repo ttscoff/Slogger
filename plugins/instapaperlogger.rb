@@ -40,7 +40,7 @@ class InstapaperLogger < Slogger
 
     sl = DayOne.new
     config['instapaper_tags'] ||= ''
-    tags = "\n\n#{config['instapaper_tags']}\n" unless config['instapaper_tags'] == ''
+    tags = "\n\n(#{config['instapaper_tags']})\n" unless config['instapaper_tags'] == ''
     today = @timespan.to_i
 
     @log.info("Getting Instapaper posts for #{config['instapaper_feeds'].length} accounts")

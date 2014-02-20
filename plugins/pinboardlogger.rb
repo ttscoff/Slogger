@@ -60,7 +60,7 @@ class PinboardLogger < Slogger
 
     sl = DayOne.new
     config['pinboard_tags'] ||= ''
-    tags = "\n\n#{config['pinboard_tags']}\n" unless config['pinboard_tags'] == ''
+    tags = "\n\n(#{config['pinboard_tags']})\n" unless config['pinboard_tags'] == ''
     today = @timespan.to_i
 
     @log.info("Getting Pinboard bookmarks for #{config['pinboard_feeds'].length} feeds")
@@ -108,7 +108,7 @@ class PinboardLogger < Slogger
       rescue Exception => e
         puts "Error getting posts for #{rss_feed}"
         p e
-        return ''
+        return
       end
     end
     unless feed_link == '' || !config['pinboard_digest']
@@ -119,5 +119,6 @@ class PinboardLogger < Slogger
         sl.to_dayone({'content' => content, 'datestamp' => Time.parse(k).utc.iso8601})
       }
     end
+    return
   end
 end

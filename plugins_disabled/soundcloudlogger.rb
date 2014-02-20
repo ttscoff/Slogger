@@ -65,7 +65,7 @@ class SoundCloudLogger < Slogger
 
   def parse_feed(rss_feed)
     tags = @scconfig['soundcloud_tags'] || ''
-    tags = "\n\n#{tags}\n" unless tags == ''
+    tags = "\n\n(#{tags})\n" unless tags == ''
     starred = @scconfig['soundcloud_starred'] || false
 
     begin
