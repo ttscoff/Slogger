@@ -37,17 +37,35 @@ end
 class String
   def markdownify
     contents = ''
-    IO.popen('"$SLOGGER_HOME/lib/html2text"', "r+") do |io|
-
-      Thread.new { self.each_line { |line|
-        io << line
-      }; io.close_write }
-
-      io.each_line do |line|
-        contents << line
+    begin
+      if RUBY_VERSION.to_f > 1.9
+        input = self.dup.force_encoding('utf-8')
+      else
+        input = self.dup
       end
+
+      IO.popen('"$SLOGGER_HOME/lib/html2text"', "r+") do |io|
+        begin
+          Thread.new { input.each_line { |line|
+            io << line
+          }; io.close_write }
+        rescue Exception => e
+          $stderr.puts e
+        end
+        begin
+          io.each_line do |line|
+            contents << line
+          end
+        rescue Exception => e
+          $stderr.puts e
+        end
+      end
+      contents
+    rescue Exception => e
+      $stderr.puts e
+      $stderr.puts "Error in Markdownify"
+      self
     end
-    contents
   end
 
   # convert (multi)Markdown to HTML
