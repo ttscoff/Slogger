@@ -36,7 +36,7 @@ class FoursquareLogger < Slogger
     @log.info("Getting Foursquare checkins")
 
     config['foursquare_tags'] ||= ''
-    @tags = "\n\n#{config['foursquare_tags']}\n" unless config['foursquare_tags'] == ''
+    @tags = "\n\n(#{config['foursquare_tags']})\n" unless config['foursquare_tags'] == ''
     @debug = config['debug'] || false
 
     entrytext = ''

@@ -111,7 +111,7 @@ class GaugesLogger < Slogger
       output += "\n\n"
 
       return false if output.strip == ""
-      entry = "# Gaug.es report for #{gauge['title']} on #{gauge['date'].strftime(@date_format)}\n\n#{output}\n#{config['gauges_tags']}"
+      entry = "# Gaug.es report for #{gauge['title']} on #{gauge['date'].strftime(@date_format)}\n\n#{output}\n(#{config['gauges_tags']})"
       DayOne.new.to_dayone({ 'content' => entry, 'datestamp' => gauge['date'].utc.iso8601 })
     }
   end

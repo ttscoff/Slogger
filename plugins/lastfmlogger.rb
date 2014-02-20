@@ -52,7 +52,7 @@ class LastFMLogger < Slogger
     end
 
     config['lastfm_tags'] ||= ''
-    tags = "\n\n#{config['lastfm_tags']}\n" unless config['lastfm_tags'] == ''
+    tags = "\n\n(#{config['lastfm_tags']})\n" unless config['lastfm_tags'] == ''
 
     config['lastfm_feeds'] ||= ['recent', 'loved']
 

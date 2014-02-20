@@ -60,7 +60,7 @@ class PinboardLogger < Slogger
 
     sl = DayOne.new
     config['pinboard_tags'] ||= ''
-    tags = "\n\n#{config['pinboard_tags']}\n" unless config['pinboard_tags'] == ''
+    tags = "\n\n(#{config['pinboard_tags']})\n" unless config['pinboard_tags'] == ''
     today = @timespan.to_i
 
     @log.info("Getting Pinboard bookmarks for #{config['pinboard_feeds'].length} feeds")
