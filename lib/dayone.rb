@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'digest/md5'
 
 class DayOne < Slogger
   def to_dayone(options = {})
@@ -82,7 +83,6 @@ class DayOne < Slogger
     unless ext =~ /\.jpg$/
       case ext
       when '.jpeg'
-        @log.info("81")
         target = orig.gsub(/\.jpeg$/,'.jpg')
         FileUtils.mv(orig,target)
         return target
@@ -125,5 +125,43 @@ class DayOne < Slogger
     if res
       return self.to_dayone(options)
     end
+  end
+
+  def dedup
+    files = Dir.glob(File.join(storage_path, 'entries', '*.doentry'))
+    hashes = []
+    files.each {|file|
+      data = Plist::parse_xml(file)
+      tags = data['Tags'].nil? ? '' : data['Tags'].join('')
+      hashes.push({'filename' => file, 'date' => data['Creation Date'], 'hash' => Digest::MD5.hexdigest(data['Entry Text']+tags+data['Starred'].to_s)})
+    }
+
+    hashes.sort_by!{|entry| entry['date']}
+
+    existing = []
+    to_delete = []
+    hashes.each {|entry|
+      if existing.include?(entry['hash'])
+        to_delete.push(entry['filename'])
+      else
+        existing.push(entry['hash'])
+      end
+    }
+
+    # puts "Ready to move #{to_delete.length} files to the Trash?"
+    trash = File.expand_path('~/Desktop/DayOneDuplicates')
+
+    FileUtils.mkdir_p(File.join(trash,"photos")) unless File.directory?(File.join(trash,"photos"))
+    FileUtils.mkdir_p(File.join(trash,"entries")) unless File.directory?(File.join(trash,"entries"))
+
+    to_delete.each {|file|
+      photo = File.expand_path("../photos/#{File.basename(file,'.doentry')}.jpg")
+
+      FileUtils.mv(photo,File.join(trash,"photos")) if File.exists?(photo)
+      FileUtils.mv(file,File.join(trash,"entries"))
+    }
+
+    @log.info("Moved #{to_delete.length} to #{trash}")
+    # %x{open -a Finder #{trash}}
   end
 end
