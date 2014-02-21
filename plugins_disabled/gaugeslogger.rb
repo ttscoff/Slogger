@@ -61,7 +61,7 @@ class GaugesLogger < Slogger
     date = @timespan + (60 * 60 * 24)
 
     json = gauges_api_call(key,"gauges")
-    return false unless json
+    return false unless json && json.has_key?('guages')
     gauges = []
 
     while date.strftime("%Y%m%d") <= Time.now.strftime("%Y%m%d")
