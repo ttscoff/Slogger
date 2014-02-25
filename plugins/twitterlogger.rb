@@ -59,7 +59,7 @@ class TwitterLogger < Slogger
     @twitter_config['twitter_tags'] ||= ''
 
     options = {}
-    options['content'] = "#{tweet[:text]}\n\n-- [@#{tweet[:screen_name]}](https://twitter.com/#{tweet[:screen_name]}/status/#{tweet[:id]})\n\n#{@twitter_config['twitter_tags']}\n"
+    options['content'] = "#{tweet[:text]}\n\n-- [@#{tweet[:screen_name]}](https://twitter.com/#{tweet[:screen_name]}/status/#{tweet[:id]})\n\n(#{@twitter_config['twitter_tags']})\n"
     tweet_time = Time.parse(tweet[:date].to_s)
     options['datestamp'] = tweet_time.utc.iso8601
 
@@ -91,11 +91,11 @@ class TwitterLogger < Slogger
     case type
 
       when 'favorites'
-        params = { "count" => 250, "screen_name" => user, "include_entities" => true }
+        params = { :count => 250, :screen_name => user, :include_entities => true }
         tweet_obj = client.favorites(params)
 
       when 'timeline'
-        params = { "count" => 250, "screen_name" => user, "include_entities" => true, "exclude_replies" => @twitter_config['exclude_replies'], "include_rts" => @twitter_config['save_retweets']}
+        params = { :count => 250, :screen_name => user, :include_entities => true, :exclude_replies => @twitter_config['exclude_replies'], :include_rts => @twitter_config['save_retweets']}
         tweet_obj = client.user_timeline(params)
 
     end
@@ -109,6 +109,7 @@ class TwitterLogger < Slogger
         break if tweet_date < today
         tweet_text = tweet.text.gsub(/\n/,"\n\t")
         screen_name = user
+
         if type == 'favorites'
           # TODO: Prepend favorite's username/link
           screen_name = tweet.user.status.user.screen_name
@@ -147,10 +148,13 @@ class TwitterLogger < Slogger
               tweet_images.push(final_url) unless final_url.nil?
             end
             # Drop.lr downloads temporarily broken
-            # tweet_text.scan(/\((http:\/\/#{@twitter_config['droplr_domain']}\/\w+?)\)/).each do |picurl|
-            #   # final_url = self.get_body(picurl[0]).match(/"(https:\/\/s3.amazonaws.com\/files.droplr.com\/.+?)"/)
-            #   tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => picurl[0]+"+" } # unless final_url.nil?
-            # end
+            tweet_text.scan(/\((http:\/\/#{@twitter_config['droplr_domain']}\/\w+?)\)/).each do |picurl|
+              # final_url = self.get_body(picurl[0]).match(/"(https:\/\/s3.*?\.amazonaws\.com\/droplr\.storage\/.+?)"/)
+              # tweet_images << { 'content' => tweet_text, 'date' => tweet_date.utc.iso8601, 'url' => picurl[0]+"+" } # unless final_url.nil?
+              aurl = URI.parse(picurl[0]+"+")
+              curl = RedirectFollower.new(aurl).resolve
+              tweet_images.push(curl) unless curl.nil?
+            end
 
             tweet_text.scan(/\((http:\/\/instagr\.am\/\w\/.+?\/)\)/).each do |picurl|
               final_url=self.get_body(picurl[0]).match(/http:\/\/distilleryimage.*?\.com\/[a-z0-9_]+\.jpg/)
@@ -180,6 +184,17 @@ class TwitterLogger < Slogger
       return []
     end
 
+  end
+
+  def split_days(tweets)
+    # tweets.push({:text => tweet_text, :date => tweet_date, :screen_name => screen_name, :images => tweet_images, :id => tweet_id})
+    dated_tweets = {}
+    tweets.each {|tweet|
+      date = tweet[:date].strftime('%Y-%m-%d')
+      dated_tweets[date] = [] unless dated_tweets[date]
+      dated_tweets[date].push(tweet)
+    }
+    dated_tweets
   end
 
   def do_log
@@ -231,8 +246,8 @@ class TwitterLogger < Slogger
     @twitter_config['digest_timeline'] ||= true
 
     sl = DayOne.new
-    @twitter_config['twitter_tags'] ||= '#social #twitter'
-    tags = "\n\n#{@twitter_config['twitter_tags']}\n" unless @twitter_config['twitter_tags'] == ''
+    @twitter_config['twitter_tags'] ||= ''
+    tags = "\n\n(#{@twitter_config['twitter_tags']})\n" unless @twitter_config['twitter_tags'] == ''
 
     @twitter_config['twitter_users'].each do |user|
 
@@ -245,13 +260,18 @@ class TwitterLogger < Slogger
       end
 
       unless tweets.empty?
+
         if @twitter_config['digest_timeline']
-          content = "## Tweets\n\n### Posts by @#{user} on #{Time.now.strftime(@date_format)}\n\n"
-          content << digest_entry(tweets, tags)
-          sl.to_dayone({'content' => content})
-          if @twitter_config['save_images']
-            tweets.select {|t| !t[:images].empty? }.each {|t| self.single_entry(t) }
-          end
+          dated_tweets = split_days(tweets)
+          dated_tweets.each {|k,v|
+            content = "## Tweets\n\n### Posts by @#{user} on #{Time.parse(k).strftime(@date_format)}\n\n"
+            content << digest_entry(v, tags)
+            sl.to_dayone({'content' => content, 'datestamp' => Time.parse(k).utc.iso8601})
+            if @twitter_config['save_images']
+              tweets.select {|t| !t[:images].empty? }.each {|t| self.single_entry(t) }
+            end
+          }
+
         else
           tweets.each do |t|
             self.single_entry(t)
@@ -260,9 +280,15 @@ class TwitterLogger < Slogger
 
       end
       unless favs.empty?
-        content = "## Favorite Tweets\n\n### Favorites from @#{user} for #{Time.now.strftime(@date_format)}\n\n"
-        content << digest_entry(favs, tags)
-        sl.to_dayone({'content' => content})
+        dated_tweets = split_days(favs)
+        dated_tweets.each {|k,v|
+          content = "## Favorite Tweets\n\n### Favorites from @#{user} on #{Time.parse(k).strftime(@date_format)}\n\n"
+          content << digest_entry(v, tags)
+          sl.to_dayone({'content' => content, 'datestamp' => Time.parse(k).utc.iso8601})
+          if @twitter_config['save_images_from_favorites']
+            favs.select {|t| !t[:images].empty? }.each {|t| self.single_entry(t) }
+          end
+        }
       end
     end
 

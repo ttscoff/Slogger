@@ -167,7 +167,7 @@ class OmniFocusLogger < Slogger
             end
             if note != "null" && log_notes
               note = note.gsub("\\n","\n> ")
-              taskString += "*Notes:*\n> #{note}"
+              taskString += "*Notes:*\n> #{note}\n"
             end
                
             output += taskString
