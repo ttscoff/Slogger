@@ -12,6 +12,8 @@ Notes:
   - strava_units determine what units to display data in: "metric" or "imperial"
 =end
 
+require 'open-uri'
+require 'json'
 
 config = {
   'description' => ['strava_access_token is an oauth access token for your account. You can obtain one at https://www.strava.com/settings/api',
@@ -62,7 +64,7 @@ class StravaLogger < Slogger
     tags = "\n\n#{tags}\n" unless tags == ''
 
     begin
-      res = Net::HTTP.get_response(URI.parse(rss_feed))
+      res = URI.parse(rss_feed).read
     rescue Exception => e
       raise "ERROR retrieving Strava activity list url: #{rss_feed} - #{e}"
     end
@@ -70,7 +72,7 @@ class StravaLogger < Slogger
     return false if res.nil?
 
     begin
-      JSON.parse(res.body).each {|activity|
+      JSON.parse(res).each {|activity|
         @log.info("Examining activity #{activity['id']}: #{activity['name']}")
 
         date = Time.parse(activity['start_date_local'])
