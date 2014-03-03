@@ -12,7 +12,6 @@ Notes:
   - strava_units determine what units to display data in: "metric" or "imperial"
 =end
 
-require 'rexml/document';
 
 config = {
   'description' => ['strava_access_token is an oauth access token for your account. You can obtain one at https://www.strava.com/settings/api',
