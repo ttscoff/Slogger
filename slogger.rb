@@ -394,6 +394,21 @@ optparse = OptionParser.new do|opts|
     end
     exit
   end
+  ## This will be cool when it works.
+  # opts.on( '--dedup_similar', 'Remove similar entries from Journal') do
+  #   puts "This will remove entries from your Journal that have"
+  #   puts "very similar content on the same date. The oldest copy"
+  #   puts "of an entry will be preserved. The entries will be"
+  #   puts "moved to a DayOneDuplicates directory on your Desktop."
+  #   puts
+  #   puts "This is a slow process and can take >15m on large journals."
+  #   puts
+  #   answer = SloggerUtils.new.ask("Are you sure you want to continue?",["y","n"])
+  #   if answer == "y"
+  #     DayOne.new.dedup(true)
+  #   end
+  #   exit
+  # end
   opts.on( '-h', '--help', 'Display this screen' ) do
     puts opts
     exit
