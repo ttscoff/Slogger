@@ -45,18 +45,24 @@ class String
       end
 
       IO.popen('"$SLOGGER_HOME/lib/html2text"', "r+") do |io|
-
-        Thread.new { input.each_line { |line|
-          io << line
-        }; io.close_write }
-
-        io.each_line do |line|
-          contents << line
+        begin
+          Thread.new { input.each_line { |line|
+            io << line
+          }; io.close_write }
+        rescue Exception => e
+          $stderr.puts e
         end
-
+        begin
+          io.each_line do |line|
+            contents << line
+          end
+        rescue Exception => e
+          $stderr.puts e
+        end
       end
       contents
-    rescue
+    rescue Exception => e
+      $stderr.puts e
       $stderr.puts "Error in Markdownify"
       self
     end
