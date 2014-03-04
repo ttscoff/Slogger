@@ -43,7 +43,7 @@ class PinboardLogger < Slogger
   def digest_entry(bookmarks, tags)
     bookmarks.reverse.map do |t|
       t[:content]
-    end.join("\n") << "\n(#{tags.strip})"
+    end.join("\n") << "\n#{tags.strip}"
   end
 
   def do_log
@@ -100,7 +100,7 @@ class PinboardLogger < Slogger
           unless output == '' || config['pinboard_digest']
             options = {}
             options['datestamp'] = feed_output[0][:date].utc.iso8601
-            options['content'] = "## New Pinboard bookmark\n#{output}(#{tags.strip})"
+            options['content'] = "## New Pinboard bookmark\n#{output}#{tags.strip}"
             sl.to_dayone(options)
           end
         }
