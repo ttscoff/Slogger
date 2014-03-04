@@ -129,7 +129,6 @@ class DayOne < Slogger
     end
   end
 
-<<<<<<< HEAD
   def levenshtein_distance(s, t)
     m = s.size
     n = t.size
@@ -272,36 +271,13 @@ class DayOne < Slogger
         images_existing.push(image['hash'])
       end
     }
-=======
-  def dedup
-    files = Dir.glob(File.join(storage_path, 'entries', '*.doentry'))
-    hashes = []
-    files.each {|file|
-      data = Plist::parse_xml(file)
-      tags = data['Tags'].nil? ? '' : data['Tags'].join('')
-      hashes.push({'filename' => file, 'date' => data['Creation Date'], 'hash' => Digest::MD5.hexdigest(data['Entry Text']+tags+data['Starred'].to_s)})
-    }
 
-    hashes.sort_by!{|entry| entry['date']}
-
-    existing = []
-    to_delete = []
-    hashes.each {|entry|
-      if existing.include?(entry['hash'])
-        to_delete.push(entry['filename'])
-      else
-        existing.push(entry['hash'])
-      end
-    }
-
->>>>>>> 1977453128bb532d77652ba3d2b9f46daa5a3fc4
     # puts "Ready to move #{to_delete.length} files to the Trash?"
     trash = File.expand_path('~/Desktop/DayOneDuplicates')
 
     FileUtils.mkdir_p(File.join(trash,"photos")) unless File.directory?(File.join(trash,"photos"))
     FileUtils.mkdir_p(File.join(trash,"entries")) unless File.directory?(File.join(trash,"entries"))
 
-<<<<<<< HEAD
     photo_path = File.join(storage_path, 'photos')
 
     to_delete.each {|file|
@@ -331,16 +307,6 @@ class DayOne < Slogger
 
     @log.info("Moved #{to_delete.length} entries/photos to #{trash}.")
     @log.info("Found and moved #{images_deleted} images without entries.")
-=======
-    to_delete.each {|file|
-      photo = File.expand_path("../photos/#{File.basename(file,'.doentry')}.jpg")
-
-      FileUtils.mv(photo,File.join(trash,"photos")) if File.exists?(photo)
-      FileUtils.mv(file,File.join(trash,"entries"))
-    }
-
-    @log.info("Moved #{to_delete.length} to #{trash}")
->>>>>>> 1977453128bb532d77652ba3d2b9f46daa5a3fc4
     # %x{open -a Finder #{trash}}
   end
 end

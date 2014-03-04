@@ -394,7 +394,6 @@ optparse = OptionParser.new do|opts|
     end
     exit
   end
-<<<<<<< HEAD
   ## This will be cool when it works.
   # opts.on( '--dedup_similar', 'Remove similar entries from Journal') do
   #   puts "This will remove entries from your Journal that have"
@@ -410,8 +409,6 @@ optparse = OptionParser.new do|opts|
   #   end
   #   exit
   # end
-=======
->>>>>>> 1977453128bb532d77652ba3d2b9f46daa5a3fc4
   opts.on( '-h', '--help', 'Display this screen' ) do
     puts opts
     exit
