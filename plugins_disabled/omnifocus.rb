@@ -115,6 +115,9 @@ class OmniFocusLogger < Slogger
           	set year of t to (yy as integer)
           	set month of t to (mm as integer)
           	set day of t to (dd as integer)
+            set hours of t to 0
+            set minutes of t to 0
+            set seconds of t to 0
           	return t
           end setDate
 
