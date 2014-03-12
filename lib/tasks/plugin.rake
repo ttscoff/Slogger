@@ -4,8 +4,13 @@ namespace :plugin do
   desc 'Installs a plugin'
   task :install, :name do |t, args|
     name = args[:name]
+    ensure_plugin_directory_is_created
     github_repo = "git@github.com:sloggerplugins/#{name}.git"
-    system("git clone --depth=1 #{github_repo} plugins/#{name}")
+    system("git clone --depth=1 #{github_repo} #{plugin_directory}/#{name}")
+    FileUtils.ln_s(
+      File.expand_path("#{plugin_directory}/#{name}"),
+      File.expand_path("plugins/")
+    )
   end
 
   desc 'Disable a currently installed plugin'
@@ -28,6 +33,16 @@ namespace :plugin do
     else
       puts "There is no currently-disabled plugin named #{name}."
     end
+  end
+
+  def ensure_plugin_directory_is_created
+    unless Dir.exists?(plugin_directory)
+      FileUtils.mkdir(plugin_directory)
+    end
+  end
+
+  def plugin_directory
+    "../slogger_plugins"
   end
 
   def disabled_plugin(name)
