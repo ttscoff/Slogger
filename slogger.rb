@@ -260,7 +260,7 @@ class Slogger
   def run_plugins
     @config['last_run_time'] = Time.now.strftime('%c')
     new_options = false
-    plugin_dir = $options[:develop] ? "/plugins_develop/*.rb" : "/plugins/*.rb"
+    plugin_dir = $options[:develop] ? "/plugins_develop/**/plugin.rb" : "/plugins/**/plugin.rb"
     Dir[SLOGGER_HOME + plugin_dir].each do |file|
       if $options[:onlyrun]
         $options[:onlyrun].each { |plugin_frag|
