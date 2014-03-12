@@ -70,9 +70,10 @@ Slogger indexes various public social services and creates Day One (<http://dayo
         
         sudo gem install bundler
         bundle install 
-4. Default plugins are stored in `/plugins/`, additional plugins are usually found in `/plugins_disabled/`. Plugins are enabled and disabled by adding/removing them from the `/plugins/` folder. Move any additional plugins you want to use into `/plugins/` and disable any other plugins by moving them from `/plugins/` to `plugins_disabled`. (Plugins that are found in `plugins` but not configured will not break anything, but you'll see warnings when run.)
-5. From within the Slogger folder, run `./slogger --update-config` to create the initial configuration file. If this doesn't work, you may need to make the file executable: `chmod a+x slogger` from within the Slogger folder. Note that any time you add new plugins or update existing ones, you'll want to run `./slogger --update-config` to ensure that your available options are up to date.
-6. Edit the file `slogger_config` that shows up in your Slogger folder
+3. Plugins can be installed using a rake task. `rake plugin:install[twitter]` will install the twitter plugin from https://github.com/sloggerplugins/twitter. You can find a complete list of plugins at https://github.com/sloggerplugins. You can also run `rake -T` to see other options associated with enabling and disabling plugins.
+
+4. From within the Slogger folder, run `./slogger --update-config` to create the initial configuration file. If this doesn't work, you may need to make the file executable: `chmod a+x slogger` from within the Slogger folder. Note that any time you add new plugins or update existing ones, you'll want to run `./slogger --update-config` to ensure that your available options are up to date.
+5. Edit the file `slogger_config` that shows up in your Slogger folder
     - The required options will be 'storage:', 'image_filename_is_title:', 'date_format:' and 'time_format:'
     - storage: should be one of
         -  'icloud'
