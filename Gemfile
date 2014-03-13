@@ -5,6 +5,8 @@ gem 'twitter', '~> 5.3.0'
 gem 'twitter_oauth'
 gem 'json'
 
+gem 'nokogiri'
+
 group :test do
   gem 'rake'
   gem 'rspec'
