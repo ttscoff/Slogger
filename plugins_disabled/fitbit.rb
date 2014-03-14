@@ -114,7 +114,8 @@ class FitbitLogger < Slogger
             floors = summary['floors']
             distance = summary['distances'][0]['distance']
             distanceUnit = client.label_for_measurement(:distance, false)
-            activityPoints = summary['activeScore']
+            veryActiveMinutes = summary['veryActiveMinutes']
+            caloriesOut = summary["caloriesOut"]
             foodsEaten = ""
             
             if config['fitbit_log_body_measurements']
@@ -131,7 +132,7 @@ class FitbitLogger < Slogger
             end            
             if config['fitbit_log_sleep']
                 sleep = client.sleep_on_date(timestring)
-                sleepSummary = sleep['summary']
+                sleepSummary = sleep['summary'] 
                 
                 hoursInBed = sleepSummary['totalTimeInBed'] / 60
                 minutesInBed = sleepSummary['totalTimeInBed'] - (hoursInBed * 60)
@@ -169,10 +170,11 @@ class FitbitLogger < Slogger
                 @log.info("Steps: #{steps}")
                 @log.info("Distance: #{distance} #{distanceUnit}")
                 @log.info("Floors: #{floors}")
-                @log.info("ActivityPoints: #{activityPoints}")
-				@log.info("Weight: #{weight} #{weightUnit}")
-				@log.info("BMI: #{bmi}")     
-				@log.info("Water Intake: #{loggedWater} #{waterUnit}")        
+                @log.info("Very Active Minutes: #{veryActiveMinutes}")
+                @log.info("Calories Out: #{caloriesOut}")
+                @log.info("Weight: #{weight} #{weightUnit}")
+                @log.info("BMI: #{bmi}")
+                @log.info("Water Intake: #{loggedWater} #{waterUnit}")
                 @log.info("Time In Bed: #{timeInBed}")
                 @log.info("Time Asleep: #{timeAsleep}")
                 @log.info("Foods Eaten:\n #{foodsEaten}")
@@ -181,7 +183,7 @@ class FitbitLogger < Slogger
             tags = config['fitbit_tags'] || ''
             tags = "\n\n#{tags}\n" unless tags == ''
             
-            output = "**Steps:** #{steps}\n**Floors:** #{floors}\n**Distance:** #{distance} #{distanceUnit}\n**Activity Points:** #{activityPoints}\n"
+            output = "**Steps:** #{steps}\n**Floors:** #{floors}\n**Distance:** #{distance} #{distanceUnit}\n**Very Active Minutes:** #{veryActiveMinutes}\n**Calories Out:** #{caloriesOut}\n"
             
             if config['fitbit_log_body_measurements']
                 output += "**Weight:** #{weight} #{weightUnit}\n**BMI:** #{bmi}\n"
