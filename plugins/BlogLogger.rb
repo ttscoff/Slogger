@@ -53,7 +53,7 @@ class BlogLogger < Slogger
       retries = 0
       success = false
       until success
-        if parse_feed(rss_feed)
+        if parse_feed(rss_feed, retries)
           success = true
         else
           break if $options[:max_retries] == retries
@@ -69,7 +69,7 @@ class BlogLogger < Slogger
     end
   end
 
-  def parse_feed(rss_feed)
+  def parse_feed(rss_feed, retries)
     markdownify = @blogconfig['markdownify_posts']
     unless (markdownify.is_a? TrueClass or markdownify.is_a? FalseClass)
       markdownify = true
@@ -79,18 +79,23 @@ class BlogLogger < Slogger
       starred = true
     end
     tags = @blogconfig['blog_tags'] || ''
-    tags = "\n\n#{tags}\n" unless tags == ''
+    tags = "\n\n(#{tags})\n" unless tags == ''
 
     today = @timespan
     begin
       rss_content = ""
       open(rss_feed) do |f|
-        rss_content = f.read
+        begin
+          rss_content = f.read
+        rescue Exception => e
+          $stderr.puts "Reading content for #{item.title}"
+          $stderr.puts e
+        end
       end
 
       rss = RSS::Parser.parse(rss_content, false)
 
-      if @blogconfig['get_most_popular']
+      if @blogconfig['get_most_popular'] && retries == 0
         @log.info("Checking for most tweeted posts on #{rss.title.content}")
         posts = []
         rss.items.each { |item|
@@ -129,8 +134,8 @@ class BlogLogger < Slogger
           sl.to_dayone(options)
         end
       end
-      rss.items.each { |item|
 
+      rss.items.each { |item|
         begin
           if item.class == RSS::Atom::Feed::Entry
             item_date = Time.parse(item.updated.to_s) + Time.now.gmt_offset
@@ -150,7 +155,8 @@ class BlogLogger < Slogger
               content = item.summary.content if content.nil?
               @log.error("No content field recognized in #{rss_feed}") if content.nil?
             rescue Exception => e
-              p e
+              $stderr.puts "Reading content for #{item.title}"
+              $stderr.puts e
               return false
             end
           else
@@ -158,28 +164,43 @@ class BlogLogger < Slogger
             @log.error("No content field recognized in #{rss_feed}") if content.nil?
           end
 
-          imageurl = false
-          image_match = content.match(/src="(https?:.*?\.(jpg|png|jpeg))(\?.*?)?"/i) rescue nil
-          imageurl = image_match[1] unless image_match.nil?
+          # if RUBY_VERSION.to_f > 1.9
+          #   content = content.force_encoding('utf-8')
+          # end
 
-          # can't find a way to truncate partial html without nokogiri or other gems...
-          # content = content.truncate_html(10) unless @blogconfig['full_posts']
-          content.gsub!(/<iframe.*?src="http:\/\/player\.vimeo\.com\/video\/(\d+)".*?\/iframe>(?:<br\/>)+/,"\nhttp://vimeo.com/\\1\n\n")
-          content.gsub!(/<iframe.*?src="http:\/\/www\.youtube\.com\/embed\/(.+?)(\?.*?)?".*?\/iframe>/,"\nhttp://www.youtube.com/watch?v=\\1\n\n")
+          begin
+            imageurl = false
+            image_match = content.match(/src="(https?:.*?\.(jpg|png|jpeg))(\?.*?)?"/i) rescue nil
+            imageurl = image_match[1] unless image_match.nil?
 
-          content = content.markdownify if markdownify rescue content
 
-          # handle "&nbsp_place_holder;" thing
-          content.gsub!(/&nbsp_place_holder;/," ")
+            # can't find a way to truncate partial html without nokogiri or other gems...
+            # content = content.truncate_html(10) unless @blogconfig['full_posts']
+            content.gsub!(/<iframe.*?src="http:\/\/player\.vimeo\.com\/video\/(\d+)".*?\/iframe>(?:<br\/>)+/,"\nhttp://vimeo.com/\\1\n\n")
+            content.gsub!(/<iframe.*?src="http:\/\/www\.youtube\.com\/embed\/(.+?)(\?.*?)?".*?\/iframe>/,"\nhttp://www.youtube.com/watch?v=\\1\n\n")
+
+            content = content.markdownify if markdownify rescue content
+
+            # handle "&nbsp_place_holder;" thing
+            content.gsub!(/&nbsp_place_holder;/," ")
+          rescue Exception => e
+            $stderr.puts "Gathering images for #{item.title}"
+            $stderr.puts e
+          end
 
           options = {}
 
-          if item.class == RSS::Atom::Feed::Entry
-            title = item.title.content.gsub(/\n+/,' ')
-            link = item.link.href
-          else
-            title = item.title.gsub(/\n+/,' ')
-            link = item.link
+          begin
+            if item.class == RSS::Atom::Feed::Entry
+              title = item.title.content.gsub(/\n+/,' ')
+              link = item.link.href
+            else
+              title = item.title.gsub(/\n+/,' ')
+              link = item.link
+            end
+          rescue Exception => e
+            $stderr.puts "Reading title for #{item.title}"
+            $stderr.puts e
           end
 
           options['content'] = "## [#{title.strip}](#{link.strip})\n\n#{content.strip}#{tags}"
@@ -203,7 +224,8 @@ class BlogLogger < Slogger
         end
       }
     rescue Exception => e
-      p e
+      $stderr.puts "Reading posts for #{rss_feed}"
+      $stderr.puts e
       return false
     end
     return true

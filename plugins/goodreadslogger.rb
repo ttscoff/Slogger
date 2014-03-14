@@ -77,7 +77,7 @@ class GoodreadsLogger < Slogger
     end
 
     tags = @grconfig['goodreads_tags'] || ''
-    tags = "\n\n#{tags}\n" unless tags == ''
+    tags = "\n\n(#{tags})\n" unless tags == ''
 
     begin
       rss_content = ""

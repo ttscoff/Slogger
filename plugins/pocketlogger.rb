@@ -42,7 +42,7 @@ class PocketLogger < Slogger
     config['pocket_tags'] ||= ''
     username = config['pocket_username']
     password = config['pocket_passwd']
-    tags = "\n\n#{config['pocket_tags']}\n" unless config['pocket_tags'] == ''
+    tags = "\n\n(#{config['pocket_tags']})\n" unless config['pocket_tags'] == ''
     today = @timespan
 
     @log.info("Getting Pocket posts for #{username}")

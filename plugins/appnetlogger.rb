@@ -46,7 +46,7 @@ class AppNetLogger < Slogger
 
     sl = DayOne.new
     config['appnet_tags'] ||= ''
-    tags = "\n\n#{config['appnet_tags']}\n" unless config['appnet_tags'] == ''
+    tags = "\n\n(#{config['appnet_tags']})\n" unless config['appnet_tags'] == ''
     today = @timespan.to_i
 
     @log.info("Getting App.net posts for #{config['appnet_usernames'].length} feeds")
@@ -58,7 +58,7 @@ class AppNetLogger < Slogger
     config['appnet_usernames'].each do |user|
       begin
         rss_feed = "https://alpha-api.app.net/feed/rss/users/@"+ user + "/posts"
-                                        
+
         url = URI.parse rss_feed
 
         http = Net::HTTP.new url.host, url.port

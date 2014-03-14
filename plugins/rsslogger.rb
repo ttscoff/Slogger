@@ -60,7 +60,7 @@ class RSSLogger < Slogger
   def parse_feed(rss_feed)
 
     tags = @rssconfig['tags'] || ''
-    tags = "\n\n#{tags}\n" unless tags == ''
+    tags = "\n\n(#{tags})\n" unless tags == ''
 
     today = @timespan
     begin

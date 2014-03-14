@@ -52,7 +52,7 @@ class LastFMLogger < Slogger
     end
 
     config['lastfm_tags'] ||= ''
-    tags = "\n\n#{config['lastfm_tags']}\n" unless config['lastfm_tags'] == ''
+    tags = "\n\n(#{config['lastfm_tags']})\n" unless config['lastfm_tags'] == ''
 
     config['lastfm_feeds'] ||= ['recent', 'loved']
 
@@ -81,7 +81,7 @@ class LastFMLogger < Slogger
       rss.items.each { |item|
         timestamp = Time.parse(item.pubDate.to_s)
         break if timestamp < today
-        ts = config['lastfm_include_timestamps'] ? "[#{timestamp.strftime(@time_format)}] " : ""
+        ts = config['lastfm_include_timestamps'] ? "#{timestamp.strftime(@time_format)} | " : ""
         title = ts + String(item.title).e_link()
         link = String(item.link).e_link()
 

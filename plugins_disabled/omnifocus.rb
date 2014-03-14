@@ -42,13 +42,13 @@ class OmniFocusLogger < Slogger
     omnifocus_completed_tasks = config['omnifocus_completed_tasks'] || false
     log_notes = config['omnifocus_log_notes'] || false
     tags = config['tags'] || ''
-    tags = "\n\n#{@tags}\n" unless @tags == ''
+    tags = "\n\n(#{@tags})\n" unless @tags == ''
 
-    
+
     output = ''
     developMode = $options[:develop]
-    
-    
+
+
     # Run an embedded applescript to get today's completed tasks
 
     if filters.empty? then
@@ -62,15 +62,15 @@ class OmniFocusLogger < Slogger
     if developMode
         @log.info("Running plugin for the last #{days} days")
     end
-    
+
     until $i >= days  do
       currentDate = Time.now - ((60 * 60 * 24) * $i)
       timestring = currentDate.strftime('%d/%m/%Y')
-      
+
       if developMode
           @log.info("Running plugin for #{timestring}")
       end
-      
+
       for filter in filters
         values = %x{osascript <<'APPLESCRIPT'
           set filter to "#{filter}"
@@ -78,31 +78,31 @@ class OmniFocusLogger < Slogger
           tell application id "com.omnigroup.OmniFocus"
           	tell default document
           		if filter is equal to "NONE" then
-          			set refDoneToday to a reference to (flattened tasks where (completion date >= dteToday))
+          			set refDoneToday to a reference to (flattened tasks where (completion date ≥ dteToday))
           		else
-          			set refDoneToday to a reference to (flattened tasks where (completion date >= dteToday) and name of containing project's folder = filter)
-			
+          			set refDoneToday to a reference to (flattened tasks where (completion date ≥ dteToday) and name of containing project's folder = filter)
+
           		end if
           		set {lstName, lstContext, lstProject, lstNote} to {name, name of its context, name of its containing project, note} of refDoneToday
           		set strText to ""
-		
+
           		set numberOfItems to count of lstName
           		repeat with iTask from 1 to numberOfItems
           			set {strName, varContext, varProject, varNote} to {item iTask of lstName, item iTask of lstContext, item iTask of lstProject, item iTask of lstNote}
-			
+
           			set contextString to "null"
           			set projectString to "null"
           			set noteString to "null"
           			if varContext is not missing value then set contextString to varContext
           			if varProject is not missing value then set projectString to varProject
           			if varNote is not missing value then set noteString to varNote
-			
+
           			set noteString to my replaceText(noteString, linefeed, "\\\\n")
-			
+
           			set delimiterString to "##__##"
-			
+
           			set strText to strText & strName & delimiterString & projectString & delimiterString & contextString & delimiterString & noteString & linefeed
-			
+
           		end repeat
           	end tell
           end tell
@@ -137,11 +137,11 @@ class OmniFocusLogger < Slogger
           		set AppleScript's text item delimiters to tempTID
           		error errorMessage number errorNumber -- pass it on
           	end try
-	
+
           	return someText
           end replaceText
         APPLESCRIPT}
-        
+
         unless values.strip.empty?
           unless filter == "NONE"
             output += "\n## Tasks in #{filter}\n"
@@ -151,17 +151,17 @@ class OmniFocusLogger < Slogger
             # Create entries here
             tasks_completed += 1
             #ensures that only valid characters are saved to output
-        
+
             #this only works in newer ruby versions but not in the default 1.8.7
             begin
                 value = value.chars.select{|i| i.valid_encoding?}.join
             rescue
             end
-            
+
             name, project, context, note = value.split("##__##")
-  
+
             taskString = "## #{name}\n "
-            
+
             if context != "null"
               taskString += "*Context:* #{context} \n"
             end
@@ -170,9 +170,9 @@ class OmniFocusLogger < Slogger
             end
             if note != "null" && log_notes
               note = note.gsub("\\n","\n> ")
-              taskString += "*Notes:*\n> #{note}\n"
+              taskString += "*Notes:*\n> #{note}"
             end
-               
+
             output += taskString
           end
           output += "\n"

@@ -27,22 +27,46 @@ ENV['SLOGGER_HOME'] = SLOGGER_HOME
 
 require SLOGGER_HOME + '/lib/sociallogger'
 require SLOGGER_HOME + '/lib/configtools'
+require SLOGGER_HOME + '/lib/plist.rb'
 # require SLOGGER_HOME + '/lib/json'
+
+if RUBY_VERSION.to_f > 1.9
+  Encoding.default_external = Encoding::UTF_8
+  Encoding.default_internal = Encoding::UTF_8
+end
 
 class String
   def markdownify
     contents = ''
-    IO.popen('"$SLOGGER_HOME/lib/html2text"', "r+") do |io|
-
-      Thread.new { self.each_line { |line|
-        io << line
-      }; io.close_write }
-
-      io.each_line do |line|
-        contents << line
+    begin
+      if RUBY_VERSION.to_f > 1.9
+        input = self.dup.force_encoding('utf-8')
+      else
+        input = self.dup
       end
+
+      IO.popen('"$SLOGGER_HOME/lib/html2text"', "r+") do |io|
+        begin
+          Thread.new { input.each_line { |line|
+            io << line
+          }; io.close_write }
+        rescue Exception => e
+          $stderr.puts e
+        end
+        begin
+          io.each_line do |line|
+            contents << line
+          end
+        rescue Exception => e
+          $stderr.puts e
+        end
+      end
+      contents
+    rescue Exception => e
+      $stderr.puts e
+      $stderr.puts "Error in Markdownify"
+      self
     end
-    contents
   end
 
   # convert (multi)Markdown to HTML
@@ -280,6 +304,11 @@ class Slogger
 <dict>
   <key>Creation Date</key>
   <date><%= datestamp %></date>
+  <key>Creator</key>
+  <dict>
+    <key>Software Agent</key>
+    <string>Slogger/#{MAJOR_VERSION}.#{MINOR_VERSION}.#{BUILD_NUMBER}</string>
+  </dict>
   <key>Entry Text</key>
   <string><%= entry %></string>
   <key>Starred</key>
@@ -353,6 +382,33 @@ optparse = OptionParser.new do|opts|
     $stdout.puts("Slogger version #{MAJOR_VERSION}.#{MINOR_VERSION}.#{BUILD_NUMBER}")
     exit
   end
+  opts.on( '--dedup', 'Remove duplicate entries from Journal') do
+    puts "This will remove entries from your Journal that have"
+    puts "duplicate content and matching tags. The oldest copy"
+    puts "of an entry will be preserved. The entries will be"
+    puts "moved to a DayOneDuplicates directory on your Desktop."
+    puts
+    answer = SloggerUtils.new.ask("Are you sure you want to continue?",["y","n"])
+    if answer == "y"
+      DayOne.new.dedup
+    end
+    exit
+  end
+  ## This will be cool when it works.
+  # opts.on( '--dedup_similar', 'Remove similar entries from Journal') do
+  #   puts "This will remove entries from your Journal that have"
+  #   puts "very similar content on the same date. The oldest copy"
+  #   puts "of an entry will be preserved. The entries will be"
+  #   puts "moved to a DayOneDuplicates directory on your Desktop."
+  #   puts
+  #   puts "This is a slow process and can take >15m on large journals."
+  #   puts
+  #   answer = SloggerUtils.new.ask("Are you sure you want to continue?",["y","n"])
+  #   if answer == "y"
+  #     DayOne.new.dedup(true)
+  #   end
+  #   exit
+  # end
   opts.on( '-h', '--help', 'Display this screen' ) do
     puts opts
     exit
