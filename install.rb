@@ -27,7 +27,7 @@ else
 end
 
 if File.exists?(dir+"/slogger")
-	flags = ""
+	opts = []
 	puts "By default, Slogger runs once a day at 11:50PM."
 	puts "If your computer is not always on, you can have"
 	puts "Slogger fetch data back to the time of the last"
@@ -36,7 +36,12 @@ if File.exists?(dir+"/slogger")
 	puts "Is your Mac routinely offline at 11:50PM?"
 	print "(Y/n)"
 	ans = gets.chomp
-	flags += "-s" unless ans.downcase == "n"
+	opts.push("-s") unless ans.downcase == "n"
+
+	flags = ""
+	opts.each {|flag|
+		flags += "\n\t\t<string>#{flag}</string>"
+	}
 
 	print "Setting up launchd... "
 	xml=<<LAUNCHCTLPLIST
@@ -49,8 +54,7 @@ if File.exists?(dir+"/slogger")
 	<key>ProgramArguments</key>
 	<array>
 		<string>/usr/bin/ruby</string>
-		<string>#{dir}/slogger</string>
-		<string>#{flags}</string>
+		<string>#{dir}/slogger</string>#{flags}
 	</array>
 	<key>StartCalendarInterval</key>
 	<dict>
