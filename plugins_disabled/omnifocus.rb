@@ -75,7 +75,7 @@ class OmniFocusLogger < Slogger
         values = %x{osascript <<'APPLESCRIPT'
           set filter to "#{filter}"
           set dteToday to setDate("#{timestring}")
-          tell application id "com.omnigroup.OmniFocus"
+          tell application id "com.omnigroup.OmniFocus.MacAppStore"
           	tell default document
           		if filter is equal to "NONE" then
           			set refDoneToday to a reference to (flattened tasks where (completion date ≥ dteToday))
