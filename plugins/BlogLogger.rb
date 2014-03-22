@@ -6,12 +6,13 @@ Author: [Brett Terpstra](http://brettterpstra.com)
 Configuration:
   blog_feeds: [ "feed url 1" , "feed url 2", ... ]
   markdownify_posts: true
+  save_image: true
   star_posts: true
   blog_tags: "#social #blogging"
 Notes:
-  - if found, the first image in the post will be saved as the main image for the entry
   - blog_feeds is an array of feeds separated by commas, a single feed is fine, but it should be inside of brackets `[]`
   - markdownify_posts will convert links and emphasis in the post to Markdown for display in Day One
+  - if save_image is true, the first image in the post will be saved as the main image for the entry
   - star_posts will star entries created for new posts
   - get_most_popular (true/false) create a separate entry showing the day's top 5 most tweeted posts from recent entries
   - blog_tags are tags you want to add to every entry, e.g. "#social #blogging"
@@ -26,6 +27,7 @@ config = {
                     'blog_tags are tags you want to add to every entry, e.g. "#social #rss"'],
   'blog_feeds' => [],
   'markdownify_posts' => true,
+  'save_image' => true,
   'star_posts' => false,
   'get_most_popular' => false,
   'blog_tags' => '#social #blogging'
@@ -170,9 +172,10 @@ class BlogLogger < Slogger
 
           begin
             imageurl = false
-            image_match = content.match(/src="(https?:.*?\.(jpg|png|jpeg))(\?.*?)?"/i) rescue nil
-            imageurl = image_match[1] unless image_match.nil?
-
+            if @blogconfig['save_image']
+              image_match = content.match(/src="(https?:.*?\.(jpg|png|jpeg))(\?.*?)?"/i) rescue nil
+              imageurl = image_match[1] unless image_match.nil?
+            end
 
             # can't find a way to truncate partial html without nokogiri or other gems...
             # content = content.truncate_html(10) unless @blogconfig['full_posts']
