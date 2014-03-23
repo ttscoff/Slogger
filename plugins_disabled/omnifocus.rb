@@ -168,7 +168,7 @@ class OmniFocusLogger < Slogger
             if project != "null"
               taskString += "*Project:* #{project}\n"
             end
-            if note != "null" && log_notes
+            if log_notes && note != "null" && note != "\n"
               note = note.gsub("\\n","\n> ")
               taskString += "*Notes:*\n> #{note}"
             end
