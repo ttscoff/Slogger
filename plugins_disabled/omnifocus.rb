@@ -41,8 +41,8 @@ class OmniFocusLogger < Slogger
     additional_config_option = config['additional_config_option'] || false
     omnifocus_completed_tasks = config['omnifocus_completed_tasks'] || false
     log_notes = config['omnifocus_log_notes'] || false
-    tags = config['tags'] || ''
-    tags = "\n\n(#{@tags})\n" unless @tags == ''
+    tags = config['omnifocus_tags'] || ''
+    tags = "\n\n(#{tags})\n" unless @tags == ''
 
 
     output = ''
