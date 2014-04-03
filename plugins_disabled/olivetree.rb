@@ -70,32 +70,28 @@ class OTBibleLogger < Slogger
     uri.query = URI.encode_www_form( params )
     req = Net::HTTP::Get.new(uri)
     req.basic_auth username, password
-    #@log.info(uri)
+
     res = Net::HTTP.start(uri.hostname, uri.port, :use_ssl => true) {|http|
       http.request(req)
     }
-    #@log.info( res.body )
+
     xml_data = res.body
     doc = REXML::Document.new(xml_data);
     annoCats = REXML::XPath.match(doc, '///[@type="AnnotationCategory"]')
     annoCats.each do |annoCat|
-      #puts annoCats
       parentCategoryID = annoCat.elements['parent-category-id'].text
       name = annoCat.elements['name'].text
       id = annoCat.elements['client-id'].text
-      #puts name
-      #puts parentCategoryID
-      #puts id
+
       # We're sticking the categories right into our config file
 
       parentText = ''
       if 1 < parentCategoryID.to_i
-        #puts 'parentID: ' + parentCategoryID
         parentText = config[parentCategoryID] || ''
       end
 
       config[id] = parentText + ' :: ' + name
-      #puts 'config[id]: ' + config[id]
+
     end
 
 
@@ -108,7 +104,7 @@ class OTBibleLogger < Slogger
       name = annoTag.elements['name'].text
       id = annoTag.elements['client-id'].text
 
-      # We're sticking the tags right into our config file
+      # We're sticking the tags right into our config file for perpetual use
       config[id] = name
     end
 
@@ -122,16 +118,11 @@ class OTBibleLogger < Slogger
       userTagID = e.elements['user-tag-id'].text
       tagAssocs[annotationID] = userTagID
     end
-    #@log.info(tagAssocs)
-    #tagAssocs.each_association { |key, container| puts "#{key} is #{container}" }
-
 
     annos = REXML::XPath.match(doc, '///[@type="Annotation"]')
     annos.each do |anno|
       annoContent = anno.elements['content'].text || ''
       annoID = anno.elements['client-id'].text || ''
-
-      # this date is LOCAL time. How could they???
 
       annoCreatedDate = Time.at(anno.elements['created-date'].text.to_i) || 0
       annoModDate = Time.at(anno.elements['modified-date'].text.to_i) || 0
@@ -234,7 +225,6 @@ class OTBibleLogger < Slogger
     bunchONums = []
     #seqNumMax = seqNums.max
     seqNums.each do |seqNum|
-      #puts seqNum.text
       bunchONums.push(seqNum.text.to_i)
     end
 
