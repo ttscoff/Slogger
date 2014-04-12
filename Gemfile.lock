@@ -68,7 +68,7 @@ PLATFORMS
 DEPENDENCIES
   feed-normalizer
   json
-  levenshtein
+  levenshtein (~> 0.2.2)
   nokogiri
   rake
   rspec
