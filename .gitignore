@@ -11,3 +11,5 @@ runlog.txt
 projectnotes.md
 bintest
 .fuse*
+.bundle
+vendor/bundle
