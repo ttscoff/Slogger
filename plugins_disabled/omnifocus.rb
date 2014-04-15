@@ -75,7 +75,7 @@ class OmniFocusLogger < Slogger
         values = %x{osascript <<'APPLESCRIPT'
           set filter to "#{filter}"
           set dteToday to setDate("#{timestring}")
-          tell application id "com.omnigroup.OmniFocus"
+          tell application "OmniFocus"
           	tell default document
           		if filter is equal to "NONE" then
           			set refDoneToday to a reference to (flattened tasks where (completion date ≥ dteToday))
@@ -168,9 +168,9 @@ class OmniFocusLogger < Slogger
             if project != "null"
               taskString += "*Project:* #{project}\n"
             end
-            if note != "null" && log_notes
+            if log_notes && note != "null" && note != "\n"
               note = note.gsub("\\n","\n> ")
-              taskString += "*Notes:*\n> #{note}"
+              taskString += "*Notes:*\n> #{note}\n"
             end
 
             output += taskString
