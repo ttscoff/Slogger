@@ -225,6 +225,7 @@ class TwitterLogger < Slogger
       print "Press Enter to continue..."
       gets
       %x{open "#{request_token.authorize_url}"}
+      puts "#{request_token.authorize_url}"
       print "Paste the code you received here: "
       code = gets.strip
 
