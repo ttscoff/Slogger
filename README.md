@@ -166,6 +166,25 @@ Download Xcode from the OSX App Store. When it has downloaded launch it, open "P
 
 Alternatively you can download the command line tools from Apple here: [https://developer.apple.com/downloads/index.action](https://developer.apple.com/downloads/index.action)
 
+#### Known Issue with Xcode 5.1
+
+Apple updated the clang compiler to version 5.1 with the latest Xcode update, which breaks building gems with native extensions. They fail with this error: `clang: error: unknown argument: '-multiply_definedsuppress' [-Wunused-command-line-argument-hard-error-in-future]`
+You can check your version of clang with `clang -v` on the terminal. 
+
+While that [bug is being worked on](https://bugs.ruby-lang.org/issues/9624), here is a temporary workaound:
+
+First we need to install bundler.
+
+```bash
+sudo env ARCHFLAGS=-Wno-error=unused-command-line-argument-hard-error-in-future gem install bundler
+```
+
+And after that, use bundler to install other gems:
+
+```bash
+sudo env ARCHFLAGS=-Wno-error=unused-command-line-argument-hard-error-in-future bundle install
+```
+
 ### Plugins
 
 If Slogger is running, but returning an error message, it may be an issue with a plugin configuration.

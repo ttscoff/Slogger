@@ -8,6 +8,8 @@
 #        Copyright 2012, Brett Terpstra
 #              http://brettterpstra.com
 #                  --------------------
+require 'rubygems'
+require 'bundler/setup'
 require 'open-uri'
 require 'net/http'
 require 'net/https'

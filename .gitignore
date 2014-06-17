@@ -12,3 +12,5 @@ projectnotes.md
 bintest
 .fuse*
 Gemfile.lock
+.bundle
+vendor/bundle
