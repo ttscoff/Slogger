@@ -11,3 +11,4 @@ runlog.txt
 projectnotes.md
 bintest
 .fuse*
+Gemfile.lock
