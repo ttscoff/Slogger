@@ -29,6 +29,7 @@ require SLOGGER_HOME + '/lib/sociallogger'
 require SLOGGER_HOME + '/lib/configtools'
 require SLOGGER_HOME + '/lib/plist.rb'
 # require SLOGGER_HOME + '/lib/json'
+require SLOGGER_HOME + '/lib/levenshtein-0.2.2/lib/levenshtein.rb'
 
 if RUBY_VERSION.to_f > 1.9
   Encoding.default_external = Encoding::UTF_8

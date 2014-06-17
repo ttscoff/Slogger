@@ -1,6 +1,5 @@
 require 'fileutils'
 require 'digest/md5'
-require 'levenshtein'
 require 'pp'
 
 class DayOne < Slogger
