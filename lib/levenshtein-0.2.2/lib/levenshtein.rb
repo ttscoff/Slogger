@@ -1,6 +1,6 @@
 # encoding: UTF-8
 
-require "levenshtein/version"
+require File.join(File.dirname(__FILE__),"levenshtein/version.rb")
 
 module Levenshtein
   # Returns the Levenshtein distance as a number between 0.0 and
@@ -61,20 +61,20 @@ module Levenshtein
 
     offset			= 0
     no_more_optimizations	= true
- 
+
     while offset < l1 and offset < l2 and a1[offset].equal?(a2[offset])
       offset += 1
 
       no_more_optimizations	= false
     end
- 
+
     while offset < l1 and offset < l2 and a1[l1-1].equal?(a2[l2-1])
       l1 -= 1
       l2 -= 1
 
       no_more_optimizations	= false
     end
- 
+
     if no_more_optimizations
       distance_fast_or_slow(a1, a2, threshold, options)
     else
@@ -138,7 +138,7 @@ module Levenshtein
 end
 
 begin
-  require "levenshtein/levenshtein_fast"	# Compiled by RubyGems.
+  require File.join(File.dirname(__FILE__),"levenshtein/levenshtein_fast")	# Compiled by RubyGems.
 rescue LoadError
   begin
     require "levenshtein_fast"			# Compiled by the build script.
