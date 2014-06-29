@@ -137,12 +137,12 @@ module Levenshtein
   end
 end
 
-begin
-  require File.join(File.dirname(__FILE__),"levenshtein/levenshtein_fast")	# Compiled by RubyGems.
-rescue LoadError
-  begin
-    require "levenshtein_fast"			# Compiled by the build script.
-  rescue LoadError
-    $stderr.puts "WARNING: Couldn't find the fast C implementation of Levenshtein. Using the much slower Ruby version instead."
-  end
-end
+# begin
+#   require File.join(File.dirname(__FILE__),"levenshtein/levenshtein_fast")	# Compiled by RubyGems.
+# rescue LoadError
+#   begin
+#     require "levenshtein_fast"			# Compiled by the build script.
+#   rescue LoadError
+#     $stderr.puts "WARNING: Couldn't find the fast C implementation of Levenshtein. Using the much slower Ruby version instead."
+#   end
+# end
