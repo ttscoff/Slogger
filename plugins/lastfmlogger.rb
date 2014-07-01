@@ -81,7 +81,7 @@ class LastFMLogger < Slogger
       rss.items.each { |item|
         timestamp = Time.parse(item.pubDate.to_s)
         break if timestamp < today
-        ts = config['lastfm_include_timestamps'] ? "[#{timestamp.strftime(@time_format)}] " : ""
+        ts = config['lastfm_include_timestamps'] ? "#{timestamp.strftime(@time_format)} | " : ""
         title = ts + String(item.title).e_link()
         link = String(item.link).e_link()
 

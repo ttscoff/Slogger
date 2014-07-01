@@ -57,10 +57,7 @@ class InstapaperLogger < Slogger
         feed_output = ''
         rss.items.each { |item|
           item_date = Time.parse(item.pubDate.to_s)
-          # Instapaper shows times in GMT, but doesn't display that in pubDate,
-          # which means Time.parse will parse it as the local time and potentially
-          # missing some items. Subtracting the gmt_offset fixes this.
-          if item_date > (@timespan - item_date.gmt_offset)
+          if item_date > @timespan
             content = item.description.gsub(/\n/,"\n    ") unless item.description == ''
             feed_output += "* [#{item.title}](#{item.link})\n"
             feed_output += "\n     #{content}\n" if config['instapaper_include_content_preview'] == true

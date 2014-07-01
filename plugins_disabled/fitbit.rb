@@ -2,13 +2,13 @@
  Plugin: Fitbit
  Description: Grabs todays fitbit stats. See fitbit.com
  Author: Patrice Brend'amour
-
+ 
  Notes:
  1. To run this plugin you need to install the fitgem gem first:
  $ sudo gem install fitgem
  2. Afterwards you can aquire a valid Fitbit Consumer token: http://dev.fitbit.com if you want to use your own. A default one is provided.
  3. Upon first start, the plugin will ask you to open a URL and authorize the access to your data
-
+ 
 =end
 
 
@@ -38,7 +38,7 @@ class FitbitLogger < Slogger
     def do_log
         if @config.key?(self.class.name)
             config = @config[self.class.name]
-
+            
             # Check that the user has configured the plugin
             if !config.key?('fitbit_consumer_key') || config['fitbit_consumer_secret'] == ""
                 @log.warn("Fitbit has not been configured, please create an application at http://dev.fitbit.com.")
@@ -48,19 +48,19 @@ class FitbitLogger < Slogger
             @log.warn("Fitbit has not been configured please edit your slogger_config file.")
             return
         end
-
+        
         # ============================================================
         # Init fitgem client
-
+        
         oauth_token = config['fitbit_oauth_token']
         oauth_secret = config['fitbit_oauth_secret']
         fitbit_consumer_key = config['fitbit_consumer_key']
         fitbit_consumer_secret = config['fitbit_consumer_secret']
-
+        
         client = Fitgem::Client.new(:consumer_key => fitbit_consumer_key, :consumer_secret => fitbit_consumer_secret, :unit_system => translateUnitSystem(config['fitbit_unit_system']))
         developMode = $options[:develop]
-
-
+        
+        
         # ============================================================
         # request oauth token if needed
         @log.info("#{oauth_token}")
@@ -79,16 +79,16 @@ class FitbitLogger < Slogger
             %x{open "http://www.fitbit.com/oauth/authorize?oauth_token=#{token}"}
             print "Paste the code you received here: "
             verifier = gets.strip
-
+            
             begin
                 access_token = client.authorize(token, secret, { :oauth_verifier => verifier })
-
+           
                 if developMode
                     @log.info("Verifier is: "+verifier)
                     @log.info("Token is:    "+access_token.token)
                     @log.info("Secret is:   "+access_token.secret)
                 end
-
+                
                 config['fitbit_oauth_token'] = access_token.token;
                 config['fitbit_oauth_secret'] = access_token.secret
                 @log.info("Fitbit successfully configured, run Slogger again to continue")
@@ -97,7 +97,7 @@ class FitbitLogger < Slogger
             end
             return config
         end
-
+        
         # ============================================================
         # iterate over the days and create entries
         $i = 0
@@ -105,18 +105,19 @@ class FitbitLogger < Slogger
         until $i >= days  do
             currentDate = Time.now - ((60 * 60 * 24) * $i)
             timestring = currentDate.strftime('%F')
-
+            
             @log.info("Logging Fitbit summary for #{timestring}")
-
+            
             activities = client.activities_on_date(timestring)
             summary = activities['summary']
             steps = summary['steps']
             floors = summary['floors']
             distance = summary['distances'][0]['distance']
             distanceUnit = client.label_for_measurement(:distance, false)
-            activityPoints = summary['activeScore']
+            veryActiveMinutes = summary['veryActiveMinutes']
+            caloriesOut = summary["caloriesOut"]
             foodsEaten = ""
-
+            
             if config['fitbit_log_body_measurements']
                 measurements = client.body_measurements_on_date(timestring)
                 weight = measurements['body']['weight']
@@ -127,25 +128,25 @@ class FitbitLogger < Slogger
                 water = client.water_on_date(timestring)
                 waterSummary = water['summary']
                 loggedWater = waterSummary['water']
-                waterUnit = client.label_for_measurement(:liquids, false)
-            end
+                waterUnit = client.label_for_measurement(:liquids, false)		
+            end            
             if config['fitbit_log_sleep']
                 sleep = client.sleep_on_date(timestring)
-                sleepSummary = sleep['summary']
-
+                sleepSummary = sleep['summary'] 
+                
                 hoursInBed = sleepSummary['totalTimeInBed'] / 60
                 minutesInBed = sleepSummary['totalTimeInBed'] - (hoursInBed * 60)
                 timeInBed = "#{hoursInBed}h #{minutesInBed}min"
-
+                
                 hoursAsleep = sleepSummary['totalMinutesAsleep'] / 60
                 minutesAsleep = sleepSummary['totalMinutesAsleep'] - (hoursAsleep * 60)
                 timeAsleep = "#{hoursAsleep}h #{minutesAsleep}min"
             end
-
+            
             if config['fitbit_log_food']
                 foodData = client.foods_on_date(timestring)
                 foods = foodData['foods']
-
+                
                 mealList = Hash.new
                 foodsEaten = ""
                 totalCalories = 0
@@ -164,25 +165,26 @@ class FitbitLogger < Slogger
                 end
 
             end
-
+            
             if developMode
                 @log.info("Steps: #{steps}")
                 @log.info("Distance: #{distance} #{distanceUnit}")
                 @log.info("Floors: #{floors}")
-                @log.info("ActivityPoints: #{activityPoints}")
-				@log.info("Weight: #{weight} #{weightUnit}")
-				@log.info("BMI: #{bmi}")
-				@log.info("Water Intake: #{loggedWater} #{waterUnit}")
+                @log.info("Very Active Minutes: #{veryActiveMinutes}")
+                @log.info("Calories Out: #{caloriesOut}")
+                @log.info("Weight: #{weight} #{weightUnit}")
+                @log.info("BMI: #{bmi}")
+                @log.info("Water Intake: #{loggedWater} #{waterUnit}")
                 @log.info("Time In Bed: #{timeInBed}")
                 @log.info("Time Asleep: #{timeAsleep}")
                 @log.info("Foods Eaten:\n #{foodsEaten}")
             end
-
+            
             tags = config['fitbit_tags'] || ''
-            tags = "\n\n(#{tags})\n" unless tags == ''
-
-            output = "**Steps:** #{steps}\n**Floors:** #{floors}\n**Distance:** #{distance} #{distanceUnit}\n**Activity Points:** #{activityPoints}\n"
-
+            tags = "\n\n#{tags}\n" unless tags == ''
+            
+            output = "**Steps:** #{steps}\n**Floors:** #{floors}\n**Distance:** #{distance} #{distanceUnit}\n**Very Active Minutes:** #{veryActiveMinutes}\n**Calories Out:** #{caloriesOut}\n"
+            
             if config['fitbit_log_body_measurements']
                 output += "**Weight:** #{weight} #{weightUnit}\n**BMI:** #{bmi}\n"
             end
@@ -196,7 +198,7 @@ class FitbitLogger < Slogger
             if config['fitbit_log_food']
                 output += "**Foods eaten:** #{totalCalories} calories\n#{foodsEaten}"
             end
-
+            
             # Create a journal entry
             options = {}
             options['content'] = "## Fitbit - Summary for #{currentDate.strftime(@date_format)}\n\n#{output}#{tags}"
@@ -207,7 +209,7 @@ class FitbitLogger < Slogger
         end
         return config
     end
-
+                                 
     def translateMeal(mealId)
         case mealId
         when 1
@@ -233,7 +235,7 @@ class FitbitLogger < Slogger
             return Fitgem::ApiUnitSystem.METRIC
         when "UK"
             return Fitgem::ApiUnitSystem.UK
-        else
+        else 
             return Fitgem::ApiUnitSystem.US
         end
     end
@@ -256,10 +258,10 @@ class Meal
         end
         return mealString
     end
-
+    
     def calories
         @calories
     end
 end
-
+    
 
