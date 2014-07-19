@@ -242,10 +242,11 @@ class TwitterLogger < Slogger
         return @twitter_config
       end
     end
-    @twitter_config['save_images'] ||= true
+    
+    defined?(@twitter_config['save_images']).nil? or @twitter_config['save_images'] = true
+    defined?( @twitter_config['digest_timeline']).nil? or  @twitter_config['digest_timeline'] = true
     @twitter_config['droplr_domain'] ||= 'd.pr'
-    @twitter_config['digest_timeline'] ||= true
-
+    
     sl = DayOne.new
     @twitter_config['twitter_tags'] ||= ''
     tags = "\n\n(#{@twitter_config['twitter_tags']})\n" unless @twitter_config['twitter_tags'] == ''
