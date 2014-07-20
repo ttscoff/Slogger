@@ -56,6 +56,7 @@ Slogger indexes various public social services and creates Day One (<http://dayo
             - Strava
             -  untappd (requires [untappd](https://github.com/cmar/untappd) gem)
                 - beer checkins for the day
+            - Wunderlist new and optionally completed/overdue tasks (see notes for required gems/versions)
 - Slogger can be called with a single argument that is a path to a local image or text file, and an entry will be created containing its contents.
     - You can use this with a folder action or launchd task to add files from a folder connected to something like <http://IFTTT.com>. Any images added to the watched folder will be turned into journal entries.
         -  Note that Slogger does not delete the original file, so your script needs to move files out of the folder manually to avoid double-processing.
