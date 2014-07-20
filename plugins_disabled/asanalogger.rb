@@ -13,12 +13,13 @@ config = { # description and a primary key (username, url, etc.) required
                     'asana_api_key is a string with your personal Asana API key.',
                     'This can be obtained from your profile screen in Asana.'],
   'asana_api_key' => '',
-  'asana_tags' => '#tasks' 
+  'asana_star_posts' => true,
+  'asana_tags' => '#tasks'
 }
 # Update the class key to match the unique classname below
 $slog.register_plugin({ 'class' => 'AsanaLogger', 'config' => config })
 
-require "JSON"
+require "json"
 require "net/https"
 
 class AsanaLogger < Slogger
@@ -74,7 +75,7 @@ class AsanaLogger < Slogger
     # set up day one post
     options = {}
     options['datestamp'] = Time.now.utc.iso8601
-    options['starred'] = true
+    options['starred'] = config['asana_star_posts']
     options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
 
     # Create a journal entry
@@ -113,7 +114,7 @@ class AsanaLogger < Slogger
     # set up the request
     req = Net::HTTP::Get.new(uri.request_uri, params)
     req.basic_auth(api_key, '')
-    
+
     # issue the request
     res = http.start { |http| http.request(req) }
 
