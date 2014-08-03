@@ -288,7 +288,7 @@ class TwitterLogger < Slogger
           content << digest_entry(v, tags)
           sl.to_dayone({'content' => content, 'datestamp' => Time.parse(k).utc.iso8601})
           if @twitter_config['save_images_from_favorites']
-            favs.select {|t| !t[:images].empty? }.each {|t| self.single_entry(t) }
+            v.select {|t| !t[:images].empty? }.each {|t| self.single_entry(t) }
           end
         }
       end
