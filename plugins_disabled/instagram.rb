@@ -1,12 +1,20 @@
 =begin
-Plugin: My New Logger
-Description: Brief description (one line)
-Author: [My Name](My URL)
+Plugin: Instagram
+Description: Logs your posts from Instagram
+Author: [Ryan M](http://ryanmo.co)
 Configuration:
-  option_1_name: [ "example_value1" , "example_value2", ... ]
-  option_2_name: example_value
+  backdate: true/false (This allows you to get the last 20 posts. This is nice for your first run. 
+  Backdate will automatically get set to false after it's run)
 Notes:
-  - multi-line notes with additional description and information (optional)
+  With this plugin, you will get:
+    - Like count
+    - Who liked your photo
+    - Comments
+    - Location, if included (also place name if you used Foursquare)
+  If you aren't using the Twitter logger plugin, you'll need to install bundle first. This can be done by running the following two commands:
+
+    sudo gem install bundle
+    bundle install
 =end
 
 config = { # description and a primary key (username, url, etc.) required
@@ -58,7 +66,7 @@ class InstagramLogger < Slogger
       puts
       puts "------------- Instagram Configuration --------------"
       puts "\nSlogger will now open an authorization page in your default web browser. Copy the code you receive and return here.\n\n"
-      puts "Press Enter to continue..."
+      puts "Press Enter to continue (You may have to hit refresh once in the browser)..."
       keypress = gets
       command = "/usr/bin/ruby lib/instagram_server.rb"
       output = `#{command}`
