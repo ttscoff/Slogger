@@ -314,6 +314,19 @@ class Slogger
   </dict>
   <key>Entry Text</key>
   <string><%= entry %></string>
+  <% if location %><key>Location</key>
+  <dict>
+  <key>Administrative Area</key>
+  <string></string>
+  <key>Country</key>
+  <string></string>
+  <key>Latitude</key>
+  <real><%= lat %></real>
+  <key>Longitude</key>
+  <real><%= long %></real>
+  <key>Place Name</key>
+  <string><% if place %><%= place %><% end %></string>
+  </dict><% end %>
   <key>Starred</key>
   <<%= starred %>/>
   <% if tags %><key>Tags</key>
