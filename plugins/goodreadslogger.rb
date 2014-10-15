@@ -80,7 +80,7 @@ class GoodreadsLogger < Slogger
     tags = "\n\n(#{tags})\n" unless tags == ''
 
     begin
-      rss_content = ""
+      #rss_content = ""
 
       feed_download_response = Net::HTTP.get_response(URI.parse(rss_feed));
       xml_data = feed_download_response.body;
@@ -93,21 +93,26 @@ class GoodreadsLogger < Slogger
           imageurl = false
           #  read items are those where the guid type begins with 'Review'
             #debugger
-          next if !item.elements['guid'].text.start_with?('Review')
-          desc = item.elements['description'].cdatas().join
+          #next if !item.elements['guid'].text.start_with?('Review')
+          #desc = item.elements['book_description'].cdatas().join
           if save_image
-            imageurl = desc.match(/src="([^"]*)" /)[1].gsub(/\/([0-9]+)s\//) { "/#{$1}l/" } rescue false
+            imageurl = item.elements['book_large_image_url'].cdatas().join rescue false
           end
-          content += "* Author: #{desc.match(/class="authorName"\>(.*)\<\/a\>/)[1]}\n" rescue ''
-          content += "* My rating: #{desc.match(/gave ([0-5]) stars/)[1]} / 5\n" rescue ''
-          review = desc.partition('<br/>')[2].strip
+          content += "* Author: #{item.elements['author_name'].text}\n"
+          content += "* My rating: #{item.elements['user_rating'].text} / 5\n" rescue ''
+          if item.elements['title'].to_s =~ /CDATA/
+            title = item.elements['title'].cdatas().join
+          else
+            title = item.elements['title'].text
+          end
+          review = item.elements['user_review'].cdatas().join rescue ''
           if !review.empty?
             content += "* My review:\n\n    #{review}\n" rescue ''
           end
           content = content != '' ? "\n\n#{content}" : ''
 
           options = {}
-          options['content'] = "Finished reading [#{desc.match(/class="bookTitle"\>(.*)\<\/a\>/)[1]}](#{item.elements['link'].text.strip})#{content}#{tags}"
+          options['content'] = "Finished reading [#{title}](#{item.elements['link'].cdatas().join})#{content}#{tags}"
           options['datestamp'] = Time.parse(item.elements['pubDate'].text).utc.iso8601
           options['starred'] = starred
           options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
