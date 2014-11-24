@@ -65,7 +65,7 @@ class TwitterLogger < Slogger
 
     sl = DayOne.new
     
-    if !tweet[:images] == []
+    if tweet[:images].empty?
       sl.to_dayone(options)
     else
       tweet[:images].each do |imageurl|
@@ -242,11 +242,11 @@ class TwitterLogger < Slogger
         return @twitter_config
       end
     end
-    
-    defined?(@twitter_config['save_images']).nil? or @twitter_config['save_images'] = true
-    defined?( @twitter_config['digest_timeline']).nil? or  @twitter_config['digest_timeline'] = true
+
+    defined?(@twitter_config['save_images']).nil? and @twitter_config['save_images'] = true
+    defined?(@twitter_config['digest_timeline']).nil? and @twitter_config['digest_timeline'] = true
     @twitter_config['droplr_domain'] ||= 'd.pr'
-    
+
     sl = DayOne.new
     @twitter_config['twitter_tags'] ||= ''
     tags = "\n\n(#{@twitter_config['twitter_tags']})\n" unless @twitter_config['twitter_tags'] == ''
