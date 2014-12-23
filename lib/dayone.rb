@@ -55,9 +55,9 @@ class DayOne < Slogger
     Dir.mkdir(entry_dir, 0700) unless File.directory?(entry_dir)
     fh = File.new("#{entry_dir}/#{uuid}#{ext}",'w+')
 
-    unless RUBY_VERSION == '1.8.7'
+    begin
       fh.puts @template.result(binding).encode(Encoding.find('ASCII'), encoding_options)
-    else
+    rescue
       fh.puts @template.result(binding)
     end
     fh.close
