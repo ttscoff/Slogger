@@ -43,12 +43,23 @@ class DayOne < Slogger
     # entry = CGI.escapeHTML(content.unpack('C*').pack('U*').gsub(/[^[:punct:]\w\s]+/,' ')) unless content.nil?
 
     # @dayonepath = storage_path
+    encoding_options = {
+      :invalid           => :replace,  # Replace invalid byte sequences
+      :undef             => :replace,  # Replace anything not defined in ASCII
+      :replace           => ''         # Use a blank for those replacements
+    }
+
     @log.info("=====[ Saving entry to entries/#{uuid} ]")
     ext = markdown ? ".md" : ".doentry"
     entry_dir = File.join(File.expand_path(@dayonepath), "entries")
     Dir.mkdir(entry_dir, 0700) unless File.directory?(entry_dir)
     fh = File.new("#{entry_dir}/#{uuid}#{ext}",'w+')
-    fh.puts @template.result(binding)
+
+    unless RUBY_VERSION == '1.8.7'
+      fh.puts @template.result(binding).encode(Encoding.find('ASCII'), encoding_options)
+    else
+      fh.puts @template.result(binding)
+    end
     fh.close
     return true
   end
