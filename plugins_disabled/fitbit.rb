@@ -57,7 +57,7 @@ class FitbitLogger < Slogger
         fitbit_consumer_key = config['fitbit_consumer_key']
         fitbit_consumer_secret = config['fitbit_consumer_secret']
         
-        client = Fitgem::Client.new(:consumer_key => fitbit_consumer_key, :consumer_secret => fitbit_consumer_secret, :unit_system => translateUnitSystem(config['fitbit_unit_system']))
+        client = Fitgem::Client.new(:consumer_key => fitbit_consumer_key, :consumer_secret => fitbit_consumer_secret, :ssl => true, :unit_system => translateUnitSystem(config['fitbit_unit_system']))
         developMode = $options[:develop]
         
         
