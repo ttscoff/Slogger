@@ -8,6 +8,10 @@ gem 'instagram'
 gem 'sinatra'
 
 gem 'nokogiri'
+gem 'digest'
+gem 'sqlite3'
+gem 'rubyvis'
+gem 'rmagick'
 
 group :test do
   gem 'rake'
