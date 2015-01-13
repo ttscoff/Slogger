@@ -8,6 +8,10 @@ gem 'instagram'
 gem 'sinatra'
 
 gem 'nokogiri'
+gem 'digest' # required for feedafever
+gem 'sqlite3' # required for feedafever
+gem 'rmagick' # required for lastfmcovers
+gem 'multimap' # required for olivetree
 
 group :test do
   gem 'rake'
