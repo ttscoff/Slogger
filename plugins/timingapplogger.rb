@@ -15,7 +15,7 @@ config = { # description and a primary key (username, url, etc.) required
                     'line 2, continue array as needed'],
   'service_username' => '', # update the name and make this a string or an array if you want to handle multiple accounts.
   'additional_config_option' => false,
-  'tags' => '#social #blogging' # A good idea to provide this with an appropriate default setting
+  'tags' => '#social #timetracking' # A good idea to provide this with an appropriate default setting
 }
 # Update the class key to match the unique classname below
 $slog.register_plugin({ 'class' => 'TimingAppLogger', 'config' => config })
@@ -41,22 +41,26 @@ class TimingAppLogger < Slogger
       @log.warn("TimingAppLogger has not been configured or a feed is invalid, please edit your slogger_config file.")
       return
     end
-    @log.info("Logging TimingAppLogger posts for #{username}")
+    @log.info("Logging TimingAppLogger posts from TimingApp API")
 
     additional_config_option = config['additional_config_option'] || false
     tags = config['tags'] || ''
     tags = "\n\n#{@tags}\n" unless @tags == ''
 
-    time_last_ran = @timespan
-    time_now = Time.now
-    blog_date_stamp = time_now.utc.iso8601
-    fetch_from = time_now.strftime('%c')
+    @tzformat = "%F,%l %p"
 
-    title = "TimingApp records (from=#{time_last_ran} to datestamp=#{time_now}"
+    fetch_from = @timespan.strftime(@tzformat)
+    time_now = Time.now
+    @log.debug time_now
+    fetch_to = time_now.strftime(@tzformat)
+
+    title = "TimingApp records (from=#{fetch_from} to datestamp=#{fetch_to}"
 
     # Perform necessary functions to retrieve posts
     exporter = TimingAppExporter.new(@config, @log)
-    content = exporter.getContent(time_last_ran, time_now)         # current_hour, or since last ran
+    content = exporter.getContent(fetch_from, fetch_to)         # current_hour, or since last ran
+
+    blog_date_stamp = time_now.utc.iso8601
 
     # create an options array to pass to 'to_dayone'
     # all options have default fallbacks, so you only need to create the options you want to specify
@@ -91,7 +95,6 @@ class TimingAppExporter
     @config = config
     @log = log
     @log.level = Logger::DEBUG
-    puts "Initialized"
   end
 
   def postProcess(line, fields, sep)
@@ -130,6 +133,7 @@ class TimingAppExporter
     #to = top_of_hour(to)
 
     #puts Time.now.utc.iso8601
+    @log.debug("FROM=#{from} TO=#{to}")
     tmp_file = "/tmp/timing_output"
     tmp_file2 = "/tmp/processed_output"
     my_script(tmp_file)
@@ -141,12 +145,12 @@ class TimingAppExporter
               ).gsub("\n", '')
 
     @log.debug filter
-    fields = %w(startDate duration application project path)
+    fields = %w(startDate duration application projects path)
     headers = fields.join(" ")
 
     sep="|"
     # https://github.com/trentm/json
-    cmd = %Q(cat "#{tmp_file}" | json -c '#{filter}' -a #{headers} path -d'#{sep}'   > #{tmp_file2})
+    cmd = %Q(cat "#{tmp_file}" | json -c '#{filter}' -a #{headers} -d'#{sep}'   > #{tmp_file2})
     @log.debug cmd
     `#{cmd}`
 
