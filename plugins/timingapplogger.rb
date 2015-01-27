@@ -41,24 +41,34 @@ class TimingAppLogger < Slogger
       @log.warn("TimingAppLogger has not been configured or a feed is invalid, please edit your slogger_config file.")
       return
     end
+
+    if config['debug'] then         ## TODO - move into the Slogger class.
+      @log.level = Logger::DEBUG
+      @log.debug 'Enabled debug mode'
+    end
+
     @log.info("Logging TimingAppLogger posts from TimingApp API")
 
     additional_config_option = config['additional_config_option'] || false
     tags = config['tags'] || ''
     tags = "\n\n#{@tags}\n" unless @tags == ''
 
-    @tzformat = "%F,%l %p"
+    @tzformat = "%F,%l:00 %p"
 
-    fetch_from = @timespan.strftime(@tzformat)
+    @log.debug "" + @timespan.strftime(@tzformat)
+    last_run = config['TimingAppLogger_last_run']
+
     time_now = Time.now
-    @log.debug time_now
-    fetch_to = time_now.strftime(@tzformat)
+    time_last_run = Time.parse(last_run)
 
-    title = "TimingApp records (from=#{fetch_from} to datestamp=#{fetch_to}"
+    from_formatted = time_last_run.strftime(@tzformat)
+    to_formatted = time_now.strftime(@tzformat)
+
+    title = "TimingApp records (from=#{from_formatted} to datestamp=#{to_formatted})"
 
     # Perform necessary functions to retrieve posts
     exporter = TimingAppExporter.new(@config, @log)
-    content = exporter.getContent(fetch_from, fetch_to)         # current_hour, or since last ran
+    content = exporter.getContent(from_formatted, to_formatted)         # current_hour, or since last ran
 
     blog_date_stamp = time_now.utc.iso8601
 
@@ -94,33 +104,23 @@ class TimingAppExporter
   def initialize(config, log)
     @config = config
     @log = log
-    @log.level = Logger::DEBUG
+
   end
 
-  def postProcess(line, fields, sep)
-
-    @log.debug("Line in: "+line)
+  def postProcess(record, fields, sep)
+    @log.debug(record)
     @log.debug("Fields in: "+fields.join(','))
-
-    fieldValues = line.split(sep)
-    fieldHash = Hash.new()
-
-    n = 0
-    fields.each do |field|
-      @log.debug ("#{n} "+field +"="+fieldValues[n])
-      fieldHash[field] = fieldValues[n]
-      n = n + 1
-    end
-
-    # TODO: generalize this
-    if fieldHash['path'].to_s.start_with?('/Volumes')
-      fieldHash['path'] = "file:/"+fieldHash['path']
-    end
 
     newLine = ""
     n = 0
     fields.each do |field|
-      newLine = newLine + fieldHash[field] + sep
+      @log.debug field
+      element = record[field]
+      if element.kind_of?(Array)
+        newLine = newLine + element.join(',') + sep
+      else
+        newLine = newLine + element + sep
+      end
     end
     newLine = newLine +"\n"
     @log.debug(newLine)
@@ -133,9 +133,9 @@ class TimingAppExporter
     #to = top_of_hour(to)
 
     #puts Time.now.utc.iso8601
-    @log.debug("FROM=#{from} TO=#{to}")
+    @log.info("FROM=#{from} TO=#{to}")
     tmp_file = "/tmp/timing_output"
-    tmp_file2 = "/tmp/processed_output"
+    filtered_output = "/tmp/processed_output"
     my_script(tmp_file)
 
     duration_minimum = '0:03:00'
@@ -144,25 +144,35 @@ class TimingAppExporter
                 this.duration > "#{duration_minimum}"
               ).gsub("\n", '')
 
-    @log.debug filter
-    fields = %w(startDate duration application projects path)
+    @log.debug "FILTER: #{filter}"
+    fields = %w(duration application projects path startDate)
     headers = fields.join(" ")
 
     sep="|"
     # https://github.com/trentm/json
-    cmd = %Q(cat "#{tmp_file}" | json -c '#{filter}' -a #{headers} -d'#{sep}'   > #{tmp_file2})
+    cmd = %Q(cat "#{tmp_file}" | json -c '#{filter}'   > #{filtered_output})
     @log.debug cmd
     `#{cmd}`
 
     # Post-process
+    file = open(filtered_output)
+    json = file.read
 
-    ans = ""
-    File.open(tmp_file2, "r") do |f|
-      f.each_line do |line|
-        line = postProcess(line, fields, sep)
-        ans = ans + line
-      end
+    parsed = JSON.parse(json)
+
+    ans = ''
+    parsed.each   do |record|
+       @log.info record['startDate']
+
+       # TODO: generalize this
+       if record['path'].to_s.start_with?('/Volumes')
+         record['path'] = "file:/"+record['path']
+       end
+       line = postProcess(record, fields, sep)
+       ans = ans + line
     end
+
+
 
     headerFormatted = fields.join(" | ")+" \n"
     headerFormatted = headerFormatted + "--- | " * fields.length + "\n"
