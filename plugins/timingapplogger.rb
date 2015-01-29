@@ -91,7 +91,13 @@ class TimingAppLogger < Slogger
 
     content = exporter.getContent(from_formatted, to_formatted)         # current_hour, or since last ran
 
-    blog_date_stamp = to.utc.iso8601
+    if content.nil?
+      @debug.log("No content = no blog post")
+      return
+    end
+
+    one_minute_before_hour = to - 60 # Put it in at e.g. 9:59 am, so it's in the right hour
+    blog_date_stamp = one_minute_before_hour.utc.iso8601
 
     # create an options array to pass to 'to_dayone'
     # all options have default fallbacks, so you only need to create the options you want to specify
@@ -117,6 +123,8 @@ end
 
 class TimingAppExporter
 
+  require 'chronic_duration'
+
   def initialize(config, log)
     @config = config
     @log = log
@@ -129,13 +137,22 @@ class TimingAppExporter
 
     newLine = ""
     n = 0
-    fields.each do |field|
-      @log.debug field
-      element = record[field]
-      if element.kind_of?(Array)
-        newLine = newLine + element.join(',') + sep
+    min_sec = 1.5 * 60
+    rounded_secs = 3 * 60
+    fields.each do |fieldName|
+#      @log.debug fieldName
+      value = record[fieldName]
+
+      if fieldName == 'duration'
+        secs = ChronicDuration.parse(value)
+        secs = ((secs + min_sec) / (rounded_secs)).round * rounded_secs
+        value = ChronicDuration.output(secs)
+      end
+
+      if value.kind_of?(Array)
+        newLine = newLine + value.join(',') + sep
       else
-        newLine = newLine + element + sep
+        newLine = newLine + value + sep
       end
     end
     newLine = newLine +"\n"
@@ -209,11 +226,14 @@ class TimingAppExporter
        ans = ans + line
     end
 
+    if !ans.empty?
+      headerFormatted = fields.join(" | ")+" \n"
+      headerFormatted = headerFormatted + "--- | " * fields.length + "\n"
+      return headerFormatted + ans
+    else
+      return nil
+    end
 
-
-    headerFormatted = fields.join(" | ")+" \n"
-    headerFormatted = headerFormatted + "--- | " * fields.length + "\n"
-    return headerFormatted + ans
   end
 
   def osascript(script)
