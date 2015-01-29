@@ -42,6 +42,7 @@ class TimingAppLogger < Slogger
       return
     end
 
+    pp config
     if config['debug'] then         ## TODO - move into the Slogger class.
       @log.level = Logger::DEBUG
       @log.debug 'Enabled debug mode'
@@ -49,33 +50,53 @@ class TimingAppLogger < Slogger
 
     @log.info("Logging TimingAppLogger posts from TimingApp API")
 
-    additional_config_option = config['additional_config_option'] || false
     tags = config['tags'] || ''
-    tags = "\n\n#{@tags}\n" unless @tags == ''
+    @_tags = "\n\n#{@tags}\n" unless @tags == ''
 
-    @tzformat = "%F,%l:00 %p"
 
-    @log.debug "" + @timespan.strftime(@tzformat)
+
+    @log.debug "" + @timespan.strftime("%l %M")
     last_run = config['TimingAppLogger_last_run']
 
-    time_now = Time.now
-    time_last_run = Time.parse(last_run)
+    def no_mins(t) # http://stackoverflow.com/a/4856312/722034
+      Time.at(t.to_i - t.sec - t.min % 60 * 60)
+    end
 
-    from_formatted = time_last_run.strftime(@tzformat)
-    to_formatted = time_now.strftime(@tzformat)
+    time_now = no_mins(Time.now)
+    time_last_run = no_mins(Time.parse(last_run))
+
+    hours = (time_now - time_last_run) / 3600
+    exporter = TimingAppExporter.new(@config, @log)
+
+    hour = time_last_run
+    while hour < time_now
+      @log.debug "Doing "+hour.to_s
+      add_blog_for_period(hour, hour+3600, exporter)
+
+      hour += 3600
+    end
+
+  end
+
+  def add_blog_for_period(from, to, exporter)
+    @tzformat = "%F,%l:00 %p"
+
+    from_formatted = from.strftime(@tzformat)
+    to_formatted = to.strftime(@tzformat)
 
     title = "TimingApp records (from=#{from_formatted} to datestamp=#{to_formatted})"
 
+
     # Perform necessary functions to retrieve posts
-    exporter = TimingAppExporter.new(@config, @log)
+
     content = exporter.getContent(from_formatted, to_formatted)         # current_hour, or since last ran
 
-    blog_date_stamp = time_now.utc.iso8601
+    blog_date_stamp = to.utc.iso8601
 
     # create an options array to pass to 'to_dayone'
     # all options have default fallbacks, so you only need to create the options you want to specify
     options = {}
-    options['content'] = "## #{title}\n\n#{content}\n#{tags}"
+    options['content'] = "## #{title}\n\n#{content}\n#{@_tags}"
     options['datestamp'] = blog_date_stamp
     options['starred'] = false
     options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
@@ -89,11 +110,6 @@ class TimingAppLogger < Slogger
     # To create an image entry, use `sl.to_dayone(options) if sl.save_image(imageurl,options['uuid'])`
     # save_image takes an image path and a uuid that must be identical the one passed to to_dayone
     # save_image returns false if there's an error
-
-  end
-
-  def helper_function(args)
-    # add helper functions within the class to handle repetitive tasks
   end
 
 end
@@ -128,6 +144,25 @@ class TimingAppExporter
     return newLine
   end
 
+  def filterContent(input_file, output_file, filter)
+    filter = filter.gsub("\n", '')
+
+    @log.debug "FILTER: #{filter}"
+
+    # https://github.com/trentm/json
+    cmd = %Q(cat "#{input_file}" | json -c '#{filter}'   > #{output_file})
+    @log.debug cmd
+    `#{cmd}`
+
+    if @debug
+      puts "BEFORE"
+      `cat #{input_file}`
+
+      puts "AFTER"
+      `cat #{output_file}`
+    end
+  end
+
   def getContent(from, to)
     #from = top_of_hour(from)
     #to = top_of_hour(to)
@@ -138,21 +173,19 @@ class TimingAppExporter
     filtered_output = "/tmp/processed_output"
     my_script(tmp_file)
 
-    duration_minimum = '0:03:00'
+
     filter = %Q(this.startDate >= "#{from}" &&
-                this.startDate < "#{to}" &&
-                this.duration > "#{duration_minimum}"
-              ).gsub("\n", '')
+                this.startDate < "#{to}"               )
 
-    @log.debug "FILTER: #{filter}"
-    fields = %w(duration application projects path startDate)
-    headers = fields.join(" ")
+    filterContent(tmp_file, filtered_output, filter)
 
-    sep="|"
-    # https://github.com/trentm/json
-    cmd = %Q(cat "#{tmp_file}" | json -c '#{filter}'   > #{filtered_output})
-    @log.debug cmd
-    `#{cmd}`
+
+
+    duration_minimum = '0:03:00'
+#   this.duration > "#{duration_minimum}"
+
+
+
 
     # Post-process
     file = open(filtered_output)
@@ -160,6 +193,10 @@ class TimingAppExporter
 
     parsed = JSON.parse(json)
 
+    fields = %w(duration application projects path startDate)
+    headers = fields.join(" ")
+
+    sep = "|"
     ans = ''
     parsed.each   do |record|
        @log.info record['startDate']
