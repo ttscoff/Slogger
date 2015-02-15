@@ -198,6 +198,10 @@ class Slogger
     @date_format = @config['date_format'] || '%F'
     @time_format = @config['time_format'] || '%R'
     @datetime_format = "#{@date_format} #{@time_format}"
+
+    @to = $options[:to]
+    @from = $options[:from]
+
   end
 
   def undo_slogger(count = 1)
@@ -377,6 +381,14 @@ optparse = OptionParser.new do|opts|
   $options[:timespan] = 1
   opts.on( '-t', '--timespan DAYS', 'Days of history to collect') do |days|
     $options[:timespan] = days.to_i
+  end
+  $options[:from] = nil
+  opts.on( '-F', '--from DATE', 'Time from ') do |date|
+    $options[:from] = date
+  end
+  $options[:to] = nil
+  opts.on( '-T', '--to DATE', 'Time to') do |date|
+    $options[:to] = date
   end
   $options[:quiet] = false
   opts.on( '-q','--quiet', 'Run quietly (no notifications/messages)' ) do

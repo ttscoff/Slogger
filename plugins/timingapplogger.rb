@@ -6,7 +6,8 @@ Configuration:
   option_1_name: [ "example_value1" , "example_value2", ... ]
   option_2_name: example_value
 Notes:
-  - multi-line notes with additional description and information (optional)
+  - You need alasql (a javascript SQL library): npm install -g alasql
+
 =end
 
 config = { # description and a primary key (username, url, etc.) required
@@ -15,7 +16,7 @@ config = { # description and a primary key (username, url, etc.) required
                     'line 2, continue array as needed'],
   'service_username' => '', # update the name and make this a string or an array if you want to handle multiple accounts.
   'additional_config_option' => false,
-  'tags' => '#social #timetracking' # A good idea to provide this with an appropriate default setting
+  'tags' => '#timingapp' # A good idea to provide this with an appropriate default setting
 }
 # Update the class key to match the unique classname below
 $slog.register_plugin({ 'class' => 'TimingAppLogger', 'config' => config })
@@ -41,8 +42,8 @@ class TimingAppLogger < Slogger
       @log.warn("TimingAppLogger has not been configured or a feed is invalid, please edit your slogger_config file.")
       return
     end
+    @log.level = Logger::DEBUG
 
-    pp config
     if config['debug'] then         ## TODO - move into the Slogger class.
       @log.level = Logger::DEBUG
       @log.debug 'Enabled debug mode'
@@ -55,50 +56,66 @@ class TimingAppLogger < Slogger
 
 
 
-    @log.debug "" + @timespan.strftime("%l %M")
+    @log.debug "Timespan formatted:"+@timespan.strftime("%l %M")
     last_run = config['TimingAppLogger_last_run']
+    @current_run_time = Time.now
 
     def no_mins(t) # http://stackoverflow.com/a/4856312/722034
       Time.at(t.to_i - t.sec - t.min % 60 * 60)
     end
 
-    time_now = no_mins(Time.now)
-    time_last_run = no_mins(Time.parse(last_run))
+    if (@to.nil?)
+      time_to = no_mins(@current_run_time)
+    else
+      time_to = Time.parse(@to)
+    end
 
-    hours = (time_now - time_last_run) / 3600
+    if (@from.nil?)
+      time_from = no_mins(Time.parse(last_run))
+    else
+      time_from = Time.parse(@from)
+    end
+
+    @log.debug "From #{time_from} to #{time_to}"
+
+    hours = (time_to - time_from) / 3600
     exporter = TimingAppExporter.new(@config, @log)
+    period = 3600 # 1 hour
 
-    hour = time_last_run
-    while hour < time_now
-      @log.debug "Doing "+hour.to_s
-      add_blog_for_period(hour, hour+3600, exporter)
+    from = time_from
+    while from < time_to
+      @log.debug("")
 
-      hour += 3600
+      @log.debug "Doing "+from.to_s
+      add_blog_for_period(from, from+period, exporter)
+
+      from += period
     end
 
   end
 
   def add_blog_for_period(from, to, exporter)
-    @tzformat = "%F,%l:00 %p"
+    @tzformat = "%F, %-l:00 %p"
 
     from_formatted = from.strftime(@tzformat)
     to_formatted = to.strftime(@tzformat)
 
-    title = "TimingApp records (from=#{from_formatted} to datestamp=#{to_formatted})"
+    title = "TimingApp (Auto; Exported at #{@current_run_time.strftime("%FT%R")})"
 
 
     # Perform necessary functions to retrieve posts
 
-    content = exporter.getContent(from_formatted, to_formatted)         # current_hour, or since last ran
+    content = exporter.getContent(from, from_formatted, to_formatted)         # current_hour, or since last ran
 
     if content.nil?
-      @debug.log("No content = no blog post")
+      @log.debug("No content = no blog post")
       return
     end
 
     one_minute_before_hour = to - 60 # Put it in at e.g. 9:59 am, so it's in the right hour
     blog_date_stamp = one_minute_before_hour.utc.iso8601
 
+    @log.debug "Writing to datestamp "+blog_date_stamp
     # create an options array to pass to 'to_dayone'
     # all options have default fallbacks, so you only need to create the options you want to specify
     options = {}
@@ -111,7 +128,9 @@ class TimingAppLogger < Slogger
     # to_dayone accepts all of the above options as a hash
     # generates an entry base on the datestamp key or defaults to "now"
     sl = DayOne.new
-    sl.to_dayone(options)
+    pp sl.to_dayone(options)
+    #puts "NOT ACTUALLY DOING THE ENTRY"
+    #exit 1
 
     # To create an image entry, use `sl.to_dayone(options) if sl.save_image(imageurl,options['uuid'])`
     # save_image takes an image path and a uuid that must be identical the one passed to to_dayone
@@ -132,16 +151,21 @@ class TimingAppExporter
   end
 
   def postProcess(record, fields, sep)
-    @log.debug(record)
+    @log.debug "Record:"
+    @log.debug   record
     @log.debug("Fields in: "+fields.join(','))
 
-    newLine = ""
+    newLine = sep
     n = 0
     min_sec = 1.5 * 60
     rounded_secs = 3 * 60
+    valid = false
     fields.each do |fieldName|
 #      @log.debug fieldName
       value = record[fieldName]
+      if (!value.nil?)
+        valid = true
+      end
 
       if fieldName == 'duration'
         secs = ChronicDuration.parse(value)
@@ -152,22 +176,26 @@ class TimingAppExporter
       if value.kind_of?(Array)
         newLine = newLine + value.join(',') + sep
       else
-        newLine = newLine + value + sep
+        newLine = newLine + value.to_s + sep
       end
     end
     newLine = newLine +"\n"
-    @log.debug(newLine)
-    @log.debug("")
-    return newLine
+    @log.debug("line:"+newLine)
+    if valid
+      return newLine
+    else
+      @log.debug "Skipped invalid line"
+      return ""
+    end
+
   end
 
-  def filterContent(input_file, output_file, filter)
-    filter = filter.gsub("\n", '')
+  def filterContent(external_program, input_file, output_file, filter)
 
     @log.debug "FILTER: #{filter}"
 
     # https://github.com/trentm/json
-    cmd = %Q(cat "#{input_file}" | json -c '#{filter}'   > #{output_file})
+    cmd = %Q(cat "#{input_file}" | #{external_program} '#{filter}'   > #{output_file})
     @log.debug cmd
     `#{cmd}`
 
@@ -180,7 +208,59 @@ class TimingAppExporter
     end
   end
 
-  def getContent(from, to)
+  def alasql_setup
+    script=<<"JAVASCRIPT"
+//var alasql = require('/usr/local/lib/node_modules/alasql/alasql.min.js');
+if(typeof exports === 'object') {
+        var assert = require("assert");
+        var alasql = require('/usr/local/lib/node_modules/alasql/alasql.min.js');   // technically a straight require("alasql") should work
+} else {
+        __dirname = '.';
+};
+
+alasql.fn.myDuration = function(secs) {
+    return Math.floor(secs/60);
+}
+
+function run_alasql(query) {
+	alasql(query,[],function(res){
+                  console.log(JSON.stringify(res));
+	})
+}
+JAVASCRIPT
+    return script
+  end
+
+  def make_filter_for_alasql(temp_file, startDate)
+    startDateBegin = startDate
+    startDateEnd = startDate
+    script =<<"JAVASCRIPT"
+var select = 'SELECT projects, path, application, myDuration([duration]) as minutes \
+	FROM json("#{temp_file}") \
+	WHERE startDate >= "#{startDateBegin}" AND startDate <= "#{startDateEnd}" \
+	';
+
+//run_alasql(select)
+// var group = select + 'GROUP BY startDate, projects, path, application, duration
+var group = select + 'GROUP BY projects \
+	ORDER BY minutes DESC, projects DESC \
+	;'
+
+run_alasql(group)
+JAVASCRIPT
+    filter_script = '/tmp/alasql.js'
+    File.open(filter_script, 'w') {|f| f.write(alasql_setup+script) }
+
+    @log.debug "Filter script: "+filter_script
+
+    return filter_script
+  end
+
+
+
+  # Precondition: to and from are on the same date.
+  # TODO: check this.
+  def getContent(date_from, from, to)
     #from = top_of_hour(from)
     #to = top_of_hour(to)
 
@@ -188,15 +268,21 @@ class TimingAppExporter
     @log.info("FROM=#{from} TO=#{to}")
     tmp_file = "/tmp/timing_output"
     filtered_output = "/tmp/processed_output"
-    my_script(tmp_file)
 
+    date_for_applescript = date_from.strftime("%A, %B %-e, %Y at 00:00") # e.g.   "Monday, February 9, 2015"
 
-    filter = %Q(this.startDate >= "#{from}" &&
-                this.startDate < "#{to}"               )
+    get_whole_day_from_timing(tmp_file, date_for_applescript)
 
-    filterContent(tmp_file, filtered_output, filter)
+    @log.debug("From #{tmp_file}, extracting just from #{from} to #{to}: ")
+    #filter = %Q(this.startDate >= "#{from}" &&
+    #            this.startDate < "#{to}"               )
+    #filter = filter.gsub("\n", '')
 
+    ###filterContent("json -c", tmp_file, filtered_output, filter)
 
+    date_for_javascript = date_from.strftime("%Y-%m-%d, %-l:%M %p")
+    filter = make_filter_for_alasql('', date_for_javascript)
+    filterContent("node", tmp_file, filtered_output, filter)
 
     duration_minimum = '0:03:00'
 #   this.duration > "#{duration_minimum}"
@@ -210,7 +296,7 @@ class TimingAppExporter
 
     parsed = JSON.parse(json)
 
-    fields = %w(duration application projects path startDate)
+    fields = %w(projects minutes application path startDate)
     headers = fields.join(" ")
 
     sep = "|"
@@ -226,9 +312,9 @@ class TimingAppExporter
        ans = ans + line
     end
 
-    if !ans.empty?
-      headerFormatted = fields.join(" | ")+" \n"
-      headerFormatted = headerFormatted + "--- | " * fields.length + "\n"
+    if !/\A\s*\z/.match(ans) # empty
+      headerFormatted = fields.join(" "+sep+" ")+" \n"
+      headerFormatted = sep+" "+headerFormatted + ("--- "+sep+" ") * fields.length + "\n"
       return headerFormatted + ans
     else
       return nil
@@ -240,25 +326,29 @@ class TimingAppExporter
     system 'osascript', *script.split(/\n/).map { |line| ['-e', line] }.flatten
   end
 
-  def my_script(temp_file)
+  def get_whole_day_from_timing(temp_file, date)
     if (File.exists?(temp_file)) then
       File.delete(temp_file)
     end
 
+    @log.debug "Timing: exporting the whole of "+date+ " to "+temp_file
     script =<<"APPLESCRIPT"
+      set dateString to date "#{date}"
       tell application "Timing"
         set ex to make new export
-        set first day of ex to ((current date) - 1 * days)
-        set last day of ex to current date
+
+        set first day of ex to dateString
+        set project names of ex to "All Activities"
+        set last day of ex to dateString
         set export mode of ex to raw
 
-        set duration format of ex to hhmmss
-        set pretty print json of ex to false
+        set duration format of ex to seconds
+        set pretty print json of ex to true
         set should exclude short entries of ex to true
         save export ex to "#{temp_file}"
       end tell
 APPLESCRIPT
-
+#        set duration format of ex to hhmmss
     osascript(script)
 
     if (! File.exists?(temp_file)) then
