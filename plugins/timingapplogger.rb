@@ -107,7 +107,7 @@ class TimingAppLogger < Slogger
 
     content = exporter.getContent(from, from_formatted, to_formatted)         # current_hour, or since last ran
 
-    if content.nil?
+    if content.nil? or content == ''
       @log.debug("No content = no blog post")
       return
     end
@@ -151,9 +151,9 @@ class TimingAppExporter
   end
 
   def postProcess(record, fields, sep)
-    @log.debug "Record:"
-    @log.debug   record
-    @log.debug("Fields in: "+fields.join(','))
+    #@log.debug "Record:"
+    #@log.debug   record
+    #@log.debug("Fields in: "+fields.join(','))
 
     newLine = sep
     n = 0
@@ -180,11 +180,12 @@ class TimingAppExporter
       end
     end
     newLine = newLine +"\n"
-    @log.debug("line:"+newLine)
+
     if valid
+      @log.debug("line:"+newLine)
       return newLine
     else
-      @log.debug "Skipped invalid line"
+      @log.debug "Skipped empty line"
       return ""
     end
 
@@ -192,9 +193,6 @@ class TimingAppExporter
 
   def filterContent(external_program, input_file, output_file, filter)
 
-    @log.debug "FILTER: #{filter}"
-
-    # https://github.com/trentm/json
     cmd = %Q(cat "#{input_file}" | #{external_program} '#{filter}'   > #{output_file})
     @log.debug cmd
     `#{cmd}`
@@ -222,7 +220,7 @@ alasql.fn.myDuration = function(secs) {
     return Math.floor(secs/60);
 }
 
-function run_alasql(query) {
+function stringify_alasql(query) {
 	alasql(query,[],function(res){
                   console.log(JSON.stringify(res));
 	})
@@ -231,95 +229,116 @@ JAVASCRIPT
     return script
   end
 
-  def make_filter_for_alasql(temp_file, startDate)
-    startDateBegin = startDate
-    startDateEnd = startDate
-    script =<<"JAVASCRIPT"
-var select = 'SELECT projects, path, application, myDuration([duration]) as minutes \
-	FROM json("#{temp_file}") \
-	WHERE startDate >= "#{startDateBegin}" AND startDate <= "#{startDateEnd}" \
-	';
 
-//run_alasql(select)
-// var group = select + 'GROUP BY startDate, projects, path, application, duration
-var group = select + 'GROUP BY projects \
-	ORDER BY minutes DESC, projects DESC \
-	;'
 
-run_alasql(group)
-JAVASCRIPT
+
+  def make_filter_for_alasql(script, var)
+
+
+    script = script +"\n"+'stringify_alasql('+var+')'
+
     filter_script = '/tmp/alasql.js'
     File.open(filter_script, 'w') {|f| f.write(alasql_setup+script) }
 
-    @log.debug "Filter script: "+filter_script
+    #@log.debug "Filter script: "+filter_script
 
     return filter_script
   end
 
-
-
-  # Precondition: to and from are on the same date.
-  # TODO: check this.
-  def getContent(date_from, from, to)
-    #from = top_of_hour(from)
-    #to = top_of_hour(to)
-
-    #puts Time.now.utc.iso8601
-    @log.info("FROM=#{from} TO=#{to}")
-    tmp_file = "/tmp/timing_output"
-    filtered_output = "/tmp/processed_output"
-
-    date_for_applescript = date_from.strftime("%A, %B %-e, %Y at 00:00") # e.g.   "Monday, February 9, 2015"
-
-    get_whole_day_from_timing(tmp_file, date_for_applescript)
-
-    @log.debug("From #{tmp_file}, extracting just from #{from} to #{to}: ")
-    #filter = %Q(this.startDate >= "#{from}" &&
-    #            this.startDate < "#{to}"               )
-    #filter = filter.gsub("\n", '')
-
-    ###filterContent("json -c", tmp_file, filtered_output, filter)
-
-    date_for_javascript = date_from.strftime("%Y-%m-%d, %-l:%M %p")
-    filter = make_filter_for_alasql('', date_for_javascript)
-    filterContent("node", tmp_file, filtered_output, filter)
-
-    duration_minimum = '0:03:00'
-#   this.duration > "#{duration_minimum}"
-
-
-
-
-    # Post-process
-    file = open(filtered_output)
-    json = file.read
-
-    parsed = JSON.parse(json)
-
-    fields = %w(projects minutes application path startDate)
-    headers = fields.join(" ")
-
-    sep = "|"
+  def json_as_csv(json_file, fields)
+    file = open(json_file).read
+    parsed = JSON.parse(file)
+    sep = '|'
     ans = ''
     parsed.each   do |record|
-       @log.info record['startDate']
+      @log.info record['startDate']
 
-       # TODO: generalize this
-       if record['path'].to_s.start_with?('/Volumes')
-         record['path'] = "file:/"+record['path']
-       end
-       line = postProcess(record, fields, sep)
-       ans = ans + line
+      # TODO: generalize this
+      if record['path'].to_s.start_with?('/Volumes')
+        record['path'] = "file:/"+record['path']
+      end
+      line = postProcess(record, fields, sep)
+      ans = ans + line
     end
+
+    @log.debug "As CSV=" + ans
 
     if !/\A\s*\z/.match(ans) # empty
       headerFormatted = fields.join(" "+sep+" ")+" \n"
       headerFormatted = sep+" "+headerFormatted + ("--- "+sep+" ") * fields.length + "\n"
       return headerFormatted + ans
     else
-      return nil
+      return ''
     end
+  end
 
+  # Precondition: to and from are on the same date.
+  # TODO: check this precondition.
+  def getContent(date_from, from, to)
+    #from = top_of_hour(from)
+    #to = top_of_hour(to)
+
+    #puts Time.now.utc.iso8601
+    @log.info("FROM=#{from} TO=#{to}")
+    raw_timing_output_file = "/tmp/timing_output"
+    filtered_output_file = "/tmp/processed_output"
+
+    date_for_applescript = date_from.strftime("%A, %B %-e, %Y at 00:00") # e.g.   "Monday, February 9, 2015"
+
+    get_whole_day_from_timing(raw_timing_output_file, date_for_applescript)
+
+    @log.debug("From #{raw_timing_output_file}, extracting hours from #{from} to #{to}: ")
+
+
+    startDateBegin = date_from.strftime("%Y-%m-%d, %-l:%M %p")
+
+    @log.debug("Doing outline")
+    outline_script =<<-"ALASQL"
+          var select = 'SELECT projects, path, application, myDuration([duration]) as minutes, myDuration(SUM([duration])) as totalMins \
+            FROM json("") \
+            WHERE startDate = "#{startDateBegin}" \
+            GROUP BY projects, totalMins \
+            ORDER BY totalMins DESC, projects DESC \
+            ;'
+    ALASQL
+
+    filterContent("node",
+                  raw_timing_output_file,
+                  filtered_output_file,
+                  make_filter_for_alasql(
+                      outline_script, 'select')
+    )
+
+    outline = json_as_csv(filtered_output_file, %w(projects totalMins))
+
+    @log.debug("Doing detail")
+    detail_script =<<-"ALASQL"
+          var detail = 'SELECT projects, path, application, myDuration([duration]) as minutes \
+            FROM json("") \
+            WHERE startDate = "#{startDateBegin}" \
+            GROUP BY projects, minutes, path, application, duration \
+            ORDER BY minutes DESC, projects DESC \
+            ;'
+    ALASQL
+
+    filterContent('node',
+                  raw_timing_output_file,
+                  filtered_output_file,
+                  make_filter_for_alasql(
+                        detail_script, 'detail')
+                 )
+
+    detail = json_as_csv(filtered_output_file, %w(projects minutes application path startDate))
+
+    if detail.length > 1
+      if outline.length > 1
+        @log.debug ">"+outline
+        outline = "### Outline\n"+ outline +"\n"
+      end
+      detail = "### Detail\n" + detail
+      return outline + detail
+    end
+    return nil
   end
 
   def osascript(script)
