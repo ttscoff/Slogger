@@ -3,7 +3,7 @@ Plugin: Instagram
 Description: Logs your posts from Instagram
 Author: [Ryan M](http://ryanmo.co)
 Configuration:
-  backdate: true/false (This allows you to get the last 20 posts. This is nice for your first run. 
+  backdate: true/false (This allows you to get the last 20 posts. This is nice for your first run.
   Backdate will automatically get set to false after it's run)
 Notes:
   With this plugin, you will get:
@@ -68,7 +68,7 @@ class InstagramLogger < Slogger
       puts "\nSlogger will now open an authorization page in your default web browser. Copy the code you receive and return here.\n\n"
       puts "Press Enter to continue (You may have to hit refresh once in the browser)..."
       keypress = gets
-      command = "/usr/bin/ruby lib/instagram_server.rb"
+      command = "ruby lib/instagram_server.rb"
       output = `#{command}`
       puts "\n\n\n------------- Authentication Started -------------\n\n"
       print "Paste the code you received here: "
@@ -103,7 +103,7 @@ class InstagramLogger < Slogger
         location_data = media['location'] unless media['location'] == nil
         likes_data = client.media_likes(media['id']) unless media['likes']['count'] == 0
         caption = media['caption']['text'] unless media['caption'] == nil
-        
+
         comments = ""
         if media['comments']['count'] != 0
           comments += "### Comments\n\n"
@@ -111,7 +111,7 @@ class InstagramLogger < Slogger
             comments += ">" + comment['text'] + " - " + comment['from']['full_name'] + "\n"
           end
         end
-        
+
         like_names = likes_data.map{|n| n['full_name'] == "" ? n['username'] : n['full_name']} unless media['likes']['count'] == 0
 
         likes = ""
