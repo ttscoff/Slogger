@@ -32,7 +32,7 @@ class GithubLogger < Slogger
     end
     @log.info("Logging Github activity for #{config['github_user']}")
     begin
-      url = URI.parse "https://github.com/#{config['github_user'].strip}.json"
+      url = URI.parse "https://api.github.com/users/#{config['github_user'].strip}/events/public"
 
       http = Net::HTTP.new url.host, url.port
       http.verify_mode = OpenSSL::SSL::VERIFY_NONE
