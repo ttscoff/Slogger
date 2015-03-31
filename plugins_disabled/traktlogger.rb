@@ -84,10 +84,11 @@ class TraktLogger < Slogger
       xml_data = feed_download_response.body
       xml_data.gsub!('media:', '') #Fix REXML unhappiness
       doc = REXML::Document.new(xml_data)
-      doc.root.each_element('//item') { |item|
+
+      doc.root.each_element('//entry') { |item|
         content = ''
 
-        item_date = Time.parse(item.elements['pubDate'].text)
+        item_date = Time.parse(item.elements['published'].text)
 
         if item_date > @timespan
           title = item.elements['title'].text
@@ -96,15 +97,17 @@ class TraktLogger < Slogger
           is_tv = title.match(/ \d+x\d+ /) ? true : false
           tags = is_tv ? tv_tags : movie_tags
 
-          imageurl = save_image ? item.elements['content'].attributes.get_attribute("url").value : false
+          imageurl = save_image ? item.elements['thumbnail'].attributes.get_attribute("url").value : false
 
-          description = item.elements['description'].text rescue ''
+          description = item.elements['summary'].text rescue ''
           description.sub!(/^.*<br><br>/, "")
 
           content += "\n\n#{description}" rescue ''
           options = {}
           header = "## Watched A #{is_tv ? 'TV Show' : 'Movie'}\n"
-          options['content'] = "#{header}[#{title.gsub(/\n+/, ' ').strip}](#{item.elements['link'].text.strip})#{content}#{tags}"
+          title = title.gsub(/\n+/, ' ').strip
+          link = item.elements['link'].attributes.get_attribute("href").value
+          options['content'] = "#{header}[#{title}](#{link})#{content}#{tags}"
 
           options['datestamp'] = item_date.utc.iso8601
           options['uuid'] = %x{uuidgen}.gsub(/-/, '').strip
