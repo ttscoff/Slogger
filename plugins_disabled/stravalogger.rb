@@ -88,14 +88,14 @@ class StravaLogger < Slogger
           if @grconfig['strava_unit'] == 'imperial'
             unit = ['ft', 'mi', 'mph']
             activity['distance'] *= 0.000621371 #mi
-            activity['average_speed'] *= 2.23694 #mi
-            activity['max_speed'] *= 0.000621371 #mi
+            activity['average_speed'] *= 2.23694 #mph
+            activity['max_speed'] *= 2.23694 #mph
             activity['total_elevation_gain'] *= 3.28084 #ft
           else
             unit = ['m', 'km', 'kph']
             activity['distance'] *= 0.001001535 #km
-            activity['average_speed'] *= 3.611940299 #km
-            activity['max_speed'] *= 0.001000553 #km
+            activity['average_speed'] *= 3.611940299 #kph
+            activity['max_speed'] *= 3.611940299 #kph
           end
 
           output = ''
