@@ -76,6 +76,11 @@ class TimingAppLogger < Slogger
       time_from = Time.parse(@from)
     end
 
+    if (@to and (@from == @to))
+      time_to = time_from + (3600 * 24 - 1)
+      @log.debug("As from==to, assuming we mean the 24 hours starting at "+@from)
+    end
+
     @log.debug "From #{time_from} to #{time_to}"
 
     hours = (time_to - time_from) / 3600
@@ -100,7 +105,7 @@ class TimingAppLogger < Slogger
     from_formatted = from.strftime(@tzformat)
     to_formatted = to.strftime(@tzformat)
 
-    title = "TimingApp (Auto; Exported at #{@current_run_time.strftime("%FT%R")})"
+    title = "TimingApp (Auto; #{from.strftime("%l %p")}-#{to.strftime("%l %p")}; exported at #{@current_run_time.strftime("%FT%R")})"
 
 
     # Perform necessary functions to retrieve posts
@@ -311,13 +316,31 @@ JAVASCRIPT
 
     outline = json_as_csv(filtered_output_file, %w(projects totalMins))
 
+
+    @log.debug("Doing total")
+    total_script =<<-"ALASQL"
+          var total = 'SELECT myDuration(SUM([duration])) as totalMins \
+            FROM json("") \
+            WHERE startDate = "#{startDateBegin}" \
+            ;'
+    ALASQL
+
+    filterContent("node",
+                  raw_timing_output_file,
+                  filtered_output_file,
+                  make_filter_for_alasql(
+                      total_script, 'total')
+    )
+
+    total = json_as_csv(filtered_output_file, %w(projects totalMins))
+
     @log.debug("Doing detail")
     detail_script =<<-"ALASQL"
           var detail = 'SELECT projects, path, application, myDuration([duration]) as minutes \
             FROM json("") \
             WHERE startDate = "#{startDateBegin}" \
             GROUP BY projects, minutes, path, application, duration \
-            ORDER BY minutes DESC, projects DESC \
+            ORDER BY projects DESC \
             ;'
     ALASQL
 
@@ -333,7 +356,7 @@ JAVASCRIPT
     if detail.length > 1
       if outline.length > 1
         @log.debug ">"+outline
-        outline = "### Outline\n"+ outline +"\n"
+        outline = "### Outline\n"+ outline +"\n" + total
       end
       detail = "### Detail\n" + detail
       return outline + detail
