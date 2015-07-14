@@ -14,3 +14,6 @@ bintest
 Gemfile.lock
 .bundle
 vendor/bundle
+.gitmodules
+plugins/*
+plugins_disabled/*
