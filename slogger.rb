@@ -270,8 +270,6 @@ class Slogger
       Sloggerplugin.const_get(plugin_module)::Runner.register
     end
 
-    require 'pry'
-    binding.pry
     @plugins.each do |plugin|
       _namespace = plugin['class'].to_s
 
