@@ -260,7 +260,6 @@ class Slogger
   def run_plugins
     @config['last_run_time'] = Time.now.strftime('%c')
     new_options = false
-    plugin_dir = $options[:develop] ? "/plugins_develop/*.rb" : "/plugins/*.rb"
     installed_plugins = Gem.loaded_specs.find_all do |name, info|
       name.start_with?("sloggerplugin-")
     end
