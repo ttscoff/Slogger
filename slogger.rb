@@ -261,17 +261,16 @@ class Slogger
     @config['last_run_time'] = Time.now.strftime('%c')
     new_options = false
     plugin_dir = $options[:develop] ? "/plugins_develop/*.rb" : "/plugins/*.rb"
-    # Dir[SLOGGER_HOME + plugin_dir].each do |file|
-    #   if $options[:onlyrun]
-    #     $options[:onlyrun].each { |plugin_frag|
-    #       if File.basename(file) =~ /^#{plugin_frag}/i
-    #         require file
-    #       end
-    #     }
-    #   else
-    #     require file
-    #   end
-    # end
+    installed_plugins = Gem.loaded_specs.find_all do |name, info|
+      name.start_with?("sloggerplugin-")
+    end
+    installed_plugins.each do |name, info|
+      require name.gsub("-", "/")
+    end
+    Sloggerplugin.constants.each do |plugin_module|
+      Sloggerplugin.const_get(plugin_module)::Runner.register
+    end
+
     require 'pry'
     binding.pry
     @plugins.each do |plugin|
