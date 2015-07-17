@@ -267,10 +267,10 @@ class Slogger
       require name.gsub("-", "/")
     end
     Sloggerplugin.constants.each do |plugin_module|
-      @plugins << Sloggerplugin.const_get(plugin_module)::Runner
+      plugins << Sloggerplugin.const_get(plugin_module)::Runner
     end
 
-    @plugins.each do |plugin|
+    plugins.each do |plugin|
       _namespace = plugin.class.to_s
 
       @config[_namespace] ||= {}
@@ -294,9 +294,8 @@ class Slogger
     ConfigTools.new({'config_file' => $options[:config_file]}).dump_config(@config)
   end
 
-  def register_plugin(_)
-    #no op
-    false
+  def register_plugin(plugin)
+    @plugins.push plugin
   end
 
   def template
