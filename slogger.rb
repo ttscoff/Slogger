@@ -257,18 +257,29 @@ class Slogger
 	end
   end
 
-  def run_plugins
-    @config['last_run_time'] = Time.now.strftime('%c')
-    new_options = false
-    installed_plugins = Gem.loaded_specs.find_all do |name, info|
+  def installed_plugins
+    @installed_plugins ||= Gem.loaded_specs.find_all do |name, info|
       name.start_with?("sloggerplugin-")
     end
+  end
+
+  def require_installed_plugins
     installed_plugins.each do |name, info|
       require name.gsub("-", "/")
     end
+  end
+
+  def load_plugins
     Sloggerplugin.constants.each do |plugin_module|
       plugins << Sloggerplugin.const_get(plugin_module)::Runner
     end
+  end
+
+  def run_plugins
+    @config['last_run_time'] = Time.now.strftime('%c')
+    new_options = false
+    require_installed_plugins
+    load_plugins
 
     plugins.each do |plugin|
       _namespace = plugin.class.to_s
