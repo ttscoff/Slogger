@@ -267,14 +267,14 @@ class Slogger
       require name.gsub("-", "/")
     end
     Sloggerplugin.constants.each do |plugin_module|
-      Sloggerplugin.const_get(plugin_module)::Runner.register
+      @plugins << Sloggerplugin.const_get(plugin_module)::Runner
     end
 
     @plugins.each do |plugin|
-      _namespace = plugin['class'].to_s
+      _namespace = plugin.class.to_s
 
       @config[_namespace] ||= {}
-      plugin['config'].each do |k,v|
+      plugin.config.each do |k,v|
         if @config[_namespace][k].nil?
           new_options = true
           @config[_namespace][k] ||= v
@@ -283,7 +283,7 @@ class Slogger
       end
       unless $options[:config_only]
         # credit to Hilton Lipschitz (@hiltmon)
-        updated_config = eval(plugin['class']).new.do_log
+        updated_config  = plugin.new.do_log
         if updated_config && updated_config.class.to_s == 'Hash'
             updated_config.each { |k,v|
               @config[_namespace][k] = v
@@ -294,8 +294,9 @@ class Slogger
     ConfigTools.new({'config_file' => $options[:config_file]}).dump_config(@config)
   end
 
-  def register_plugin(plugin)
-    @plugins.push plugin
+  def register_plugin(_)
+    #no op
+    false
   end
 
   def template
