@@ -1,9 +1,9 @@
 source 'https://rubygems.org'
 
 def plugin(name)
-  gemname = "sloggerplugin-#{name}"
-  path = "../#{gemname}"
-  gem gemname, path: path
+  gem_name = "sloggerplugin-#{name}"
+  github_path = "sloggerplugins/#{name}"
+  gem gem_name, github: github_path
 end
 
 gem 'feed-normalizer'
@@ -21,7 +21,6 @@ gem 'multimap' # required for olivetree
 gem 'pry'
 
 plugin "blogger"
-
 
 group :test do
   gem 'rake'
