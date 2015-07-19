@@ -153,8 +153,8 @@ end
 
 class Slogger
 
-  attr_accessor :config, :dayonepath, :plugins
-  attr_reader :timespan, :log
+  attr_accessor :config, :dayonepath, :plugins, :log
+  attr_reader :timespan
   def initialize
     cfg = ConfigTools.new({'config_file' => $options[:config_file]})
     @log = Logger.new(STDERR)
@@ -201,7 +201,10 @@ class Slogger
 
     @to = $options[:to]
     @from = $options[:from]
+  end
 
+  def options
+    $options
   end
 
   def undo_slogger(count = 1)
@@ -294,7 +297,7 @@ class Slogger
       end
       unless $options[:config_only]
         # credit to Hilton Lipschitz (@hiltmon)
-        updated_config  = plugin.new.do_log
+        updated_config  = plugin.new.do_log(self)
         if updated_config && updated_config.class.to_s == 'Hash'
             updated_config.each { |k,v|
               @config[_namespace][k] = v
