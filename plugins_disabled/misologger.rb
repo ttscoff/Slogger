@@ -10,13 +10,15 @@ Notes:
   - You need the change the ID with your user id. You can find your user id going to http://gomiso.com/resources/widget and watching in the code snippet.
 =end
 
+require 'nokogiri'
+
 config = { # description and a primary key (username, url, etc.) required
   'description' => ['MisoLogger downloads your feed from Miso and add the Films and TVShows that you watch to DayOne',
                     'The miso_feed parameter is like -> http://gomiso.com/feeds/user/ID/checkins.rss',
                     'You need to change the ID with your user id. You can find your user id going to http://gomiso.com/resources/widget and watching in the code snippet.'],
   'miso_feed' => "",
   'pre_title' => "Watched",
-  'additional_config_option' => false,
+  'save_images' => true,
   'tags' => '#social #entertainment' # A good idea to provide this with an appropriate default setting
 }
 # Update the class key to match the unique classname below
@@ -38,7 +40,9 @@ class MisoLogger < Slogger
       else
         # set any local variables as needed
         feed = config['miso_feed']
+        saveImages = config['save_images']
       end
+
     else
       @log.warn("MisoLogger has not been configured or a feed is invalid, please edit your slogger_config file.")
       return
@@ -72,23 +76,36 @@ class MisoLogger < Slogger
     watched = config['pre_title'] || ''
 
     ## Parse feed
-    rss = RSS::Parser.parse(rss_content, false)
+    rss = Nokogiri::XML(rss_content)
     content = ''
-    rss.items.each { |item|
-      break if Time.parse(item.pubDate.to_s) < @timespan
-      content += "\n" + "## " + watched + " " + item.title + "\nat *" + item.pubDate.to_s + "*\n" + item.description
+    image = ''
+    date = Time.now.utc.iso8601
+    rss.css('item').each { |item|
+      break if Time.parse(item.at("pubDate").text) < @timespan
+    
+      title = item.at("title").text
+      description = item.at("description").text
+      date = item.at("pubDate").text
+      image = item.at("miso|image_url").text
+      
+      content += "\n" + "## " + watched + " " + title + "\n" + description
     }
 
     if content != '' 
       # create an options array to pass to 'to_dayone'
       options = {}
       options['content'] = content + "\n" + "#{tags}"
-      options['datestamp'] = Time.now.utc.iso8601
+      options['datestamp'] = Time.parse(date).utc.iso8601
       options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
 
       # Create a journal entry
       sl = DayOne.new
-      sl.to_dayone(options)
+      if image == '' || !saveImages
+        sl.to_dayone(options)
+      else
+        path = sl.save_image(image,options['uuid'])
+        sl.store_single_photo(path,options) unless path == false
+      end
     end
   end
 
