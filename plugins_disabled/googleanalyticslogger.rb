@@ -103,8 +103,13 @@ class GoogleAnalyticsLogger < Slogger
 
     @log.info("Run for #{start_date} - #{end_date}")
 
+    slogger_version = MAJOR_VERSION.to_s + '.' + MINOR_VERSION.to_s + '.' + BUILD_NUMBER.to_s
+
     # Here we go
-    client = Google::APIClient.new
+    client = Google::APIClient.new(
+      :application_name => 'Slogger',
+      :application_version => slogger_version,
+    )
 
     # Initialize OAuth 2.0 client
     client.authorization.client_id = config['client_id']

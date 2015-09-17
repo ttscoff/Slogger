@@ -54,6 +54,9 @@ Slogger indexes various public social services and creates Day One (<http://dayo
             - Gist
             - SoundCloud
             - Strava
+            -  untappd (requires [untappd](https://github.com/cmar/untappd) gem)
+                - beer checkins for the day
+            - Wunderlist new and optionally completed/overdue tasks (see notes for required gems/versions)
 - Slogger can be called with a single argument that is a path to a local image or text file, and an entry will be created containing its contents.
     - You can use this with a folder action or launchd task to add files from a folder connected to something like <http://IFTTT.com>. Any images added to the watched folder will be turned into journal entries.
         -  Note that Slogger does not delete the original file, so your script needs to move files out of the folder manually to avoid double-processing.
@@ -62,13 +65,14 @@ Slogger indexes various public social services and creates Day One (<http://dayo
 ## Install ##
 
 1. Download and unzip (or clone using git) the Slogger project. It can be stored in your home directory, a scripts folder or anywhere else on your drive.
-2. From the command line, change to the Slogger folder and run the following commands:
+2. Make sure you have the Xcode command line tools installed. (See Troubleshooting section below.)
+3. From the command line, change to the Slogger folder and run the following commands:
         
         sudo gem install bundler
         bundle install 
-3. Default plugins are stored in `/plugins/`, additional plugins are usually found in `/plugins_disabled/`. Plugins are enabled and disabled by adding/removing them from the `/plugins/` folder. Move any additional plugins you want to use into `/plugins/` and disable any other plugins by moving them from `/plugins/` to `plugins_disabled`. (Plugins that are found in `plugins` but not configured will not break anything, but you'll see warnings when run.)
-4. From within the Slogger folder, run `./slogger --update-config` to create the initial configuration file. If this doesn't work, you may need to make the file executable: `chmod a+x slogger` from within the Slogger folder. Note that any time you add new plugins or update existing ones, you'll want to run `./slogger --update-config` to ensure that your available options are up to date.
-5. Edit the file `slogger_config` that shows up in your Slogger folder
+4. Default plugins are stored in `/plugins/`, additional plugins are usually found in `/plugins_disabled/`. Plugins are enabled and disabled by adding/removing them from the `/plugins/` folder. Move any additional plugins you want to use into `/plugins/` and disable any other plugins by moving them from `/plugins/` to `plugins_disabled`. (Plugins that are found in `plugins` but not configured will not break anything, but you'll see warnings when run.)
+5. From within the Slogger folder, run `./slogger --update-config` to create the initial configuration file. If this doesn't work, you may need to make the file executable: `chmod a+x slogger` from within the Slogger folder. Note that any time you add new plugins or update existing ones, you'll want to run `./slogger --update-config` to ensure that your available options are up to date.
+6. Edit the file `slogger_config` that shows up in your Slogger folder
     - The required options will be 'storage:', 'image_filename_is_title:', 'date_format:' and 'time_format:'
     - storage: should be one of
         -  'icloud'
@@ -77,9 +81,9 @@ Slogger indexes various public social services and creates Day One (<http://dayo
     - image_filename_is_title: should be set to true or false. If true, it will use the base filename (without extension) as the title of images imported individually.
     - date_format and time_format should be set to your preferred style (strftime)
 
-6. Edit additional configuration options for any plugins defined. The config file is formatted as YAML, and your options need to conform to that syntax. For the most part, you can just maintain the formatting (quotes, dashes, brackets, etc.) of the default settings when updating.
+7. Edit additional configuration options for any plugins defined. The config file is formatted as YAML, and your options need to conform to that syntax. For the most part, you can just maintain the formatting (quotes, dashes, brackets, etc.) of the default settings when updating.
     - **Note:** Some plugins have options that will be filled in automatically. For example, the Twitter plugin requires you to log in on the command line and enter a PIN, after which it completes the authorization and saves your token to the configuration. If you install a plugin which requires oAuth, be sure to run Slogger from the command line with "./slogger -o plugin_name" once to complete the login procedure and save your credentials.
-7. Next time you run `./slogger`, it will execute the enabled and configured plugins and generate your journal entries. 
+8. Next time you run `./slogger`, it will execute the enabled and configured plugins and generate your journal entries. 
 
 ## Usage ##
 

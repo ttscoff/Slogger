@@ -1,0 +1,15 @@
+The Levenshtein distance is a metric for measuring the amount
+of difference between two sequences (i.e., the so called edit
+distance). The Levenshtein distance between two sequences is
+given by the minimum number of operations needed to transform
+one sequence into the other, where an operation is an
+insertion, deletion, or substitution of a single element.
+
+The two sequences can be two strings, two arrays, or two other
+objects responding to :each. All sequences are by generic
+(fast) C code.
+
+All objects in the sequences should respond to :hash and :eql?.
+
+More information about the Levenshtein distance algorithm:
+http://en.wikipedia.org/wiki/Levenshtein_distance .

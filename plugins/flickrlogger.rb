@@ -69,7 +69,7 @@ class FlickrLogger < Slogger
     images = []
     begin
       config['flickr_ids'].each do |user|
-        open("http://www.flickr.com/services/rest/?method=flickr.people.getPublicPhotos&api_key=#{config['flickr_api_key']}&user_id=#{user}&extras=description,date_upload,date_taken,url_m&per_page=15") { |f|
+        open("https://www.flickr.com/services/rest/?method=flickr.people.getPublicPhotos&api_key=#{config['flickr_api_key']}&user_id=#{user}&extras=description,date_upload,date_taken,url_m&per_page=15") { |f|
             REXML::Document.new(f.read).elements.each("rsp/photos/photo") { |photo|
               if config.key?('flickr_datetype') && config['flickr_datetype'] == 'taken'
                 # import images in dayone using the date/time when the photo was taken

@@ -57,15 +57,15 @@ class TwitterLogger < Slogger
   def single_entry(tweet)
 
     @twitter_config['twitter_tags'] ||= ''
-
+    
     options = {}
     options['content'] = "#{tweet[:text]}\n\n-- [@#{tweet[:screen_name]}](https://twitter.com/#{tweet[:screen_name]}/status/#{tweet[:id]})\n\n(#{@twitter_config['twitter_tags']})\n"
     tweet_time = Time.parse(tweet[:date].to_s)
     options['datestamp'] = tweet_time.utc.iso8601
 
     sl = DayOne.new
-
-    if tweet[:images] == []
+    
+    if tweet[:images].empty?
       sl.to_dayone(options)
     else
       tweet[:images].each do |imageurl|
@@ -242,9 +242,10 @@ class TwitterLogger < Slogger
         return @twitter_config
       end
     end
-    @twitter_config['save_images'] ||= true
+
+    defined?(@twitter_config['save_images']).nil? and @twitter_config['save_images'] = true
+    defined?(@twitter_config['digest_timeline']).nil? and @twitter_config['digest_timeline'] = true
     @twitter_config['droplr_domain'] ||= 'd.pr'
-    @twitter_config['digest_timeline'] ||= true
 
     sl = DayOne.new
     @twitter_config['twitter_tags'] ||= ''
@@ -261,7 +262,7 @@ class TwitterLogger < Slogger
       end
 
       unless tweets.empty?
-
+        
         if @twitter_config['digest_timeline']
           dated_tweets = split_days(tweets)
           dated_tweets.each {|k,v|
@@ -269,7 +270,7 @@ class TwitterLogger < Slogger
             content << digest_entry(v, tags)
             sl.to_dayone({'content' => content, 'datestamp' => Time.parse(k).utc.iso8601})
             if @twitter_config['save_images']
-              tweets.select {|t| !t[:images].empty? }.each {|t| self.single_entry(t) }
+              v.select {|t| !t[:images].empty? }.each {|t| self.single_entry(t) }
             end
           }
 
@@ -287,7 +288,7 @@ class TwitterLogger < Slogger
           content << digest_entry(v, tags)
           sl.to_dayone({'content' => content, 'datestamp' => Time.parse(k).utc.iso8601})
           if @twitter_config['save_images_from_favorites']
-            favs.select {|t| !t[:images].empty? }.each {|t| self.single_entry(t) }
+            v.select {|t| !t[:images].empty? }.each {|t| self.single_entry(t) }
           end
         }
       end

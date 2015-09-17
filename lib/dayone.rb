@@ -1,6 +1,5 @@
 require 'fileutils'
 require 'digest/md5'
-require 'levenshtein'
 require 'pp'
 
 class DayOne < Slogger
@@ -34,6 +33,12 @@ class DayOne < Slogger
       end
     end
     starred = options['starred'] || false
+    if options['location']
+       location = true
+       lat = options['lat']
+       long = options['long']
+       place = options['place'] || ''
+    end
 
     # entry = CGI.escapeHTML(content.unpack('C*').pack('U*').gsub(/[^[:punct:]\w\s]+/,' ')) unless content.nil?
 

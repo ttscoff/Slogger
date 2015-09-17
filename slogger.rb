@@ -31,6 +31,7 @@ require SLOGGER_HOME + '/lib/sociallogger'
 require SLOGGER_HOME + '/lib/configtools'
 require SLOGGER_HOME + '/lib/plist.rb'
 # require SLOGGER_HOME + '/lib/json'
+require SLOGGER_HOME + '/lib/levenshtein-0.2.2/lib/levenshtein.rb'
 
 if RUBY_VERSION.to_f > 1.9
   Encoding.default_external = Encoding::UTF_8
@@ -197,6 +198,10 @@ class Slogger
     @date_format = @config['date_format'] || '%F'
     @time_format = @config['time_format'] || '%R'
     @datetime_format = "#{@date_format} #{@time_format}"
+
+    @to = $options[:to]
+    @from = $options[:from]
+
   end
 
   def undo_slogger(count = 1)
@@ -313,6 +318,19 @@ class Slogger
   </dict>
   <key>Entry Text</key>
   <string><%= entry %></string>
+  <% if location %><key>Location</key>
+  <dict>
+  <key>Administrative Area</key>
+  <string></string>
+  <key>Country</key>
+  <string></string>
+  <key>Latitude</key>
+  <real><%= lat %></real>
+  <key>Longitude</key>
+  <real><%= long %></real>
+  <key>Place Name</key>
+  <string><% if place %><%= place %><% end %></string>
+  </dict><% end %>
   <key>Starred</key>
   <<%= starred %>/>
   <% if tags %><key>Tags</key>
@@ -363,6 +381,14 @@ optparse = OptionParser.new do|opts|
   $options[:timespan] = 1
   opts.on( '-t', '--timespan DAYS', 'Days of history to collect') do |days|
     $options[:timespan] = days.to_i
+  end
+  $options[:from] = nil
+  opts.on( '-F', '--from DATE', 'Time from ') do |date|
+    $options[:from] = date
+  end
+  $options[:to] = nil
+  opts.on( '-T', '--to DATE', 'Time to') do |date|
+    $options[:to] = date
   end
   $options[:quiet] = false
   opts.on( '-q','--quiet', 'Run quietly (no notifications/messages)' ) do
