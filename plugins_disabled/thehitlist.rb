@@ -206,7 +206,7 @@ class TheHitListLogger < Slogger
         
         set newCompletedText to existingText
         if (length of newText > 0 and length of existingText > 0) then
-            set newCompletedText to existingText & linefeed
+            set newCompletedText to existingText & linefeed & linefeed
         end if
         if (length of newText > 0) then
             set newCompletedText to newCompletedText & separator & newText
