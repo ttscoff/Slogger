@@ -27,7 +27,7 @@ class TheHitListLogger < Slogger
     # Unassigned Var
     #additional_config_option = config['additional_config_option'] || false
     config['thehitlist_tags'] ||= ''
-    tags = config['thehitlist_tags'] == '' ? '' : "\n\n#{config['thehitlist_tags']}\n"
+    tags = config['thehitlist_tags'] == '' ? '' : "\n\n(#{config['thehitlist_tags']})\n"
 
     datespan = @timespan.strftime('%d/%m/%Y')
     timespan = @timespan.strftime('%H:%M:%S')
@@ -290,7 +290,7 @@ class TheHitListLogger < Slogger
       separate_days.reduce('') do | s, (entry_date, entry)|
         options = {}
         options['datestamp'] = entry_date
-        options['content'] = "## The Hit List - Completed Tasks\n\n#{entry}\n(#{tags})"
+        options['content'] = "## The Hit List - Completed Tasks\n\n#{entry}\n#{tags}"
         puts options
         sl = DayOne.new
         sl.to_dayone(options)
