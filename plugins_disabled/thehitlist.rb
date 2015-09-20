@@ -68,7 +68,7 @@ class TheHitListLogger < Slogger
                     set thisItemText to my processList(theFilterStart, theFilterEnd, "", singleFolder)
                 end if
                 
-                set thisDayText to my appendTextIfNeeded(thisItemText, thisDayText, "")
+                set thisDayText to my appendTextIfNeeded(thisItemText, thisDayText, linefeed)
                 
             end repeat
             
@@ -116,7 +116,7 @@ class TheHitListLogger < Slogger
                     set thisItemText to my processList(theFilterStartDate, theFilterEndDate, newPath, singleItem)
                 end if
                 
-                set completedText to my appendTextIfNeeded(thisItemText, completedText, "")
+                set completedText to my appendTextIfNeeded(thisItemText, completedText, linefeed)
             end repeat
             
             return completedText
@@ -140,7 +140,7 @@ class TheHitListLogger < Slogger
             # complete, and build up a string of these items.
             set taskList to every task in theList
             repeat with thisTask in taskList
-                set thisTaskText to my processTask(theFilterStartDate, theFilterEndDate, listPath, thisTask)
+                set thisTaskText to my processTask(theFilterStartDate, theFilterEndDate, listPath, thisTask, "")
                 set listText to my appendTextIfNeeded(thisTaskText, listText, "")
             end repeat
             
@@ -162,11 +162,13 @@ class TheHitListLogger < Slogger
     # theFilterEndDate: the end of the filter range
     # taskPath: The path to this task already
     # theTask: The task to process.
-    on processTask(theFilterStartDate, theFilterEndDate, taskPath, theTask)
+    # separator: any separator which should be added before appending the task text
+    on processTask(theFilterStartDate, theFilterEndDate, taskPath, theTask, separator)
         
         tell application "The Hit List"
             
-            set taskTitle to "- \\"" & (the timing task of theTask) & "\\""
+            set taskPrefix to separator & "- "
+            set taskTitle to (the timing task of theTask)
             set taskText to ""
             
             # If this task is completed, add it to the text 
@@ -174,22 +176,23 @@ class TheHitListLogger < Slogger
                 set taskCompletionDate to the completed date of theTask
                 if taskCompletionDate ≥ theFilterStartDate and taskCompletionDate ≤ theFilterEndDate then
                     set theTime to (my zeroPadNumber(hours of taskCompletionDate)) & ":" & (my zeroPadNumber(minutes of taskCompletionDate))
-                    set taskText to taskTitle & " was completed at " & theTime
+                    set taskText to taskPrefix & "\\"" & taskTitle & "\\" was completed at " & theTime
                 end if
             end if
             
             # Loop through each sub task and check if it is complete
             set subtaskText to ""
+            set newSeparator to "    " & separator
             set subtasks to every task in theTask
             repeat with thisTask in subtasks
-                set thisSubtaskText to my processTask(theFilterStartDate, theFilterEndDate, taskPath, thisTask)
-                set subtaskText to my appendTextIfNeeded(thisSubtaskText, subtaskText, "-")
+                set thisSubtaskText to my processTask(theFilterStartDate, theFilterEndDate, taskPath, thisTask, newSeparator)
+                set subtaskText to my appendTextIfNeeded(thisSubtaskText, subtaskText, "")
             end repeat
             
             # If this task is not complete and some subtasks are, 
             # add the task title to the text
             if (length of subtaskText > 0) and (length of taskText = 0) then
-                set taskText to taskTitle & linefeed & subtaskText
+                set taskText to taskPrefix & taskTitle & linefeed & subtaskText
             end if
             
             return taskText
@@ -201,15 +204,15 @@ class TheHitListLogger < Slogger
     # if it is non-empty.
     # newText: the new text to add
     # existingText: the text which already exists
-    # separator: any separator which should be added before appending newText
-    on appendTextIfNeeded(newText, existingText, separator)
+    # lineSeparator: any separator which should be added after a new line 
+    on appendTextIfNeeded(newText, existingText, lineSeparator)
         
         set newCompletedText to existingText
         if (length of newText > 0 and length of existingText > 0) then
-            set newCompletedText to existingText & linefeed & linefeed
+            set newCompletedText to existingText & linefeed & lineSeparator
         end if
         if (length of newText > 0) then
-            set newCompletedText to newCompletedText & separator & newText
+            set newCompletedText to newCompletedText & newText
         end if
         
         return newCompletedText
