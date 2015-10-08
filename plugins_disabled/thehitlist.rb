@@ -170,29 +170,34 @@ class TheHitListLogger < Slogger
             set taskPrefix to separator & "- "
             set taskTitle to (the timing task of theTask)
             set taskText to ""
+            set completedThisDay to false
             
             # If this task is completed, add it to the text 
             if theTask is completed then
                 set taskCompletionDate to the completed date of theTask
                 if taskCompletionDate ≥ theFilterStartDate and taskCompletionDate ≤ theFilterEndDate then
+                    set completedThisDay to true
                     set theTime to (my zeroPadNumber(hours of taskCompletionDate)) & ":" & (my zeroPadNumber(minutes of taskCompletionDate))
                     set taskText to taskPrefix & "\\"" & taskTitle & "\\" was completed at " & theTime
                 end if
             end if
             
-            # Loop through each sub task and check if it is complete
-            set subtaskText to ""
-            set newSeparator to "    " & separator
-            set subtasks to every task in theTask
-            repeat with thisTask in subtasks
-                set thisSubtaskText to my processTask(theFilterStartDate, theFilterEndDate, taskPath, thisTask, newSeparator)
-                set subtaskText to my appendTextIfNeeded(thisSubtaskText, subtaskText, "")
-            end repeat
+            # Loop through each sub task and check if it is complete. 
+		    # Only need to do this if this task is incomplete, or completed this day
+		    if (theTask is not completed) or (completedThisDay is true) then
+                set subtaskText to ""
+                set newSeparator to "    " & separator
+                set subtasks to every task in theTask
+                repeat with thisTask in subtasks
+                    set thisSubtaskText to my processTask(theFilterStartDate, theFilterEndDate, taskPath, thisTask, newSeparator)
+                    set subtaskText to my appendTextIfNeeded(thisSubtaskText, subtaskText, "")
+                end repeat
             
-            # If this task is not complete and some subtasks are, 
-            # add the task title to the text
-            if (length of subtaskText > 0) and (length of taskText = 0) then
-                set taskText to taskPrefix & taskTitle & linefeed & subtaskText
+                # If this task is not complete and some subtasks are, 
+                # add the task title to the text
+                if (length of subtaskText > 0) and (length of taskText = 0) then
+                    set taskText to taskPrefix & taskTitle & linefeed & subtaskText
+                end if
             end if
             
             return taskText
