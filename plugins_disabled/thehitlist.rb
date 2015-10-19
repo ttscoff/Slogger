@@ -197,6 +197,8 @@ class TheHitListLogger < Slogger
                 # add the task title to the text
                 if (length of subtaskText > 0) and (length of taskText = 0) then
                     set taskText to taskPrefix & taskTitle & linefeed & subtaskText
+                else if (length of subtaskText > 0) then
+                    set taskText to taskText & linefeed & subtaskText
                 end if
             end if
             
