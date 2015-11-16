@@ -1,6 +1,6 @@
 =begin
 Plugin: Last.fm Logger with Covers
-Version: 1.5
+Version: 1.6
 Description: Logs playlists and loved tracks for a time period. 
 Author: Based on Last.fm Logger by[Brett Terpstra](http://brettterpstra.com) with additions by [Micah Cooper](http://www.meebles.org)
 Configuration:
@@ -89,7 +89,7 @@ class LastFMLogger < Slogger
 
   
 
-  def do_log
+  def do_log #this is the "main" method for feeding into Slogger
     if @config.key?(self.class.name)
       config = @config[self.class.name]
       if !config.key?('lastfm_user') || config['lastfm_user'] == ''
@@ -113,38 +113,52 @@ class LastFMLogger < Slogger
     feeds << {'title'=>"Loved Tracks", 'feed' => "lovedtracks"} if config['lastfm_feeds'].include?('loved')
     
     startdate = @timespan.to_i
+    #puts 'timespan' + @timespan.to_s
 
     @log.info("Getting Last.fm playlists for #{config['lastfm_user']}")
 
     # With thanks to Ben Foxall https://gist.github.com/benfoxall/7976631
-    page = 0
-    total = 1 # set properly by response
+    page = 1
+    total = 1  # set properly by response
     key = 'e38cc7822bd7476fe4083e36ee69748e' # set to your own
     today = @timespan
 
-    feeds.each do |rss_feed|
+    feeds.each do |rss_feed| # we may have recenttracks and lovedtracks or a subset (as defined in config file), so we loop
       done = 0
       songCollection = []
 
-      while ((page < total) && (done != 1))
+      # Basic two loop operation
+      # First loop builds the data
+      # second loop constructs time groupings as specified by user
+
+      # begin first loop
+      while ((page <= total) && (done != 1)) # The xml will say how many total pages there are and what the current page is. We loop until we're done
 
         url = "http://ws.audioscrobbler.com/2.0/?method=user.get#{rss_feed['feed']}&user=#{config['lastfm_user']}&api_key=#{key}&limit=200&page=#{page}"
-        puts url
+        puts url # for debugging
         xml_data = Net::HTTP.get_response(URI.parse(url)).body
-        doc = REXML::Document.new(xml_data)
+        #puts xml_data
 
-        doc.elements.each("lfm/#{rss_feed['feed']}/track") do |ele|  
+        doc = REXML::Document.new(xml_data)
+        #puts doc
+
+        doc.elements.each("lfm/#{rss_feed['feed']}/track") do |ele|  # get each track from the feed
+          #puts ele
           
           begin
-            utsObj = ele.elements['date'].attributes
-            utsNum = utsObj['uts'].to_i
+            utsObj = ele.elements['date'].attributes 
+            utsNum = utsObj['uts'].to_i # convert xml string date to a unix date
           rescue # if we're currently playing a song, we might have problems
             utsNum = Time.now.utc.to_i
           end
           utsDateTime = utsNum
 
-          if utsDateTime < startdate
+          if utsDateTime < startdate # if the timestamp on the song is earlier than @timespan, move on
+                                     # The pages go from most recent to oldest, so as soon as we get to a song earlier than our timespan, we quit
             done = 1
+            #puts 'done is 1'
+            #puts utsDateTime
+            #puts startdate
             break
           end
           
@@ -152,6 +166,8 @@ class LastFMLogger < Slogger
           artist = ele.get_text('artist')
           trackname = ele.get_text('trackname')
           mbid = ele.get_text('mbid')
+
+          #puts artist
 
           if config['lastfm_covers']
             smallCover = REXML::XPath.first(ele, "image[@size='small']").text.to_s
@@ -166,6 +182,7 @@ class LastFMLogger < Slogger
           end
 
           songtags = idSong(artist, trackname, mbid)
+          #puts songtags
 
           songHash = {
             "dateTime" => utsDateTime,
@@ -208,10 +225,12 @@ class LastFMLogger < Slogger
         periodDays = 99999 # a hack :( but should restore default behavior
       end
 
+      # begin second loop (build entries as desired)
       while (targetDate < nowTime) do
         endDate = targetDate + 60 * 60 * 24 * periodDays
         dailyCollection = processEntries(targetDate, endDate, songCollection)  
-        targetDate = endDate
+        #targetDate = endDate
+        
 
         # define a hash to store song count and a hash to link song title to the last.fm URL
         songs_count = {}
@@ -333,7 +352,7 @@ class LastFMLogger < Slogger
         tags = tags.scan(/#([A-Za-z0-9]+)/m).map { |tag| tag[0].strip }.delete_if {|tag| tag =~ /^\d+$/ }.uniq.sort
 
         if content != ''
-          endTimeStamp = Time.at(endDate)
+          endTimeStamp = Time.at(targetDate)
           options = {}
           options['content'] = content
           options['datestamp'] = endTimeStamp.utc.iso8601
@@ -350,6 +369,7 @@ class LastFMLogger < Slogger
           sl.to_dayone(options) 
 
         end
+        targetDate = endDate
       end
     end # feed iteration
 
