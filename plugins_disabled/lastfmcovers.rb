@@ -1,6 +1,10 @@
 =begin
 Plugin: Last.fm Logger with Covers
+<<<<<<< HEAD
+Version: 1.6.1
+=======
 Version: 1.6
+>>>>>>> upstream/master
 Description: Logs playlists and loved tracks for a time period. 
 Author: Based on Last.fm Logger by[Brett Terpstra](http://brettterpstra.com) with additions by [Micah Cooper](http://www.meebles.org)
 Configuration:
@@ -352,7 +356,17 @@ class LastFMLogger < Slogger
         tags = tags.scan(/#([A-Za-z0-9]+)/m).map { |tag| tag[0].strip }.delete_if {|tag| tag =~ /^\d+$/ }.uniq.sort
 
         if content != ''
+<<<<<<< HEAD
+          if config['lastfm_chunk'] == 'daily'
+              endTimeStamp = Time.at(endDate)
+          elsif config['lastfm_chunk'] == 'weekly'
+              endTimeStamp = Time.at(endDate)
+          else
+              endTimeStamp = Time.now.utc.to_i
+          end
+=======
           endTimeStamp = Time.at(targetDate)
+>>>>>>> upstream/master
           options = {}
           options['content'] = content
           options['datestamp'] = endTimeStamp.utc.iso8601
