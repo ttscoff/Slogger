@@ -34,6 +34,7 @@ class OTBibleLogger < Slogger
   end
 
   def bigQuery
+
     bookName = ['', 'Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy', 'Joshua', 'Judges', 'Ruth',
            '1 Samuel', '2 Samuel', '1 Kings', '2 Kings', '1 Chronicles', '2 Chronicles',
                        'Ezra', 'Nehemiah', 'Esther', 'Job', 'Psalm', 'Proverbs', 'Ecclesiastes', 'Song of Solomon',
@@ -75,13 +76,28 @@ class OTBibleLogger < Slogger
       http.request(req)
     }
 
-    xml_data = res.body
+    case res
+      when Net::HTTPSuccess, Net::HTTPRedirection then
+        xml_data = res.body
+      else
+        puts res.error!
+    end
+
+    
+
     doc = REXML::Document.new(xml_data);
-    annoCats = REXML::XPath.match(doc, '///[@type="AnnotationCategory"]')
+
+    ##annoCats = REXML::XPath.match(doc, '///[@type="AnnotationCategory"]')
+    xpathtext = ''
+    annoCats = REXML::XPath.match(doc, '/syncables/syncable/data-type[text()="AnnotationCategory"]/..') # ending .. gets the parent elements with this text
+    #puts annoCats
     annoCats.each do |annoCat|
-      parentCategoryID = annoCat.elements['parent-category-id'].text
-      name = annoCat.elements['name'].text
-      id = annoCat.elements['client-id'].text
+      #puts 'new cat'
+      #puts annoCat
+      #puts 
+      parentCategoryID = annoCat.elements['datum/parent-category-id'].text
+      name = annoCat.elements['datum/name'].text
+      id = annoCat.elements['datum/client-id'].text
 
       # We're sticking the categories right into our config file
 
@@ -99,10 +115,10 @@ class OTBibleLogger < Slogger
     # UserTags is one entry, annotations are another, and then there's a 3rd
     # value joining the two.
 
-    annoTags = REXML::XPath.match(doc, '///[@type="UserTag"]')
+    annoTags = REXML::XPath.match(doc, '/syncables/syncable/data-type[text()="UserTag"]/..')
     annoTags.each do |annoTag|
-      name = annoTag.elements['name'].text
-      id = annoTag.elements['client-id'].text
+      name = annoTag.elements['datum/name'].text
+      id = annoTag.elements['datum/client-id'].text
 
       # We're sticking the tags right into our config file for perpetual use
       config[id] = name
@@ -113,30 +129,103 @@ class OTBibleLogger < Slogger
     # Now we're going on a tag hunt
     # This was within each annotation find, but that was slow and silly
     tagAssocs = Multimap.new
-    doc.elements.each('///[@type="AnnotationUserTag"]') do |e|
-      annotationID = e.elements['annotation-id'].text
-      userTagID = e.elements['user-tag-id'].text
+    doc.elements.each('/syncables/syncable/data-type[text()="AnnotationUserTag"]/..') do |e|
+      annotationID = e.elements['datum/annotation-id'].text unless e.elements['datum/annotation-id'].nil?
+      userTagID = e.elements['datum/user-tag-id'].text unless e.elements['datum/user-tag-id'].nil?
       tagAssocs[annotationID] = userTagID
     end
 
-    annos = REXML::XPath.match(doc, '///[@type="Annotation"]')
+    annos = REXML::XPath.match(doc, '/syncables/syncable/data-type[text()="Annotation"]/..')
     annos.each do |anno|
-      annoContent = anno.elements['content'].text || ''
-      annoID = anno.elements['client-id'].text || ''
+      if !anno.elements['datum/content'].nil?
+        annoContent = anno.elements['datum/content'].text
+        #puts annoContent
+      else
+        annoContent = ''
+      end
 
-      annoCreatedDate = Time.at(anno.elements['created-date'].text.to_i) || 0
-      annoModDate = Time.at(anno.elements['modified-date'].text.to_i) || 0
-      annoTitle = anno.elements['title'].text || ''
-      annoEndPhrase = anno.elements['end-phrase'].text || ''
-      annoStartPhrase = anno.elements['start-phrase'].text || ''
-      annoCat = anno.elements['annotation-category-id'].text || ''
-      annoWordCat = config[annoCat] || ''
-      annoBookBegin = bookName[anno.elements['book-begin'].text.to_i] || ''
-      annoBookEnd = bookName[anno.elements['book-end'].text.to_i] || ''
-      annoChapStart = anno.elements['chapter-begin'].text || ''
-      annoChapEnd = anno.elements['chapter-end'].text || ''
-      annoVerseStart = anno.elements['verse-begin'].text || ''
-      annoVerseEnd = anno.elements['verse-end'].text || ''
+      #annoContent = anno.elements['datum/content'].text unless anno.elements['datum/content'].nil? || ''
+      if anno.elements['datum/client-id'].nil?
+        annoID = ''
+      else
+        annoID = anno.elements['datum/client-id'].text
+      end
+      #annoID = anno.elements['datum/client-id'].text unless anno.elements['datum/client-id'].nil? || ''
+
+      if anno.elements['datum/created-date'].nil?
+        puts 'setting to now'
+        annoCreatedDate = Time.now
+      else
+        annoCreatedDate = Time.at(anno.elements['datum/created-date'].text.to_i) 
+      end
+
+      if anno.elements['datum/modified-date'].nil?
+        annoModDate = 0
+      else
+        annoModDate = Time.at(anno.elements['datum/modified-date'].text.to_i) #unless anno.elements['datum/modified-date'].nil? || 0
+      end
+
+      if anno.elements['datum/title'].nil?
+        annoTitle = ''
+      else
+        annoTitle = anno.elements['datum/title'].text
+      end
+
+      if anno.elements['datum/end-phrase'].nil?
+        annoEndPhrase = ''
+      else
+        annoEndPhrase = anno.elements['datum/end-phrase'].text 
+      end
+
+      if anno.elements['datum/start-phrase'].nil?
+        annoStartPhrase = ''
+      else
+        annoStartPhrase = anno.elements['datum/start-phrase'].text 
+      end
+
+      if anno.elements['datum/annotation-category-id'].nil? 
+        annoCat = ''
+        annoWordCat = ''
+      else
+        annoCat = anno.elements['datum/annotation-category-id'].text 
+        annoWordCat = config[annoCat] || ''
+      end
+      
+      if anno.elements['datum/book-begin'].nil? 
+        annoBookBegin = nil
+      else
+        annoBookBegin = bookName[anno.elements['datum/book-begin'].text.to_i] 
+      end
+
+      if anno.elements['datum/book-end'].nil? 
+        annoBookEnd = nil
+      else
+        annoBookEnd = bookName[anno.elements['datum/book-end'].text.to_i]
+      end
+
+      if anno.elements['datum/chapter-begin'].nil?
+        annoChapStart = nil
+      else 
+        annoChapStart = anno.elements['datum/chapter-begin'].text 
+      end
+
+      if anno.elements['datum/chapter-end'].nil? 
+        annoChapEnd = nil
+      else
+        annoChapEnd = anno.elements['datum/chapter-end'].text 
+      end
+
+      if anno.elements['datum/verse-begin'].nil?
+        annoVerseStart = nil
+      else
+        annoVerseStart = anno.elements['datum/verse-begin'].text 
+      end
+
+      if anno.elements['datum/verse-end'].nil? 
+        annoVerseEnd = nil
+      else
+        annoVerseEnd = anno.elements['datum/verse-end'].text 
+      end
 
       # we stuck our associations in a multimap earlier
       # now we query that multimap for each annotation to see if it has
@@ -149,11 +238,12 @@ class OTBibleLogger < Slogger
         #@log.info(config[aTA])
       end
 
-      if 'true' != anno.elements['book-begin'].attributes['nil']
+      #if 'true' != anno.elements['datum/book-begin'].attributes['nil']
+      if annoBookBegin
         verseSelection = ''
         verseSelection = verseSelection + annoBookBegin
 
-        if annoChapStart != ''
+        if annoChapStart 
           verseSelection = verseSelection + ' ' + annoChapStart
         end
         #verseSelection = verseSelection + annoChapStart
@@ -162,7 +252,7 @@ class OTBibleLogger < Slogger
         end
 
         verseSelectionEnd = ''
-        if anno.elements['book-begin'].text.to_i < anno.elements['book-end'].text.to_i
+        if anno.elements['datum/book-begin'].text.to_i < anno.elements['datum/book-end'].text.to_i
 
           verseSelectionEnd = verseSelectionEnd + annoBookEnd
           if annoChapEnd
@@ -174,6 +264,7 @@ class OTBibleLogger < Slogger
           if verseSelectionEnd != ''
             verseSelection = verseSelection + ' – ' + verseSelectionEnd
           end
+=begin
         elsif anno.elements['book-begin'].text.to_i < anno.elements['book-end'].text.to_i
 
           if annoChapEnd
@@ -185,6 +276,7 @@ class OTBibleLogger < Slogger
           if verseSelectionEnd != ''
             verseSelection = verseSelection + ' – ' + verseSelectionEnd
           end
+=end
         end
       end
 
@@ -194,6 +286,7 @@ class OTBibleLogger < Slogger
 
       # Pull Annotation Category (with hierarchy) and push onto tag array
       tags = tags.push(annoWordCat)
+
       # Push the Name of the Bible book if there is one
       tags = tags.push(annoBookBegin)
       # Grab those tags from way up
@@ -203,12 +296,14 @@ class OTBibleLogger < Slogger
 
       options = {}
       options['content'] = "#{annoTitle}\n\n#{verseSelection}\n\n#{annoContent}"
-      options['datestamp'] = annoModDate.utc.iso8601
+      if annoModDate != 0
+        options['datestamp'] = annoModDate.utc.iso8601
+      elsif annoCreatedDate
+        options['datestamp'] = annoCreatedDate.utc.iso8601
+      end
       options['starred'] = false
       options['uuid'] = %x{uuidgen}.gsub(/-/,'').strip
       options['tags'] = tags
-
-
 
 
       # Create a journal entry
@@ -279,9 +374,20 @@ class OTBibleLogger < Slogger
     req.basic_auth username, password
     ##req.use_ssl = true
 
+
     res = Net::HTTP.start(uri.hostname, uri.port, :use_ssl => true) {|http|
       http.request(req)
     }
+
+    case res
+      when Net::HTTPSuccess, Net::HTTPRedirection then
+        xml_data = res.body
+      else
+        puts res.error!
+    end
+
+
+
 
     xml_data = res.body
     doc = REXML::Document.new(xml_data);
