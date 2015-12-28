@@ -92,7 +92,18 @@ class InstagramLogger < Slogger
 
     client = Instagram.client(:access_token => @instagram_config['access_token'])
     user = client.user
-    instagram_media = client.user_recent_media
+    
+    response = client.user_recent_media
+    
+    instagram_media = [].concat(response)
+    max_id = response.pagination.next_max_id
+    
+    while !(max_id.to_s.empty?) do
+        response = client.user_recent_media(:max_id => max_id)
+        max_id = response.pagination.next_max_id
+        instagram_media.concat(response)
+    end
+    
     begin
       instagram_media.each do |media|
         time_created = media['created_time'].to_i
