@@ -3,7 +3,7 @@ Plugin: Instagram
 Description: Logs your posts from Instagram
 Author: [Ryan M](http://ryanmo.co)
 Configuration:
-  backdate: true/false (This allows you to get the last 20 posts. This is nice for your first run. 
+  backdate: true/false (This allows you to get all your past posts. This is nice for your first run. 
   Backdate will automatically get set to false after it's run)
 Notes:
   With this plugin, you will get:
@@ -20,7 +20,7 @@ Notes:
 config = { # description and a primary key (username, url, etc.) required
   'description' => ['Logs your posts from Instagram',
                     'No real setup required beyond needing to authenticate with the Instagram API.',
-                    'backdate (true/false) gives you the option to add the 20 most recent photos to Day One.'],
+                    'backdate (true/false) gives you the option to add all your past photos to Day One.'],
   'tags' => '#social #instagram', # A good idea to provide this with an appropriate default setting
   'backdate' => false,
   'access_token' => ''
@@ -92,7 +92,18 @@ class InstagramLogger < Slogger
 
     client = Instagram.client(:access_token => @instagram_config['access_token'])
     user = client.user
-    instagram_media = client.user_recent_media
+    
+    response = client.user_recent_media
+    
+    instagram_media = [].concat(response)
+    max_id = response.pagination.next_max_id
+    
+    while !(max_id.to_s.empty?) do
+        response = client.user_recent_media(:max_id => max_id)
+        max_id = response.pagination.next_max_id
+        instagram_media.concat(response)
+    end
+    
     begin
       instagram_media.each do |media|
         time_created = media['created_time'].to_i
