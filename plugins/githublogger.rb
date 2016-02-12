@@ -20,15 +20,15 @@ $slog.register_plugin({ 'class' => 'GithubLogger', 'config' => config })
 class GithubLogger < Slogger
 
   def do_log
-    
+
     developMode = $options[:develop]
-      
+
     if @config.key?(self.class.name)
-        config = @config[self.class.name]
-        if !config.key?('github_user') || config['github_user'] == ''
-          @log.warn("Github user has not been configured or is invalid, please edit your slogger_config file.")
-          return
-        end
+      config = @config[self.class.name]
+      if !config.key?('github_user') || config['github_user'] == ''
+        @log.warn("Github user has not been configured or is invalid, please edit your slogger_config file.")
+        return
+      end
     else
       @log.warn("Github user has not been configured, please edit your slogger_config file.")
       return
@@ -48,13 +48,13 @@ class GithubLogger < Slogger
       end
     rescue Exception => e
       @log.error("ERROR retrieving Github url: #{url}")
-      # p e
+      @log.error(e)
     end
 
     return false if res.nil?
-    
+
     if developMode
-        @log.info("Response from Github: #{res}")
+      @log.info("Response from Github: #{res}")
     end
     json = JSON.parse(res)
 
@@ -64,32 +64,32 @@ class GithubLogger < Slogger
       date = Time.parse(action['created_at'])
       if date > @timespan
         case action['type']
-          when "PushEvent"
-            if !action["repo"]
-              action['repo'] = {"name" => "unknown repository"}
-            end
-            output += "* Pushed to branch *#{action['payload']['ref'].gsub(/refs\/heads\//,'')}* of [#{action['repo']['name']}](#{action['repo']['url']})\n"
-            action['payload']['commits'].each do |commit|
-              output += "    * #{commit['message'].gsub(/\n+/," ")}\n" unless commit.length < 3
-            end
-          when "CreateEvent"
-            if action['payload']['ref_type'] == "repository"
-                output += "* Created [#{action['repo']['name']}](#{action['repo']['url']})\n"
-            else
-                output += "* Created the #{action['payload']['ref_type']} '#{action['payload']['ref']}' for [#{action['repo']['name']}](#{action['repo']['url']})\n"
-            end
-          when "DeleteEvent"
-            output += "* Deleted the #{action['payload']['ref_type']} '#{action['payload']['ref']}' of [#{action['repo']['name']}](#{action['repo']['url']})\n"
-          when "ForkEvent"
-            if !action["repo"]
-                action['repo'] = {"name" => "unknown repository"}
-            end
-            output += "* Forked [#{action['repo']['name']}](#{action['repo']['url']})\n"
-          when "WatchEvent"
-            if action['payload']['action'] == "started"
-              output += "* Started watching [#{action['repo']['name']}](#{action['repo']['url']})\n"
-              output += "    * #{action['repo']['description'].gsub(/\n/," ")}\n" unless action['repo']['description'].nil?
-            end
+        when "PushEvent"
+          if !action["repo"]
+            action['repo'] = {"name" => "unknown repository"}
+          end
+          output += "* Pushed to branch *#{action['payload']['ref'].gsub(/refs\/heads\//,'')}* of [#{action['repo']['name']}](#{action['repo']['url']})\n"
+          action['payload']['commits'].each do |commit|
+            output += "    * #{commit['message'].gsub(/\n+/," ")}\n" unless commit.length < 3
+          end
+        when "CreateEvent"
+          if action['payload']['ref_type'] == "repository"
+            output += "* Created [#{action['repo']['name']}](#{action['repo']['url']})\n"
+          else
+            output += "* Created the #{action['payload']['ref_type']} '#{action['payload']['ref']}' for [#{action['repo']['name']}](#{action['repo']['url']})\n"
+          end
+        when "DeleteEvent"
+          output += "* Deleted the #{action['payload']['ref_type']} '#{action['payload']['ref']}' of [#{action['repo']['name']}](#{action['repo']['url']})\n"
+        when "ForkEvent"
+          if !action["repo"]
+            action['repo'] = {"name" => "unknown repository"}
+          end
+          output += "* Forked [#{action['repo']['name']}](#{action['repo']['url']})\n"
+        when "WatchEvent"
+          if action['payload']['action'] == "started"
+            output += "* Started watching [#{action['repo']['name']}](#{action['repo']['url']})\n"
+            output += "    * #{action['repo']['description'].gsub(/\n/," ")}\n" unless action['repo']['description'].nil?
+          end
         end
       else
         break
