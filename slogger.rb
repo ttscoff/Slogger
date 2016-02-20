@@ -22,7 +22,6 @@ require 'optparse'
 require 'fileutils'
 require 'rexml/parsers/pullparser'
 require 'rubygems'
-require 'json'
 
 SLOGGER_HOME = File.dirname(File.expand_path(__FILE__))
 ENV['SLOGGER_HOME'] = SLOGGER_HOME
@@ -30,7 +29,6 @@ ENV['SLOGGER_HOME'] = SLOGGER_HOME
 require SLOGGER_HOME + '/lib/sociallogger'
 require SLOGGER_HOME + '/lib/configtools'
 require SLOGGER_HOME + '/lib/plist.rb'
-# require SLOGGER_HOME + '/lib/json'
 require SLOGGER_HOME + '/lib/levenshtein-0.2.2/lib/levenshtein.rb'
 
 if RUBY_VERSION.to_f > 1.9
@@ -154,7 +152,7 @@ end
 class Slogger
 
   attr_accessor :config, :dayonepath, :plugins, :log
-  attr_reader :timespan
+  attr_reader :timespan, :date_format
   def initialize
     cfg = ConfigTools.new({'config_file' => $options[:config_file]})
     @log = Logger.new(STDERR)
@@ -285,7 +283,7 @@ class Slogger
     load_plugins
 
     plugins.each do |plugin|
-      _namespace = plugin.class.to_s
+      _namespace = plugin.name
 
       @config[_namespace] ||= {}
       plugin.config.each do |k,v|

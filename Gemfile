@@ -9,7 +9,6 @@ end
 gem 'feed-normalizer'
 gem 'twitter', '~> 5.3.0'
 gem 'twitter_oauth'
-gem 'json'
 gem 'instagram'
 gem 'sinatra'
 
@@ -21,6 +20,7 @@ gem 'multimap' # required for olivetree
 gem 'pry'
 
 plugin "blogger"
+plugin "githublogger"
 
 group :test do
   gem 'rake'
