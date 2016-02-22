@@ -8,7 +8,7 @@ config = {
   todoist_description: [
     'Logs completed todos from Todoist'
   ],
-  todoist_token: '',
+  todoist_token: '6bdc699af159db1b1e1148af84c8ecaf79cfe659',
   todoist_tags: '#todos',
   todoist_save_hashtags: true
 }
@@ -19,7 +19,7 @@ class TodoistLogger < Slogger
   def do_log
     if @config.key?(self.class.name)
       config = @config[self.class.name]
-      unless config.key?('todoist_token')
+      unless config.key?(:todoist_token)
         @log.warn(
           "\tNo API token for todoist is present in your slogger_config\n" \
           "\t\t\t\t\tPlease edit your configuration file")
@@ -41,9 +41,10 @@ class TodoistLogger < Slogger
     }
 
     separate_days.each do |day|
+      options = {}
       options['content'] = "Some todo!\n\nDay:\t#{day}"
       sl = DayOne.new
-      sl.to_day_one(options)
+      sl.to_dayone(options)
     end
   end
 end
