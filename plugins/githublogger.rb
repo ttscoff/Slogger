@@ -58,20 +58,20 @@ class GithubLogger < Slogger
       if date > @timespan
         case action['type']
           when "PushEvent"
-            if !action["repository"]
-              action['repository'] = {"name" => "unknown repository"}
+            if !action["repo"]
+              action['repo'] = {"name" => "unknown repo"}
             end
-            output += "* Pushed to branch *#{action['payload']['ref'].gsub(/refs\/heads\//,'')}* of [#{action['repository']['name']}](#{action['url']})\n"
-            action['payload']['shas'].each do |sha|
-              output += "    * #{sha[2].gsub(/\n+/," ")}\n" unless sha.length < 3
+            output += "* Pushed to branch *#{action['payload']['ref'].gsub(/refs\/heads\//,'')}* of [#{action['repo']['name']}](#{action['url']})\n"
+            action['payload']['commits'].each do |commits|
+              output += "    * #{commits["message"]}\n"
             end
           when "GistEvent"
             output += "* Created gist [#{action['payload']['name']}](#{action['payload']['url']})\n"
             output += "    * #{action['payload']['desc'].gsub(/\n/," ")}\n" unless action['payload']['desc'].nil?
           when "WatchEvent"
             if action['payload']['action'] == "started"
-              output += "* Started watching [#{action['repository']['owner']}/#{action['repository']['name']}](#{action['repository']['url']})\n"
-              output += "    * #{action['repository']['description'].gsub(/\n/," ")}\n" unless action['repository']['description'].nil?
+              output += "* Started watching [#{action['repo']['owner']}/#{action['repo']['name']}](#{action['repo']['url']})\n"
+              output += "    * #{action['repo']['description'].gsub(/\n/," ")}\n" unless action['repo']['description'].nil?
             end
         end
       else
