@@ -14,16 +14,16 @@ Slogger indexes various public social services and creates Day One (<http://dayo
 - Slogger 2.x uses a plugin architecture to allow easy extension
     - Default plugins:
         -  Github
-            -  new plugin, supercedes Gist logger. 
+            -  new plugin, supercedes Gist logger.
             -  Logs push, watch and gist activity
         -  Flickr
             - images uploaded in the last 24 hours, each as an individual post
             - Can handle multiple accounts
-        -  Last.fm 
+        -  Last.fm
             - Scrobbled songs for the current day
             - *updated to grab more songs*
         -  Blog entries
-            -  designed to pull in your blog posts with leading image and excerpt (optionally markdownified). 
+            -  designed to pull in your blog posts with leading image and excerpt (optionally markdownified).
             -  Handles multiple feeds
         -  RSS Feeds
             -  logs any feed entries for the given timespan as a digest entry
@@ -33,15 +33,15 @@ Slogger indexes various public social services and creates Day One (<http://dayo
             -  handles multiple Twitter accounts
         -  Instapaper
             -  Unread and/or individual folders
-        -  Foursquare 
+        -  Foursquare
             -  Checkins for the day
-        -  Pinboard 
+        -  Pinboard
             -  Daily digest with descriptions
             -  optionally include bookmark tags in entry
         -  Pocket
             -  Digest list of links---read and unread---posted to Pocket
-        -  Goodreads 
-            -  books marked read for the day, one entry each with book cover image, ratings and your review. 
+        -  Goodreads
+            -  books marked read for the day, one entry each with book cover image, ratings and your review.
             -  Inserted at the date marked finished.
         -  App.net
             -  App.net posts for the current day    
@@ -67,30 +67,31 @@ Slogger indexes various public social services and creates Day One (<http://dayo
 1. Download and unzip (or clone using git) the Slogger project. It can be stored in your home directory, a scripts folder or anywhere else on your drive.
 2. Make sure you have the Xcode command line tools installed. (See Troubleshooting section below.)
 3. From the command line, change to the Slogger folder and run the following commands:
-        
+
         sudo gem install bundler
-        bundle install 
+        bundle install
 4. Default plugins are stored in `/plugins/`, additional plugins are usually found in `/plugins_disabled/`. Plugins are enabled and disabled by adding/removing them from the `/plugins/` folder. Move any additional plugins you want to use into `/plugins/` and disable any other plugins by moving them from `/plugins/` to `plugins_disabled`. (Plugins that are found in `plugins` but not configured will not break anything, but you'll see warnings when run.)
 5. From within the Slogger folder, run `./slogger --update-config` to create the initial configuration file. If this doesn't work, you may need to make the file executable: `chmod a+x slogger` from within the Slogger folder. Note that any time you add new plugins or update existing ones, you'll want to run `./slogger --update-config` to ensure that your available options are up to date.
 6. Edit the file `slogger_config` that shows up in your Slogger folder
     - The required options will be 'storage:', 'image_filename_is_title:', 'date_format:' and 'time_format:'
     - storage: should be one of
-        -  'icloud'
-        -  a path to a Dropbox-synced Journal (e.g. '/Users/username/Dropbox/Apps/Day One/Journal.dayone')
+        -  ~~'icloud'~~
+        - For use with Day One 2, use a path like `/Users/[username]/Library/Group Containers/5U8NS4GX82.dayoneapp2/Data/Auto Import/Default Journal.dayone/`
+        -  a path to a Dropbox-synced Journal (e.g. `/Users/username/Dropbox/Apps/Day One/Journal.dayone`)
         -  a path to a folder for storing markdown files and related images (if the path doesn't end in "Journal.dayone", markdown storage is triggered automatically)
     - image_filename_is_title: should be set to true or false. If true, it will use the base filename (without extension) as the title of images imported individually.
     - date_format and time_format should be set to your preferred style (strftime)
 
 7. Edit additional configuration options for any plugins defined. The config file is formatted as YAML, and your options need to conform to that syntax. For the most part, you can just maintain the formatting (quotes, dashes, brackets, etc.) of the default settings when updating.
     - **Note:** Some plugins have options that will be filled in automatically. For example, the Twitter plugin requires you to log in on the command line and enter a PIN, after which it completes the authorization and saves your token to the configuration. If you install a plugin which requires oAuth, be sure to run Slogger from the command line with "./slogger -o plugin_name" once to complete the login procedure and save your credentials.
-8. Next time you run `./slogger`, it will execute the enabled and configured plugins and generate your journal entries. 
+8. Next time you run `./slogger`, it will execute the enabled and configured plugins and generate your journal entries.
 
 ## Usage ##
 
 1. From within the Slogger folder, run `./slogger` to run the data
-   capture for the plugins you have in you `/plugins/` directory. 
+   capture for the plugins you have in you `/plugins/` directory.
 2. Check the output to see if there are any errors occurring. Plugin configuration errors can be ignored, or you can remove offending plugins from the `/plugins/` folder (if you don't need them).
-3. If you wish to automate slogger: 
+3. If you wish to automate slogger:
     - use [Lingon](http://www.peterborgapps.com/lingon/), [LaunchControl](http://www.soma-zone.com/LaunchControl/), or other `launchd` scheduling app, **or**...
     - run `./install.rb` to automatically install a launchd task that will run at 11:50pm every night. It's the same as Lingon would create, but all free and stuff.
         - To uninstall the launchd task, run the command `rm ~/Library/LaunchAgents/com.brettterpstra.slogger.plist` and then log out and back in.
@@ -111,7 +112,7 @@ Slogger indexes various public social services and creates Day One (<http://dayo
         -u, --undo COUNT                 Undo the last COUNT runs
         -v, --version                    Display the version number
 
-> **Note:** You can use the `-s` option to only log since the last run date, handy if you want to run Slogger more or less than once per day or are testing plugins. 
+> **Note:** You can use the `-s` option to only log since the last run date, handy if you want to run Slogger more or less than once per day or are testing plugins.
 >
 > You can also use `-o` to run only a certain plugin in the standard plugin directory: just provide it with enough of the name to be unique, e.g. `slogger -o gist`.
 >
@@ -173,7 +174,7 @@ Alternatively you can download the command line tools from Apple here: [https://
 #### Known Issue with Xcode 5.1
 
 Apple updated the clang compiler to version 5.1 with the latest Xcode update, which breaks building gems with native extensions. They fail with this error: `clang: error: unknown argument: '-multiply_definedsuppress' [-Wunused-command-line-argument-hard-error-in-future]`
-You can check your version of clang with `clang -v` on the terminal. 
+You can check your version of clang with `clang -v` on the terminal.
 
 While that [bug is being worked on](https://bugs.ruby-lang.org/issues/9624), here is a temporary workaound:
 
@@ -212,7 +213,7 @@ If you are using Dropbox, a common location for your Day One Journal, which will
 
 By default Slogger sets the Date format to ISO 8601 (Y/m/d) `"%F"` and the Time format to H:M (24-hour clock) `"%R"`. These settings can be changed to anything from the `strftime` specification, viewable here: [http://linux.die.net/man/3/strftime](http://linux.die.net/man/3/strftime).
 
-The European Date format dd/mm/yy is not supported. The closest option is probably to set date to `"%x"` which is "The preferred date representation for the current locale without the time." 
+The European Date format dd/mm/yy is not supported. The closest option is probably to set date to `"%x"` which is "The preferred date representation for the current locale without the time."
 
 ## License
 
