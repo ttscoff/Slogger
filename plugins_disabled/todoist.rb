@@ -31,20 +31,90 @@ class TodoistLogger < Slogger
     end
     @log.info("Logging Todoist for completed tasks")
 
-    config['todoist_tags'] ||= ''
-    tags = config['todoist_tags'] == '' ? '' : "\n\n#{config['todoist_tags']}\n"
-
     timespan = @timespan.strftime('%d/%m/%Y')
     output = ''
-    separate_days = {
-      day1: []
-    }
 
-    separate_days.each do |day|
+    begin
+      url = URI('https://todoist.com/API/v6/get_all_completed_items')
+      params = { token: config[:todoist_token], limit: 50 }
+      url.query = URI.encode_www_form(params)
+
+      res = Net::HTTP.get_response(url)
+    rescue Exception => e
+      @log.error("ERROR retrieving Todoist information: #{url}")
+      return false
+    end
+
+    return false unless res.is_a?(Net::HTTPSuccess)
+    json = JSON.parse(res.body)
+
+    items = json['items']
+    projects = json['projects']
+
+    entries_by_day = split_by_day(items)
+    entries = []
+
+    entries_by_day.each do |day, items|
+      entries.push(compile_entry(day, items, projects))
+    end
+
+    count = 0
+    entries.each do |e|
+      count += 1
       options = {}
-      options['content'] = "Some todo!\n\nDay:\t#{day}"
+      options['title'] = "Todos completed on #{e[:day]}"
+      options['content'] = e[:content]
+      options['datestamp'] = e[:datestamp].to_s if e[:datestamp]
       sl = DayOne.new
       sl.to_dayone(options)
     end
+
+    @log.info("Todoist logged #{count} #{count > 1 ? 'entries' : 'entry'}")
+  end
+
+  def get_project(projects, id)
+    id = id.to_i
+    projects.each do |k, v|
+      return v if k.to_i == id
+    end
+  end
+
+  def split_by_day(items)
+    split = {}
+
+    for i in items
+      date = DateTime.parse(i["completed_date"])
+      date = Time.new(date.year, date.month, date.day)
+      date_day = date
+      split[date_day] = [] unless split[date_day]
+      split[date_day].push(i)
+    end
+
+    return split
+  end
+
+  def compile_entry(day, completed_items, projects)
+    items = []
+    datestamp = day
+    completed_items.each do |item|
+      item["project"] = get_project(projects, item["project_id"])
+      items.push(item)
+    end
+
+    entry = "# Todoist Log\n\n"
+    entry += "### Completed Items:\n\n"
+
+    items.each do |item|
+      entry += "- #{item['content']}\n"
+    end
+
+    entry += "\n\n#{config["TodoistLogger"][:todoist_tags]}"
+
+    entry = {
+      content: entry,
+      datestamp: datestamp
+    }
+
+    return entry
   end
 end
