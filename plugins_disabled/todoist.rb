@@ -4,16 +4,21 @@
 #        `Things.rb` plugin.
 # Author: [Freddie Lindsey](twitter.com/freddielindsey)
 
+
+# You can add todoist_item_limit to the config (between 1 -> 50) although
+# I wouldn't recommend it unless you have good reason.
+# Ensure your todoist_token is copied below. You can find it from
+# the app's settings.
+# Note: There is no need to include hashes in the todoist_tags value ->
+# dayone.rb will read them anyway
 config = {
   todoist_description: [
     'Logs completed todos from Todoist'
   ],
-  todoist_token: '6bdc699af159db1b1e1148af84c8ecaf79cfe659',
+  todoist_token: '',
   todoist_tags: [
    'todos'
-  ], # No need to include hashes here
-  todoist_save_hashtags: true,
-  todoist_item_limit: 2
+  ]
 }
 
 $slog.register_plugin({ 'class' => 'TodoistLogger', 'config' => config })
