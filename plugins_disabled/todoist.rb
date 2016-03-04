@@ -36,7 +36,13 @@ class TodoistLogger < Slogger
 
     begin
       url = URI('https://todoist.com/API/v6/get_all_completed_items')
-      params = { token: config[:todoist_token], limit: 50 }
+      time_ = Time.new(@timespan.year, @timespan.month, @timespan.day)
+      since = time_.strftime('%Y-%m-%dT%H:%M')
+      params = {
+        token: config[:todoist_token],
+        limit: 50,
+        since: since
+      }
       url.query = URI.encode_www_form(params)
 
       res = Net::HTTP.get_response(url)
@@ -64,7 +70,7 @@ class TodoistLogger < Slogger
       options = {}
       options['title'] = "Todos completed on #{e[:day]}"
       options['content'] = e[:content]
-      options['datestamp'] = e[:datestamp].to_s if e[:datestamp]
+      options['datestamp'] = e[:datestamp].utc.iso8601 if e[:datestamp]
       sl = DayOne.new
       sl.to_dayone(options)
     end
@@ -85,34 +91,38 @@ class TodoistLogger < Slogger
     for i in items
       date = DateTime.parse(i["completed_date"])
       date = Time.new(date.year, date.month, date.day)
-      date_day = date
-      split[date_day] = [] unless split[date_day]
-      split[date_day].push(i)
+      split[date] = [] unless split[date]
+      split[date].push(i)
     end
 
     return split
   end
 
   def compile_entry(day, completed_items, projects)
-    items = []
+    items = {}
     datestamp = day
     completed_items.each do |item|
-      item["project"] = get_project(projects, item["project_id"])
-      items.push(item)
+      project = get_project(projects, item["project_id"])["name"]
+      items[project] = [] unless items[project]
+      items[project].push(item)
     end
 
     entry = "# Todoist Log\n\n"
     entry += "### Completed Items:\n\n"
 
-    items.each do |item|
-      entry += "- #{item['content']}\n"
+    items.each do |project, items|
+      entry += "\n#### #{project}\n"
+      items.each do |item|
+        entry += "- #{item['content']}\n"
+      end
     end
 
-    entry += "\n\n#{config["TodoistLogger"][:todoist_tags]}"
+    entry += "\n\n(#{config["TodoistLogger"][:todoist_tags]})"
 
     entry = {
       content: entry,
-      datestamp: datestamp
+      datestamp: datestamp,
+      day: datestamp.strftime("%F")
     }
 
     return entry
