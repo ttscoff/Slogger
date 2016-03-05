@@ -22,7 +22,6 @@ require 'optparse'
 require 'fileutils'
 require 'rexml/parsers/pullparser'
 require 'rubygems'
-require 'json'
 
 SLOGGER_HOME = File.dirname(File.expand_path(__FILE__))
 ENV['SLOGGER_HOME'] = SLOGGER_HOME
@@ -30,7 +29,6 @@ ENV['SLOGGER_HOME'] = SLOGGER_HOME
 require SLOGGER_HOME + '/lib/sociallogger'
 require SLOGGER_HOME + '/lib/configtools'
 require SLOGGER_HOME + '/lib/plist.rb'
-# require SLOGGER_HOME + '/lib/json'
 require SLOGGER_HOME + '/lib/levenshtein-0.2.2/lib/levenshtein.rb'
 
 if RUBY_VERSION.to_f > 1.9
@@ -153,8 +151,8 @@ end
 
 class Slogger
 
-  attr_accessor :config, :dayonepath, :plugins
-  attr_reader :timespan, :log
+  attr_accessor :config, :dayonepath, :plugins, :log
+  attr_reader :timespan, :date_format
   def initialize
     cfg = ConfigTools.new({'config_file' => $options[:config_file]})
     @log = Logger.new(STDERR)
@@ -201,7 +199,10 @@ class Slogger
 
     @to = $options[:to]
     @from = $options[:from]
+  end
 
+  def options
+    $options
   end
 
   def undo_slogger(count = 1)
@@ -257,26 +258,35 @@ class Slogger
 	end
   end
 
+  def installed_plugins
+    @installed_plugins ||= Gem.loaded_specs.find_all do |name, info|
+      name.start_with?("sloggerplugin-")
+    end
+  end
+
+  def require_installed_plugins
+    installed_plugins.each do |name, info|
+      require name.gsub("-", "/")
+    end
+  end
+
+  def load_plugins
+    Sloggerplugin.constants.each do |plugin_module|
+      plugins << Sloggerplugin.const_get(plugin_module)::Runner
+    end
+  end
+
   def run_plugins
     @config['last_run_time'] = Time.now.strftime('%c')
     new_options = false
-    plugin_dir = $options[:develop] ? "/plugins_develop/*.rb" : "/plugins/*.rb"
-    Dir[SLOGGER_HOME + plugin_dir].each do |file|
-      if $options[:onlyrun]
-        $options[:onlyrun].each { |plugin_frag|
-          if File.basename(file) =~ /^#{plugin_frag}/i
-            require file
-          end
-        }
-      else
-        require file
-      end
-    end
-    @plugins.each do |plugin|
-      _namespace = plugin['class'].to_s
+    require_installed_plugins
+    load_plugins
+
+    plugins.each do |plugin|
+      _namespace = plugin.name
 
       @config[_namespace] ||= {}
-      plugin['config'].each do |k,v|
+      plugin.config.each do |k,v|
         if @config[_namespace][k].nil?
           new_options = true
           @config[_namespace][k] ||= v
@@ -285,7 +295,7 @@ class Slogger
       end
       unless $options[:config_only]
         # credit to Hilton Lipschitz (@hiltmon)
-        updated_config = eval(plugin['class']).new.do_log
+        updated_config  = plugin.new.do_log(self)
         if updated_config && updated_config.class.to_s == 'Hash'
             updated_config.each { |k,v|
               @config[_namespace][k] = v
