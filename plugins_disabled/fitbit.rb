@@ -4,8 +4,8 @@
  Author: Patrice Brend'amour
 
  Notes:
- 1. To run this plugin you need to install the fitgem gem first:
- $ sudo gem install fitgem
+ 1. To run this plugin you need to install the git version fitgem gem first. The easiest way to do this is to add the following line to your Slogger Gemfile and run bundle update
+    gem 'fitgem', :git => 'git://github.com/whazzmaster/fitgem'
  2. Afterwards you can aquire a valid Fitbit Consumer token: http://dev.fitbit.com if you want to use your own. A default one is provided.
  3. Upon first start, the plugin will ask you to open a URL and authorize the access to your data
 
