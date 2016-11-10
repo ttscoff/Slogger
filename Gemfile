@@ -14,7 +14,7 @@ gem 'multimap' # required for olivetree
 
 group :test do
   gem 'rake'
-  gem 'rspec'
+  gem 'rspec', '< 3.0'
   gem 'vcr'
   gem 'webmock'
 end
