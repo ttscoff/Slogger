@@ -128,11 +128,11 @@ class OTBibleLogger < Slogger
 
     # Now we're going on a tag hunt
     # This was within each annotation find, but that was slow and silly
-    tagAssocs = Multimap.new
+    tagAssocs = Hash.new([])
     doc.elements.each('/syncables/syncable/data-type[text()="AnnotationUserTag"]/..') do |e|
       annotationID = e.elements['datum/annotation-id'].text unless e.elements['datum/annotation-id'].nil?
       userTagID = e.elements['datum/user-tag-id'].text unless e.elements['datum/user-tag-id'].nil?
-      tagAssocs[annotationID] = userTagID
+      tagAssocs[annotationID] << userTagID
     end
 
     annos = REXML::XPath.match(doc, '/syncables/syncable/data-type[text()="Annotation"]/..')
