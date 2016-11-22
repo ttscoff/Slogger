@@ -53,7 +53,7 @@ if File.exists?(dir+"/slogger")
 	<string>com.brettterpstra.Slogger</string>
 	<key>ProgramArguments</key>
 	<array>
-		<string>/usr/bin/ruby</string>
+		<string>#{`which ruby`.strip}</string>
 		<string>#{dir}/slogger</string>#{flags}
 	</array>
 	<key>StartCalendarInterval</key>
