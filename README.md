@@ -2,8 +2,7 @@
 
 Slogger is no longer actively supported. Some parts of it may still work, but there are no guarantees, and as a whole the apps and services it depends on have changed and without active maintenance, it's no longer viable. Thanks for all the love during its development, and please let me know if you know of viable alternatives.
 
-
-Support Slogger by contributing to my [GitTip fund](https://www.gittip.com/ttscoff/).
+---
 
 
 ## Upgrade Note ##
